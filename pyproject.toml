@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chatup"
+dynamic = ["version"]
+description = "Chattool Setup"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+dependencies = ["click>=8.0", "chatstyle"]
+authors = [{name = "rexwzh", email = "1073853456@qq.com"}]
+keywords = ["chatup", "cli"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+[project.scripts]
+chatup = "chatup.cli:main"
+
+[tool.setuptools.dynamic]
+version = {attr = "chatup.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools]
+include-package-data = true
