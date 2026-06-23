@@ -29,8 +29,8 @@ def test_setup_package_data_includes_assets_and_workspace_templates():
     data = _pyproject()
     package_data = data["tool"]["setuptools"]["package-data"]["chatup.setup"]
 
-    assert "assets/opencode_chatloop/commands/*.md" in package_data
-    assert "assets/opencode_chatloop/plugins/chatloop/*" in package_data
+    assert "assets/opencode_chatloop/commands/*.md" not in package_data
+    assert "assets/opencode_chatloop/plugins/chatloop/*" not in package_data
     assert "workspace/templates/default/zh/*.md" in package_data
     assert "workspace/templates/default/zh/projects/*.md" in package_data
     assert "workspace/templates/default/en/*.md" in package_data

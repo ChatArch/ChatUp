@@ -489,8 +489,8 @@ SETUP_COMMAND_ELEMENTS = (
                 param_decls=("--plugin",),
                 kwargs={
                     "default": None,
-                    "type": click.Choice(["auto-loop", "chatloop"]),
-                    "help": "Optionally enable an OpenCode plugin preset such as opencode-auto-loop or the global PRD-driven chatloop.",
+                    "type": click.Choice(["auto-loop"]),
+                    "help": "Optionally enable a supported OpenCode plugin preset such as opencode-auto-loop.",
                 },
             ),
             SetupOptionElement(

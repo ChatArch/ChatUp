@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import click
 
@@ -19,11 +20,6 @@ from chatup.interaction import (
     resolve_value,
 )
 from chatup.setup.mode_prompt import resolve_install_only_mode
-from chatup.setup.opencode_chatloop import (
-    build_legacy_chatloop_plugin_entry,
-    install_chatloop_assets,
-    resolve_opencode_home,
-)
 from chatup.setup.nodejs import (
     ensure_nodejs_requirement,
     run_npm_command,
@@ -36,6 +32,13 @@ DEFAULT_BASE_URL = "https://api.openai.com/v1"
 DEFAULT_PROVIDER_NPM = "@ai-sdk/openai-compatible"
 PLUGIN_PRESETS = {"auto-loop": "opencode-auto-loop"}
 logger = setup_logger("setup_opencode")
+
+
+def resolve_opencode_home() -> Path:
+    env_home = os.getenv("OPENCODE_HOME")
+    if env_home:
+        return Path(env_home).expanduser().resolve()
+    return (Path.home() / ".config" / "opencode").resolve()
 
 
 def _configure_logger(log_level="INFO"):
@@ -215,26 +218,9 @@ def _append_plugin(config_payload: dict, plugin_entry: str) -> None:
     config_payload["plugin"] = existing_plugins
 
 
-def _remove_plugin(config_payload: dict, plugin_entry: str) -> None:
-    existing_plugins = config_payload.get("plugin")
-    if not isinstance(existing_plugins, list):
-        return
-    config_payload["plugin"] = [item for item in existing_plugins if item != plugin_entry]
-
-
 def _apply_plugin_preset(config_payload: dict, plugin: str | None, opencode_home: Path) -> dict | None:
     if not plugin:
         return None
-
-    if plugin == "chatloop":
-        installed = install_chatloop_assets(opencode_home)
-        _remove_plugin(config_payload, build_legacy_chatloop_plugin_entry(opencode_home))
-        _append_plugin(config_payload, str(installed["plugin_entry"]))
-        return {
-            "name": plugin,
-            "plugin_label": str(installed["plugin_entry"]),
-            **installed,
-        }
 
     plugin_name = PLUGIN_PRESETS[plugin]
     _append_plugin(config_payload, plugin_name)
@@ -362,9 +348,6 @@ def setup_opencode(
         click.echo("OpenCode CLI install completed.")
         if plugin_result:
             click.echo(f"Enabled OpenCode plugin preset: {plugin_result['plugin_label']}")
-            if plugin == "chatloop":
-                click.echo(f"ChatLoop plugin: {plugin_result['plugin_dir']}")
-                click.echo(f"ChatLoop commands: {plugin_result['commands_dir']}")
         return
 
     if need_prompt:
@@ -388,10 +371,6 @@ def setup_opencode(
                         "opencode-auto-loop",
                         "auto-loop",
                     ),
-                    create_choice(
-                        "chatloop (global PRD-driven loop)",
-                        "chatloop",
-                    )
                 ],
                 default_values=[],
                 instruction="(Use arrow keys to move, <space> to toggle, <a> to toggle all, <enter> to confirm)",
@@ -446,6 +425,3 @@ def setup_opencode(
         click.echo(f"Reused ChatTool OpenAI config: {env_ref}")
     if plugin_result:
         click.echo(f"Enabled OpenCode plugin preset: {plugin_result['plugin_label']}")
-        if plugin == "chatloop":
-            click.echo(f"ChatLoop plugin: {plugin_result['plugin_dir']}")
-            click.echo(f"ChatLoop commands: {plugin_result['commands_dir']}")

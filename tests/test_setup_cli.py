@@ -55,3 +55,11 @@ def test_all_migrated_setup_commands_expose_help():
         result = CliRunner().invoke(main, ["setup", command, "--help"])
         assert result.exit_code == 0, command
         assert "--help" in result.output
+
+
+def test_opencode_setup_no_longer_exposes_legacy_chatloop_preset():
+    result = CliRunner().invoke(main, ["setup", "opencode", "--help"])
+
+    assert result.exit_code == 0
+    assert "auto-loop" in result.output
+    assert "chatloop" not in result.output.lower()

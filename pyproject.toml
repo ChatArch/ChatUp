@@ -41,9 +41,6 @@ include-package-data = true
 "chatup.setup" = [
     "assets/*.sh",
     "assets/hermes/*.sh",
-    "assets/opencode_chatloop/README.md",
-    "assets/opencode_chatloop/commands/*.md",
-    "assets/opencode_chatloop/plugins/chatloop/*",
     "workspace/templates/default/zh/*.md",
     "workspace/templates/default/zh/projects/*.md",
     "workspace/templates/default/en/*.md",
