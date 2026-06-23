@@ -7,7 +7,10 @@ ChatUp is the standalone ChatArch setup CLI. It is the first-level replacement f
 ```bash
 chatup --help
 chatup doctor
+chatup uv
 ```
+
+`chatup uv` installs `uv` through the official installer when needed, then creates the ChatArch Python environment with pip. Defaults are `--venv ~/.chatarch/venv` and `--python 3.12`; override them when a different runtime path or Python minor version is required.
 
 ## Development
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1
+
+### Added
+- Add `chatup uv` to install `uv` when missing and create the ChatArch Python virtual environment with Python 3.12 and pip at `~/.chatarch/venv` by default.
+
 ## 0.2.0
 
 ### Added

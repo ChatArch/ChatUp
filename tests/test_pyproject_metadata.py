@@ -18,6 +18,7 @@ def _pyproject() -> dict:
 def test_chatup_depends_on_chatenv_without_registering_config_provider():
     data = _pyproject()
 
+    assert data["project"]["requires-python"] == ">=3.10"
     assert "chatstyle>=0.1.0,<0.2.0" in data["project"]["dependencies"]
     assert "chatenv>=0.2.0,<0.3.0" in data["project"]["dependencies"]
     assert "entry-points" not in data["project"] or "chatenv.configs" not in data["project"]["entry-points"]
