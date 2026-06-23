@@ -1,8 +1,8 @@
 from pathlib import Path
 
+from chatenv.configs import OpenAIConfig
+from chatenv.fields import BaseEnvConfig
 from chatenv.paths import get_paths
-
-from chatup.config import BaseEnvConfig, OpenAIConfig
 
 # ChatTool 7.0.0 uses the ChatArch env root directly. Old platformdirs based
 # paths are intentionally not used as fallback.
@@ -21,8 +21,7 @@ CHATARCH_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 # explicit args > environment > typed env files > default values
 BaseEnvConfig.load_all(CHATARCH_ENV_DIR)
 
-# Inject loaded values into current namespace
-# This ensures backward compatibility (e.g., chattool.const.OPENAI_API_KEY)
+# Inject loaded values into current namespace for setup modules that read constants.
 globals().update(BaseEnvConfig.get_all_values())
 
 _api_base = globals().get("OPENAI_API_BASE")

@@ -15,7 +15,7 @@ def _pyproject() -> dict:
     return tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
 
 
-def test_chatup_reuses_chatenv_shared_configs_without_provider_entry_point():
+def test_chatup_depends_on_chatenv_without_registering_config_provider():
     data = _pyproject()
 
     assert "chatstyle>=0.1.0,<0.2.0" in data["project"]["dependencies"]
@@ -23,13 +23,15 @@ def test_chatup_reuses_chatenv_shared_configs_without_provider_entry_point():
     assert "entry-points" not in data["project"] or "chatenv.configs" not in data["project"]["entry-points"]
 
 
-def test_chatup_config_reexports_chatenv_shared_configs():
-    from chatenv.configs import FeishuConfig as SharedFeishuConfig
-    from chatenv.configs import OpenAIConfig as SharedOpenAIConfig
-    from chatup.config import FeishuConfig, OpenAIConfig
+def test_chatup_does_not_ship_a_config_package():
+    assert not (ROOT / "src" / "chatup" / "config").exists()
 
-    assert OpenAIConfig is SharedOpenAIConfig
-    assert FeishuConfig is SharedFeishuConfig
+
+def test_setup_modules_import_shared_configs_directly():
+    for module in ["codex.py", "hermes.py", "lark_cli.py", "opencode.py"]:
+        text = (ROOT / "src" / "chatup" / "setup" / module).read_text(encoding="utf-8")
+        assert "from chatup.config" not in text
+        assert "from chatenv.configs import" in text
 
 
 def test_setup_package_data_includes_assets_and_workspace_templates():

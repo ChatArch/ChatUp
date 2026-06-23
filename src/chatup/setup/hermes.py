@@ -11,7 +11,8 @@ from pathlib import Path
 
 import click
 
-from chatup.config import BaseEnvConfig, FeishuConfig, OpenAIConfig
+from chatenv.configs import FeishuConfig, OpenAIConfig
+from chatenv.fields import BaseEnvConfig
 from chatenv.source_chain import split_config_sources
 from chatup.const import CHATARCH_ENV_DIR
 from chatup.interaction import abort_if_force_without_tty, resolve_interactive_mode, resolve_value

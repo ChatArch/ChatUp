@@ -5,7 +5,8 @@ import os
 from pathlib import Path
 import click
 
-from chatup.config import BaseEnvConfig, OpenAIConfig
+from chatenv.configs import OpenAIConfig
+from chatenv.fields import BaseEnvConfig
 from chatenv.source_chain import split_config_sources
 from chatup.const import CHATARCH_ENV_DIR, CHATARCH_ENV_FILE
 from chatup.interaction import (
