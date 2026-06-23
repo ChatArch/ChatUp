@@ -313,7 +313,7 @@ def setup_codex(
     has_existing_config = any(
         value for key, value in existing.items() if key != "openai_api_key"
     ) or bool(existing.get("openai_api_key"))
-    usage = "Usage: chatup setup codex [--api-key <openai-api-key>] [--base-url <value>] [--model <value>] [-e <openai-env>] [-i|-I]"
+    usage = "Usage: chatup codex [--api-key <openai-api-key>] [--base-url <value>] [--model <value>] [-e <openai-env>] [-i|-I]"
     interactive, can_prompt, force_interactive, auto_interactive, need_prompt = (
         resolve_interactive_mode(
             interactive=interactive,

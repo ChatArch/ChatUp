@@ -134,7 +134,7 @@ def install_chromedriver(url, target_dir):
 
 def setup_chrome_driver(interactive=None, update=False):
     """Main setup function."""
-    usage = "Usage: chatup setup chrome [--update] [-i|-I]"
+    usage = "Usage: chatup chrome [--update] [-i|-I]"
     interactive, can_prompt, force_interactive, _, need_prompt = (
         resolve_interactive_mode(
             interactive=interactive,

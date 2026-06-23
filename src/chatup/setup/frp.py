@@ -80,7 +80,7 @@ def extract_frp(archive_path, extract_to, binary_name):
 def setup_frp(interactive=None, log_level="INFO"):
     _configure_logger(log_level)
     logger.info("Start frp setup")
-    usage = "Usage: chatup setup frp [-i|-I]"
+    usage = "Usage: chatup frp [-i|-I]"
     interactive, can_prompt, force_interactive, _, _ = resolve_interactive_mode(
         interactive=interactive,
         auto_prompt_condition=True,

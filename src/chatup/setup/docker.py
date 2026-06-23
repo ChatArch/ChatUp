@@ -96,7 +96,7 @@ def _maybe_run_command(
 
 def setup_docker(interactive=None, use_sudo=False, log_level="INFO"):
     _configure_logger(log_level)
-    usage = "Usage: chatup setup docker [--sudo] [-i|-I]"
+    usage = "Usage: chatup docker [--sudo] [-i|-I]"
     interactive, can_prompt, force_interactive, _, _ = resolve_interactive_mode(
         interactive=interactive,
         auto_prompt_condition=True,

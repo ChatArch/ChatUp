@@ -18,7 +18,7 @@ def test_workspace_chatblog_missing_docs_creates_placeholder_and_public_link(tmp
 
     result = CliRunner().invoke(
         main,
-        ["setup", "workspace", str(workspace_dir), "--with-chatblog", "-I"],
+        ["workspace", str(workspace_dir), "--with-chatblog", "-I"],
     )
 
     assert result.exit_code == 0, result.output
@@ -45,7 +45,7 @@ def test_workspace_chatblog_uses_docs_even_when_source_posts_exists(tmp_path, mo
 
     result = CliRunner().invoke(
         main,
-        ["setup", "workspace", str(workspace_dir), "--with-chatblog", "-I"],
+        ["workspace", str(workspace_dir), "--with-chatblog", "-I"],
     )
 
     assert result.exit_code == 0, result.output
@@ -82,7 +82,6 @@ def test_workspace_all_extras_clone_chattool_chatblog_chatmemory(tmp_path, monke
     result = CliRunner().invoke(
         main,
         [
-            "setup",
             "workspace",
             str(workspace_dir),
             "--with-chattool",

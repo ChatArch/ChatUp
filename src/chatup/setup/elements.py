@@ -213,7 +213,7 @@ def workspace_setup(
 SETUP_COMMAND_ELEMENTS = (
     SetupCommandElement(
         name="zsh",
-        help="Setup zsh, oh-my-zsh, plugins, theme, and shell aliases.",
+        help="Configure zsh, oh-my-zsh, plugins, theme, and shell aliases.",
         callback=zsh_setup,
         options=(
             LOG_LEVEL_OPTION,
@@ -249,7 +249,7 @@ SETUP_COMMAND_ELEMENTS = (
     ),
     SetupCommandElement(
         name="cc-connect",
-        help="Setup cc-connect CLI and runtime dependencies.",
+        help="Install cc-connect CLI and runtime dependencies.",
         callback=cc_connect_setup,
         options=(
             LOG_LEVEL_OPTION,
@@ -271,7 +271,7 @@ SETUP_COMMAND_ELEMENTS = (
     ),
     SetupCommandElement(
         name="claude",
-        help="Setup Claude Code CLI and config files.",
+        help="Configure Claude Code CLI and config files.",
         callback=claude_setup,
         options=(
             LOG_LEVEL_OPTION,
@@ -308,7 +308,7 @@ SETUP_COMMAND_ELEMENTS = (
     ),
     SetupCommandElement(
         name="chrome",
-        help="Setup Chrome and Chromedriver.",
+        help="Install Chrome and Chromedriver.",
         callback=chrome_setup,
         options=(
             SetupOptionElement(
@@ -351,7 +351,7 @@ SETUP_COMMAND_ELEMENTS = (
     ),
     SetupCommandElement(
         name="frp",
-        help="Setup FRP Client/Server.",
+        help="Install FRP Client/Server.",
         callback=frp_setup,
         options=(
             LOG_LEVEL_OPTION,
@@ -366,7 +366,7 @@ SETUP_COMMAND_ELEMENTS = (
     ),
     SetupCommandElement(
         name="nodejs",
-        help="Setup nvm and Node.js (default LTS).",
+        help="Install nvm and Node.js (default LTS).",
         callback=nodejs_setup,
         options=(
             LOG_LEVEL_OPTION,
@@ -381,7 +381,7 @@ SETUP_COMMAND_ELEMENTS = (
     ),
     SetupCommandElement(
         name="codex",
-        help="Setup Codex CLI and config files.",
+        help="Configure Codex CLI and config files.",
         callback=codex_setup,
         options=(
             LOG_LEVEL_OPTION,
@@ -428,7 +428,7 @@ SETUP_COMMAND_ELEMENTS = (
     ),
     SetupCommandElement(
         name="opencode",
-        help="Setup OpenCode CLI and config files.",
+        help="Configure OpenCode CLI and config files.",
         callback=opencode_setup,
         options=(
             LOG_LEVEL_OPTION,
@@ -477,7 +477,7 @@ SETUP_COMMAND_ELEMENTS = (
     ),
     SetupCommandElement(
         name="lark-cli",
-        help="Setup official lark-cli and reuse ChatEnv Feishu config.",
+        help="Configure official lark-cli and reuse ChatEnv Feishu config.",
         callback=lark_cli_setup,
         options=(
             LOG_LEVEL_OPTION,
@@ -515,7 +515,7 @@ SETUP_COMMAND_ELEMENTS = (
     ),
     SetupCommandElement(
         name="hermes",
-        help="Setup Hermes Agent and optional Hermes WebUI.",
+        help="Install Hermes Agent and optional Hermes WebUI.",
         callback=hermes_setup,
         options=(
             LOG_LEVEL_OPTION,

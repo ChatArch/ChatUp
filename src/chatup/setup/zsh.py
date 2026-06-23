@@ -266,7 +266,7 @@ def select_zsh_setup_options_interactively(
 
 
 def render_zsh_aliases(include_quicksetup: bool = True) -> str:
-    lines = [ZSH_ALIASES_BEGIN, "# Managed by chatup setup zsh."]
+    lines = [ZSH_ALIASES_BEGIN, "# Managed by chatup zsh."]
     if include_quicksetup:
         lines.append(QUICKSETUP_ALIAS_BLOCK.rstrip("\n"))
     lines.append(ZSH_ALIASES_END)
@@ -277,7 +277,7 @@ def render_alias_source_block() -> str:
     return "\n".join(
         [
             ZSH_ALIASES_SOURCE_BEGIN,
-            "# Load aliases managed by chatup setup zsh.",
+            "# Load aliases managed by chatup zsh.",
             'if [ -f "$HOME/.zsh_aliases" ]; then source "$HOME/.zsh_aliases"; fi',
             ZSH_ALIASES_SOURCE_END,
         ]
@@ -363,7 +363,7 @@ def setup_zsh(
     log_level="INFO",
 ):
     _configure_logger(log_level)
-    usage = "Usage: chatup setup zsh [--no-omz] [--no-aliases] [--login-shell/--no-login-shell] [-i|-I]"
+    usage = "Usage: chatup zsh [--no-omz] [--no-aliases] [--login-shell/--no-login-shell] [-i|-I]"
     interactive, can_prompt, force_interactive, _, _ = resolve_interactive_mode(
         interactive=interactive,
         auto_prompt_condition=False,
@@ -372,7 +372,7 @@ def setup_zsh(
     prompt_enabled = bool(force_interactive and can_prompt)
 
     if os.name != "posix":
-        click.echo("setup zsh only supports Unix-like systems.", err=True)
+        click.echo("chatup zsh only supports Unix-like systems.", err=True)
         raise click.Abort()
 
     logger.info("Start zsh setup")

@@ -295,7 +295,7 @@ def setup_lark_cli(
     missing_required = not (app_id and app_secret)
     has_existing_config = config_path.exists()
     usage = (
-        "Usage: chatup setup lark-cli [--app-id <value>] [--app-secret <value>] "
+        "Usage: chatup lark-cli [--app-id <value>] [--app-secret <value>] "
         "[--brand feishu|lark] [-e <feishu-env>] [-i|-I]"
     )
     interactive, can_prompt, force_interactive, _, need_prompt = (

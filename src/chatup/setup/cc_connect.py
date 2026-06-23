@@ -25,7 +25,7 @@ def _configure_logger(log_level="INFO"):
 def setup_cc_connect(interactive=None, log_level="INFO"):
     _configure_logger(log_level)
     logger.info("Start cc-connect setup")
-    usage = "Usage: chatup setup cc-connect [-i|-I]"
+    usage = "Usage: chatup cc-connect [-i|-I]"
     interactive, can_prompt, force_interactive, _, _ = resolve_interactive_mode(
         interactive=interactive,
         auto_prompt_condition=False,

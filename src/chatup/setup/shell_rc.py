@@ -1,7 +1,7 @@
-"""Shell rc helpers shared by setup commands.
+"""Shell rc helpers shared by ChatUp commands.
 
-This module intentionally does not register a `setup alias` command or carry
-ChatTool command aliases. It only helps setup flows choose shell rc files.
+This module intentionally does not register an `alias` command or carry
+ChatTool command aliases. It only helps ChatUp flows choose shell rc files.
 """
 
 import os

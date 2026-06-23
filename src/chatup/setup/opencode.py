@@ -282,7 +282,7 @@ def setup_opencode(
     missing_required = not (base_url and api_key and model)
     has_existing_config = any(value for value in existing.values())
     usage = (
-        "Usage: chatup setup opencode [--base-url <value>] [--api-key <value>] "
+        "Usage: chatup opencode [--base-url <value>] [--api-key <value>] "
         "[--model <value>] [-e <openai-env>] [-i|-I]"
     )
     interactive, can_prompt, force_interactive, auto_interactive, need_prompt = (

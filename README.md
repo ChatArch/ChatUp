@@ -1,6 +1,6 @@
 # chatup
 
-ChatUp is the standalone ChatArch setup CLI. It starts as the extraction target for `chattool setup` and will gradually receive the existing setup commands while preserving ChatTool's interactive/non-interactive CLI conventions.
+ChatUp is the standalone ChatArch setup CLI. It is the first-level replacement for `chattool setup`: commands such as `chattool setup workspace` become `chatup workspace` while preserving the same interactive/non-interactive CLI conventions.
 
 ## Quick Start
 
