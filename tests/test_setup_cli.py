@@ -10,6 +10,7 @@ def test_chatup_root_help_lists_setup_commands_without_setup_group_or_alias():
     for command in [
         "workspace",
         "nodejs",
+        "uv",
         "codex",
         "claude",
         "opencode",
@@ -46,6 +47,7 @@ def test_top_level_setup_commands_expose_help():
         "lark-cli",
         "nodejs",
         "opencode",
+        "uv",
         "workspace",
         "zsh",
     ]
@@ -102,3 +104,115 @@ def test_cc_connect_installs_chatarch_package(monkeypatch):
 
     assert result.exit_code == 0, result.output
     assert commands == [["install", "-g", "@chatarch/cc-connect"]]
+
+
+def test_uv_help_exposes_defaults():
+    result = CliRunner().invoke(main, ["uv", "--help"])
+
+    assert result.exit_code == 0
+    assert "--venv" in result.output
+    assert "--python" in result.output
+    assert "~/.chatarch/venv" in result.output or "/.chatarch/venv" in result.output
+    assert "3.12" in result.output
+    assert "--force" in result.output
+
+
+def test_uv_setup_creates_default_chatarch_python_env(monkeypatch, tmp_path):
+    import chatup.setup.uv as uv_setup
+
+    created = []
+    readiness = iter([False, True])
+    monkeypatch.setattr(uv_setup, "DEFAULT_VENV_PATH", tmp_path / "default-venv")
+    monkeypatch.setattr(uv_setup, "ensure_uv_installed", lambda: "/usr/local/bin/uv")
+    monkeypatch.setattr(uv_setup, "is_chatarch_python_ready", lambda path, version: next(readiness))
+    monkeypatch.setattr(
+        uv_setup,
+        "create_chatarch_python_env",
+        lambda uv_bin, path, version, *, force=False: created.append((uv_bin, path, version, force)),
+    )
+
+    result = uv_setup.setup_uv()
+
+    assert result["status"] == "created"
+    assert result["venv"] == str(tmp_path / "default-venv")
+    assert result["python_version"] == "3.12"
+    assert created == [("/usr/local/bin/uv", tmp_path / "default-venv", "3.12", False)]
+
+
+def test_uv_setup_accepts_custom_path_python_and_force(monkeypatch, tmp_path):
+    import chatup.setup.uv as uv_setup
+
+    target = tmp_path / "custom-venv"
+    created = []
+    readiness = iter([False, True])
+    monkeypatch.setattr(uv_setup, "ensure_uv_installed", lambda: "/opt/bin/uv")
+    monkeypatch.setattr(uv_setup, "is_chatarch_python_ready", lambda path, version: next(readiness))
+    monkeypatch.setattr(
+        uv_setup,
+        "create_chatarch_python_env",
+        lambda uv_bin, path, version, *, force=False: created.append((uv_bin, path, version, force)),
+    )
+
+    result = CliRunner().invoke(main, ["uv", "--venv", str(target), "--python", "3.11", "--force"])
+
+    assert result.exit_code == 0, result.output
+    assert created == [("/opt/bin/uv", target, "3.11", True)]
+
+
+def test_ensure_uv_installed_uses_official_installer_when_missing(monkeypatch):
+    import chatup.setup.uv as uv_setup
+
+    monkeypatch.setattr(uv_setup, "find_uv", lambda: None)
+    monkeypatch.setattr(uv_setup, "install_uv_with_official_script", lambda: "/home/me/.local/bin/uv")
+
+    assert uv_setup.ensure_uv_installed() == "/home/me/.local/bin/uv"
+
+
+def test_create_chatarch_python_env_seeds_pip_and_force_clears(monkeypatch, tmp_path):
+    import chatup.setup.uv as uv_setup
+
+    commands = []
+
+    class Result:
+        returncode = 0
+        stdout = ""
+        stderr = ""
+
+    def fake_run_command(command, **kwargs):
+        commands.append(command)
+        return Result()
+
+    monkeypatch.setattr(uv_setup, "_run_command", fake_run_command)
+
+    uv_setup.create_chatarch_python_env("uv", tmp_path / "venv", "3.12", force=True)
+
+    assert commands == [
+        ["uv", "python", "install", "3.12"],
+        ["uv", "venv", "--python", "3.12", "--seed", "--clear", "--force", str(tmp_path / "venv")],
+    ]
+
+
+def test_create_chatarch_python_env_allows_existing_same_version_venv(monkeypatch, tmp_path):
+    import chatup.setup.uv as uv_setup
+
+    target = tmp_path / "venv"
+    target.mkdir()
+    commands = []
+
+    class Result:
+        returncode = 0
+        stdout = ""
+        stderr = ""
+
+    def fake_run_command(command, **kwargs):
+        commands.append(command)
+        return Result()
+
+    monkeypatch.setattr(uv_setup, "_run_command", fake_run_command)
+
+    uv_setup.create_chatarch_python_env("uv", target, "3.12", force=False)
+
+    assert commands == [
+        ["uv", "python", "install", "3.12"],
+        ["uv", "venv", "--python", "3.12", "--seed", "--allow-existing", str(target)],
+    ]

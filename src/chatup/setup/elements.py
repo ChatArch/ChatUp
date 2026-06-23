@@ -14,6 +14,7 @@ from chatup.setup.lark_cli import setup_lark_cli
 from chatup.setup.opencode import setup_opencode
 from chatup.setup.zsh import setup_zsh
 from chatup.setup.nodejs import setup_nodejs
+from chatup.setup.uv import DEFAULT_PYTHON_VERSION, DEFAULT_VENV_PATH, setup_uv
 from chatup.setup.workspace import setup_workspace
 
 
@@ -45,6 +46,10 @@ def frp_setup(interactive):
 
 def nodejs_setup(interactive, log_level):
     setup_nodejs(interactive=interactive, log_level=log_level)
+
+
+def uv_setup(venv, python_version, force, log_level):
+    setup_uv(venv=venv, python_version=python_version, force=force, log_level=log_level)
 
 
 def docker_setup(sudo, interactive, log_level):
@@ -375,6 +380,37 @@ SETUP_COMMAND_ELEMENTS = (
                 kwargs={
                     "default": None,
                     "help": INTERACTIVE_OPTION_HELP,
+                },
+            ),
+        ),
+    ),
+    SetupCommandElement(
+        name="uv",
+        help="Install uv and create the ChatArch Python 3.12 environment with pip.",
+        callback=uv_setup,
+        options=(
+            LOG_LEVEL_OPTION,
+            SetupOptionElement(
+                param_decls=("--venv", "--venv-path"),
+                kwargs={
+                    "default": str(DEFAULT_VENV_PATH),
+                    "show_default": True,
+                    "help": "Target ChatArch Python virtual environment path.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--python", "--python-version", "python_version"),
+                kwargs={
+                    "default": DEFAULT_PYTHON_VERSION,
+                    "show_default": True,
+                    "help": "Python version to install through uv and use for the venv.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--force", "-f"),
+                kwargs={
+                    "is_flag": True,
+                    "help": "Clear and recreate the target environment if it already exists.",
                 },
             ),
         ),
