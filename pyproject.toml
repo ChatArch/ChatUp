@@ -25,9 +25,6 @@ classifiers = [
 [project.scripts]
 chatup = "chatup.cli:main"
 
-[project.entry-points."chatenv.configs"]
-chatup = "chatup.config"
-
 [tool.setuptools.dynamic]
 version = {attr = "chatup.__version__"}
 

@@ -8,6 +8,7 @@
 
 ### Changed
 - Require the published shared config runtime `chatenv>=0.2.0,<0.3.0` and bounded ChatArch CLI runtime `chatstyle>=0.1.0,<0.2.0`.
+- Reuse ChatEnv `0.2.x` shared OpenAI/Feishu configs through `chatup.config` compatibility exports instead of carrying copied schema definitions or registering another `chatenv.configs` provider.
 - Remove the legacy hand-written OpenCode ChatLoop plugin/assets from ChatUp; `setup opencode --plugin` now keeps only supported presets such as `auto-loop`, because RuffleLoop covers the loop use case.
 
 ## 0.1.0

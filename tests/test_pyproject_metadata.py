@@ -15,14 +15,21 @@ def _pyproject() -> dict:
     return tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
 
 
-def test_chatenv_config_entry_point_registered():
+def test_chatup_reuses_chatenv_shared_configs_without_provider_entry_point():
     data = _pyproject()
 
     assert "chatstyle>=0.1.0,<0.2.0" in data["project"]["dependencies"]
     assert "chatenv>=0.2.0,<0.3.0" in data["project"]["dependencies"]
-    assert data["project"]["entry-points"]["chatenv.configs"] == {
-        "chatup": "chatup.config"
-    }
+    assert "entry-points" not in data["project"] or "chatenv.configs" not in data["project"]["entry-points"]
+
+
+def test_chatup_config_reexports_chatenv_shared_configs():
+    from chatenv.configs import FeishuConfig as SharedFeishuConfig
+    from chatenv.configs import OpenAIConfig as SharedOpenAIConfig
+    from chatup.config import FeishuConfig, OpenAIConfig
+
+    assert OpenAIConfig is SharedOpenAIConfig
+    assert FeishuConfig is SharedFeishuConfig
 
 
 def test_setup_package_data_includes_assets_and_workspace_templates():
