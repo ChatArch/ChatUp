@@ -12,6 +12,8 @@ from chatup.setup.nodejs import (
 from chatup.utils.custom_logger import setup_logger
 
 logger = setup_logger("setup_cc_connect")
+CC_CONNECT_BINARY = "cc-connect"
+CC_CONNECT_NPM_PACKAGE = "@chatarch/cc-connect"
 
 
 def _configure_logger(log_level="INFO"):
@@ -23,7 +25,7 @@ def _configure_logger(log_level="INFO"):
 def setup_cc_connect(interactive=None, log_level="INFO"):
     _configure_logger(log_level)
     logger.info("Start cc-connect setup")
-    usage = "Usage: chattool setup cc-connect [-i|-I]"
+    usage = "Usage: chatup setup cc-connect [-i|-I]"
     interactive, can_prompt, force_interactive, _, _ = resolve_interactive_mode(
         interactive=interactive,
         auto_prompt_condition=False,
@@ -38,16 +40,18 @@ def setup_cc_connect(interactive=None, log_level="INFO"):
 
     logger.info("Checking cc-connect installation")
     if not should_install_global_npm_package(
-        "cc-connect",
-        "cc-connect",
+        CC_CONNECT_NPM_PACKAGE,
+        CC_CONNECT_BINARY,
         interactive=interactive,
         can_prompt=can_prompt,
     ):
         return
 
-    click.echo("未检测到 cc-connect，正在安装 (npm install -g cc-connect)...")
-    logger.info("Installing cc-connect cli with npm")
-    result = run_npm_command(["install", "-g", "cc-connect"])
+    click.echo(
+        f"未检测到 {CC_CONNECT_BINARY}，正在安装 (npm install -g {CC_CONNECT_NPM_PACKAGE})..."
+    )
+    logger.info("Installing ChatArch cc-connect cli with npm")
+    result = run_npm_command(["install", "-g", CC_CONNECT_NPM_PACKAGE])
     if result.returncode != 0:
         logger.error("Failed to install cc-connect")
         click.echo("cc-connect 安装失败。", err=True)

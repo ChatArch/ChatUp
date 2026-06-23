@@ -18,8 +18,8 @@ from chatup.utils.custom_logger import setup_logger
 
 BUNDLED_NVM_VERSION = "v0.40.3"
 MIN_NODEJS_MAJOR = 20
-NVM_INIT_BEGIN = "# >>> chattool nvm >>>"
-NVM_INIT_END = "# <<< chattool nvm <<<"
+NVM_INIT_BEGIN = "# >>> chatup nvm >>>"
+NVM_INIT_END = "# <<< chatup nvm <<<"
 logger = setup_logger("setup_nodejs")
 
 
@@ -175,7 +175,7 @@ def ensure_nodejs_requirement(
 
     if interactive is not False and can_prompt:
         install_now = ask_confirm(
-            f"{message} Install or upgrade Node.js now via `chattool setup nodejs`?",
+            f"{message} Install or upgrade Node.js now via `chatup setup nodejs`?",
             default=True,
         )
         if install_now == BACK_VALUE:
@@ -193,7 +193,7 @@ def ensure_nodejs_requirement(
             raise click.Abort()
 
     click.echo(message, err=True)
-    click.echo("Please run: chattool setup nodejs", err=True)
+    click.echo("Please run: chatup setup nodejs", err=True)
     raise click.Abort()
 
 
@@ -302,8 +302,7 @@ def _render_nvm_init_block():
 
 
 def _resolve_shell_rc_targets(interactive=False):
-    from chatup.setup.alias import (
-        BACK_VALUE,
+    from chatup.setup.shell_rc import (
         resolve_shell_rc,
         resolve_target_shells,
         select_target_shells_interactively,
@@ -343,7 +342,7 @@ def _echo_recent_output(result, heading):
 def setup_nodejs(interactive=None, log_level="INFO"):
     _configure_logger(log_level)
     logger.info("Start nodejs setup")
-    usage = "Usage: chattool setup nodejs [-i|-I]"
+    usage = "Usage: chatup setup nodejs [-i|-I]"
     interactive, can_prompt, force_interactive, _, need_prompt = (
         resolve_interactive_mode(
             interactive=interactive,

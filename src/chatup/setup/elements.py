@@ -12,7 +12,6 @@ from chatup.setup.frp import setup_frp
 from chatup.setup.hermes import setup_hermes
 from chatup.setup.lark_cli import setup_lark_cli
 from chatup.setup.opencode import setup_opencode
-from chatup.setup.alias import setup_alias
 from chatup.setup.zsh import setup_zsh
 from chatup.setup.nodejs import setup_nodejs
 from chatup.setup.workspace import setup_workspace
@@ -50,10 +49,6 @@ def nodejs_setup(interactive, log_level):
 
 def docker_setup(sudo, interactive, log_level):
     setup_docker(interactive=interactive, use_sudo=sudo, log_level=log_level)
-
-
-def alias_setup(shell, dry_run):
-    setup_alias(shell=shell, dry_run=dry_run)
 
 
 def zsh_setup(omz, aliases, login_shell, interactive, log_level):
@@ -217,28 +212,6 @@ def workspace_setup(
 
 SETUP_COMMAND_ELEMENTS = (
     SetupCommandElement(
-        name="alias",
-        help="Setup shell aliases for ChatTool commands.",
-        callback=alias_setup,
-        options=(
-            SetupOptionElement(
-                param_decls=("-s", "--shell"),
-                kwargs={
-                    "default": None,
-                    "type": click.Choice(["zsh", "bash"]),
-                    "help": "Target shell override: zsh or bash. By default, update all detected shells.",
-                },
-            ),
-            SetupOptionElement(
-                param_decls=("--dry-run",),
-                kwargs={
-                    "is_flag": True,
-                    "help": "Preview alias changes without writing to shell rc file.",
-                },
-            ),
-        ),
-    ),
-    SetupCommandElement(
         name="zsh",
         help="Setup zsh, oh-my-zsh, plugins, theme, and shell aliases.",
         callback=zsh_setup,
@@ -284,7 +257,7 @@ SETUP_COMMAND_ELEMENTS = (
                 param_decls=("--sudo",),
                 kwargs={
                     "is_flag": True,
-                    "help": "Allow setup docker to execute suggested sudo commands after confirmation.",
+                    "help": "Reserved for compatibility; cc-connect setup does not currently require sudo.",
                 },
             ),
             SetupOptionElement(
@@ -504,7 +477,7 @@ SETUP_COMMAND_ELEMENTS = (
     ),
     SetupCommandElement(
         name="lark-cli",
-        help="Setup official lark-cli and reuse ChatTool Feishu config.",
+        help="Setup official lark-cli and reuse ChatEnv Feishu config.",
         callback=lark_cli_setup,
         options=(
             LOG_LEVEL_OPTION,
@@ -564,7 +537,7 @@ SETUP_COMMAND_ELEMENTS = (
                 param_decls=("--update-installer",),
                 kwargs={
                     "is_flag": True,
-                    "help": "Download the latest ChatArch Hermes install.sh into the ChatTool cache before setup.",
+                    "help": "Download the latest ChatArch Hermes install.sh into the ChatUp cache before setup.",
                 },
             ),
             SetupOptionElement(

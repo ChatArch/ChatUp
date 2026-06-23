@@ -282,7 +282,7 @@ def setup_opencode(
     missing_required = not (base_url and api_key and model)
     has_existing_config = any(value for value in existing.values())
     usage = (
-        "Usage: chattool setup opencode [--base-url <value>] [--api-key <value>] "
+        "Usage: chatup setup opencode [--base-url <value>] [--api-key <value>] "
         "[--model <value>] [-e <openai-env>] [-i|-I]"
     )
     interactive, can_prompt, force_interactive, auto_interactive, need_prompt = (
@@ -423,6 +423,6 @@ def setup_opencode(
     click.echo("OpenCode setup completed.")
     click.echo(f"Config: {config_path}")
     if env_ref:
-        click.echo(f"Reused ChatTool OpenAI config: {env_ref}")
+        click.echo(f"Reused ChatEnv OpenAI config: {env_ref}")
     if plugin_result:
         click.echo(f"Enabled OpenCode plugin preset: {plugin_result['plugin_label']}")

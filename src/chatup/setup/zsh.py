@@ -15,17 +15,16 @@ from chatup.interaction import (
     create_choice,
     resolve_interactive_mode,
 )
-from chatup.setup.alias import ALIAS_MAP
 from chatup.utils.custom_logger import setup_logger
 
 logger = setup_logger("setup_zsh")
 
-ZSH_ALIASES_BEGIN = "# >>> chattool zsh aliases >>>"
-ZSH_ALIASES_END = "# <<< chattool zsh aliases <<<"
-ZSH_ALIASES_SOURCE_BEGIN = "# >>> chattool zsh alias source >>>"
-ZSH_ALIASES_SOURCE_END = "# <<< chattool zsh alias source <<<"
-ZSH_LOGIN_BEGIN = "# >>> chattool zsh login >>>"
-ZSH_LOGIN_END = "# <<< chattool zsh login <<<"
+ZSH_ALIASES_BEGIN = "# >>> chatup zsh aliases >>>"
+ZSH_ALIASES_END = "# <<< chatup zsh aliases <<<"
+ZSH_ALIASES_SOURCE_BEGIN = "# >>> chatup zsh alias source >>>"
+ZSH_ALIASES_SOURCE_END = "# <<< chatup zsh alias source <<<"
+ZSH_LOGIN_BEGIN = "# >>> chatup zsh login >>>"
+ZSH_LOGIN_END = "# <<< chatup zsh login <<<"
 
 OMZ_PLUGIN_CANDIDATES = (
     ("git", "git - oh-my-zsh built-in git aliases and completions"),
@@ -43,7 +42,7 @@ ZSH_SETUP_OPTION_CANDIDATES = (
     ),
     (
         "aliases",
-        "~/.zsh_aliases with QuickSetup and ChatTool aliases",
+        "~/.zsh_aliases with QuickSetup shell aliases",
     ),
     (
         "login_shell",
@@ -266,14 +265,10 @@ def select_zsh_setup_options_interactively(
     )
 
 
-def render_zsh_aliases(include_quicksetup: bool = True, include_chattool: bool = True) -> str:
-    lines = [ZSH_ALIASES_BEGIN, "# Managed by chattool setup zsh."]
+def render_zsh_aliases(include_quicksetup: bool = True) -> str:
+    lines = [ZSH_ALIASES_BEGIN, "# Managed by chatup setup zsh."]
     if include_quicksetup:
         lines.append(QUICKSETUP_ALIAS_BLOCK.rstrip("\n"))
-    if include_chattool:
-        lines.append("# ChatTool aliases")
-        for key, command in ALIAS_MAP.items():
-            lines.append(f"alias {key}='{command}'")
     lines.append(ZSH_ALIASES_END)
     return "\n".join(lines) + "\n"
 
@@ -282,7 +277,7 @@ def render_alias_source_block() -> str:
     return "\n".join(
         [
             ZSH_ALIASES_SOURCE_BEGIN,
-            "# Load aliases managed by chattool setup zsh.",
+            "# Load aliases managed by chatup setup zsh.",
             'if [ -f "$HOME/.zsh_aliases" ]; then source "$HOME/.zsh_aliases"; fi',
             ZSH_ALIASES_SOURCE_END,
         ]
@@ -368,7 +363,7 @@ def setup_zsh(
     log_level="INFO",
 ):
     _configure_logger(log_level)
-    usage = "Usage: chattool setup zsh [--no-omz] [--no-aliases] [--login-shell/--no-login-shell] [-i|-I]"
+    usage = "Usage: chatup setup zsh [--no-omz] [--no-aliases] [--login-shell/--no-login-shell] [-i|-I]"
     interactive, can_prompt, force_interactive, _, _ = resolve_interactive_mode(
         interactive=interactive,
         auto_prompt_condition=False,

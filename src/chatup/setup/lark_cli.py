@@ -295,7 +295,7 @@ def setup_lark_cli(
     missing_required = not (app_id and app_secret)
     has_existing_config = config_path.exists()
     usage = (
-        "Usage: chattool setup lark-cli [--app-id <value>] [--app-secret <value>] "
+        "Usage: chatup setup lark-cli [--app-id <value>] [--app-secret <value>] "
         "[--brand feishu|lark] [-e <feishu-env>] [-i|-I]"
     )
     interactive, can_prompt, force_interactive, _, need_prompt = (
@@ -415,11 +415,11 @@ def setup_lark_cli(
     click.echo(f"Config dir: {config_dir}")
     click.echo(f"Config file: {config_path}")
     click.echo(
-        f"ChatTool Feishu env: {CHATARCH_ENV_DIR / FeishuConfig.get_storage_name() / '.env'}"
+        f"ChatEnv Feishu env: {CHATARCH_ENV_DIR / FeishuConfig.get_storage_name() / '.env'}"
     )
     if env_ref:
-        click.echo(f"Reused ChatTool Feishu config: {env_ref}")
+        click.echo(f"Reused ChatEnv Feishu config: {env_ref}")
     else:
-        click.echo("Reused ChatTool Feishu config: saved active Feishu config")
+        click.echo("Reused ChatEnv Feishu config: saved active Feishu config")
     click.echo("Next step: lark-cli auth login --recommend")
     click.echo("Optional Skills install: npx skills add larksuite/cli -y -g")

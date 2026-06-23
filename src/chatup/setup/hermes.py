@@ -59,7 +59,7 @@ def _sha256(path: Path) -> str:
 
 
 def _cache_installer_path() -> Path:
-    return Path.home() / ".cache" / "chattool" / "hermes" / "install.sh"
+    return Path.home() / ".cache" / "chatup" / "hermes" / "install.sh"
 
 
 def _packaged_installer_path() -> Path:
@@ -436,7 +436,7 @@ def setup_hermes(
     log_level="INFO",
 ):
     _configure_logger(log_level)
-    usage = "Usage: chattool setup hermes [--installer PATH] [--update-installer] [-e OPENAI_ENV] [-i|-I]"
+    usage = "Usage: chatup setup hermes [--installer PATH] [--update-installer] [-e OPENAI_ENV] [-i|-I]"
     interactive, can_prompt, force_interactive, _, _ = resolve_interactive_mode(
         interactive=interactive,
         auto_prompt_condition=False,

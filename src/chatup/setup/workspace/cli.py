@@ -114,7 +114,7 @@ def setup_workspace(
     workspace_default = resolve_workspace_dir(workspace_dir=workspace_dir)
     needs_prompt = profile_name is None or workspace_dir is None
     usage = (
-        "Usage: chattool setup workspace [PROFILE] [WORKSPACE_DIR] "
+        "Usage: chatup setup workspace [PROFILE] [WORKSPACE_DIR] "
         "[--language zh|en] [--with-chattool] [--chattool-source <path-or-url>] "
         "[--with-chatblog] [--chatblog-source <path-or-url>] "
         "[--with-memory] [--memory-source <path-or-url>] "

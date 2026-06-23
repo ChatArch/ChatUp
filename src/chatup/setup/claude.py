@@ -96,7 +96,7 @@ def setup_claude(
     missing_required = not auth_token
     has_existing_config = any(value for value in existing.values())
     usage = (
-        "Usage: chattool setup claude [--auth-token <value>] [--base-url <value>] "
+        "Usage: chatup setup claude [--auth-token <value>] [--base-url <value>] "
         "[--small-fast-model <value>] [-i|-I]"
     )
     interactive, can_prompt, force_interactive, auto_interactive, need_prompt = (
