@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-import shutil
 import subprocess
 
 import click
@@ -76,20 +75,6 @@ def _clone_or_update_repo(
     return "updated"
 
 
-def _copy_skill_tree(src: Path, dst: Path) -> list[str]:
-    copied = []
-    dst.mkdir(parents=True, exist_ok=True)
-    for skill_dir in sorted(src.iterdir()):
-        if not skill_dir.is_dir() or not (skill_dir / "SKILL.md").exists():
-            continue
-        target_dir = dst / skill_dir.name
-        if target_dir.exists():
-            shutil.rmtree(target_dir)
-        shutil.copytree(skill_dir, target_dir)
-        copied.append(skill_dir.name)
-    return copied
-
-
 def apply_chattool_option(
     workspace_dir: Path,
     source: str,
@@ -98,17 +83,10 @@ def apply_chattool_option(
 ) -> dict:
     repo_dir = workspace_dir / "core" / "ChatTool"
     repo_action = _clone_or_update_repo(source, repo_dir, interactive, can_prompt)
-    skills_source = repo_dir / "skills"
-    if not skills_source.exists():
-        raise click.ClickException(
-            f"ChatTool repo does not contain skills/: {skills_source}"
-        )
-    copied_skills = _copy_skill_tree(skills_source, workspace_dir / "skills")
     return {
         "name": "chattool",
         "repo_dir": repo_dir,
         "repo_action": repo_action,
-        "copied_skills": copied_skills,
     }
 
 
@@ -237,7 +215,7 @@ def prompt_optional_modules(language: str) -> dict[str, dict]:
         if language == "en"
         else "选择额外的 workspace 模块",
         choices=[
-            create_choice("ChatTool -> core/ChatTool + ./skills", "chattool"),
+            create_choice("ChatTool -> core/ChatTool", "chattool"),
             create_choice("ChatBlog -> core/ChatBlog + public/chatblog", "chatblog"),
             create_choice("ChatMemory -> core/ChatMemory + skills/chatarch, skills/common, skills/agents + local", "memory"),
         ],

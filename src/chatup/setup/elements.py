@@ -659,7 +659,7 @@ SETUP_COMMAND_ELEMENTS = (
                 param_decls=("--with-chattool/--no-chattool",),
                 kwargs={
                     "default": False,
-                    "help": "Optionally clone/update ChatTool into core/ChatTool and sync its skills into workspace skills/.",
+                    "help": "Optionally clone/update ChatTool into core/ChatTool without syncing its legacy skills.",
                 },
             ),
             SetupOptionElement(

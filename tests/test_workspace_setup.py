@@ -62,9 +62,9 @@ def test_workspace_all_extras_clone_chattool_chatblog_chatmemory(tmp_path, monke
     def fake_clone_or_update(source, repo_dir, interactive, can_prompt):
         cloned.append(repo_dir.relative_to(workspace_dir))
         if repo_dir.name == "ChatTool":
-            skill = repo_dir / "skills" / "demo" / "SKILL.md"
-            skill.parent.mkdir(parents=True, exist_ok=True)
-            skill.write_text("# demo\n", encoding="utf-8")
+            legacy_skill = repo_dir / "skills" / "trae" / "SKILL.md"
+            legacy_skill.parent.mkdir(parents=True, exist_ok=True)
+            legacy_skill.write_text("# stale trae\n", encoding="utf-8")
         elif repo_dir.name == "ChatBlog":
             (repo_dir / "docs").mkdir(parents=True, exist_ok=True)
         elif repo_dir.name == "ChatMemory":
@@ -97,6 +97,7 @@ def test_workspace_all_extras_clone_chattool_chatblog_chatmemory(tmp_path, monke
     assert Path("core/ChatBlog") in cloned
     assert Path("core/ChatMemory") in cloned
     assert (workspace_dir / "public" / "chatblog").is_symlink()
+    assert not (workspace_dir / "skills" / "trae").exists()
     assert (workspace_dir / "skills" / "chatarch").is_symlink()
     assert (workspace_dir / "skills" / "common").is_symlink()
     assert (workspace_dir / "skills" / "agents").is_symlink()

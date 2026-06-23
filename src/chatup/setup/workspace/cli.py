@@ -223,8 +223,7 @@ def setup_workspace(
         if item["name"] == "chattool":
             click.echo(f"ChatTool repo: {item['repo_dir']}")
             click.echo(f"Repo action: {item['repo_action']}")
-            click.echo(f"Skills: {workspace_path / 'skills'}")
-            click.echo(f"Copied skills: {len(item['copied_skills'])}")
+            click.echo("Skills: unchanged; use ChatMemory shared skill groups")
         if item["name"] == "chatblog":
             click.echo(f"ChatBlog repo: {item['repo_dir']}")
             click.echo(f"Repo action: {item['repo_action']}")
