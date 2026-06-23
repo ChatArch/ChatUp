@@ -11,8 +11,8 @@ requires-python = ">=3.9"
 license = "MIT"
 dependencies = [
     "click>=8.0",
-    "chatstyle>=0.1.0",
-    "chatenv>=0.1.2",
+    "chatstyle>=0.1.0,<0.2.0",
+    "chatenv>=0.2.0,<0.3.0",
     "colorama",
 ]
 authors = [{name = "rexwzh", email = "1073853456@qq.com"}]

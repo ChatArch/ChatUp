@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0
+
+### Added
+- Migrate ChatTool setup commands into ChatUp, including workspace setup helpers and package assets.
+- Add workspace fallback behavior so ChatBlog without `source/_posts` can temporarily link documentation through `public` instead of failing setup.
+
+### Changed
+- Require the published shared config runtime `chatenv>=0.2.0,<0.3.0` and bounded ChatArch CLI runtime `chatstyle>=0.1.0,<0.2.0`.
+
 ## 0.1.0
 
 ### Added

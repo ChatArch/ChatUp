@@ -18,7 +18,8 @@ def _pyproject() -> dict:
 def test_chatenv_config_entry_point_registered():
     data = _pyproject()
 
-    assert "chatenv>=0.1.2" in data["project"]["dependencies"]
+    assert "chatstyle>=0.1.0,<0.2.0" in data["project"]["dependencies"]
+    assert "chatenv>=0.2.0,<0.3.0" in data["project"]["dependencies"]
     assert data["project"]["entry-points"]["chatenv.configs"] == {
         "chatup": "chatup.config"
     }
