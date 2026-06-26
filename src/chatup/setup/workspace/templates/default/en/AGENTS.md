@@ -40,7 +40,7 @@ This workspace is an outer collaboration scaffold around source repositories.
 - Source repositories go under `core/`
 - Workspace maintenance scripts go under `scripts/`
 - The workspace root keeps a `.trash/` directory; prefer moving files there before deleting them directly
-- Imported shared skills go under `skills/`
+- Imported shared skills go under `skills/`; ChatMemory links the `chatarch`, `common`, and `agents` shared groups by default, and `package-development` / `package-review` are available under `skills/chatarch/`
 - Public publish output goes under `public/`
 - Archived projects go under `archive/YYYY-MM-DD/`
 

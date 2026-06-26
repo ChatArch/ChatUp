@@ -68,6 +68,9 @@ def test_workspace_all_extras_clone_chattool_chatblog_chatmemory(tmp_path, monke
         elif repo_dir.name == "ChatBlog":
             (repo_dir / "docs").mkdir(parents=True, exist_ok=True)
         elif repo_dir.name == "ChatMemory":
+            skills_readme = repo_dir / "Skills" / "README.md"
+            skills_readme.parent.mkdir(parents=True, exist_ok=True)
+            skills_readme.write_text("# ChatMemory Skills\n", encoding="utf-8")
             for group in ["chatarch", "common", "agents"]:
                 skill = repo_dir / "Skills" / group / "demo" / "SKILL.md"
                 skill.parent.mkdir(parents=True, exist_ok=True)
@@ -100,3 +103,13 @@ def test_workspace_all_extras_clone_chattool_chatblog_chatmemory(tmp_path, monke
     assert (workspace_dir / "skills" / "chatarch").is_symlink()
     assert (workspace_dir / "skills" / "common").is_symlink()
     assert (workspace_dir / "skills" / "agents").is_symlink()
+    assert (workspace_dir / "skills" / "README.md").is_symlink()
+    assert (workspace_dir / "skills" / "README.md").resolve() == workspace_dir / "core" / "ChatMemory" / "Skills" / "README.md"
+    assert not (workspace_dir / "skills" / "package-development").exists()
+    assert not (workspace_dir / "skills" / "package-review").exists()
+    local_readme = (workspace_dir / "skills" / "local" / "README.md").read_text(encoding="utf-8")
+    assert "chatarch/package-development" in local_readme
+    assert "chatarch/package-review" in local_readme
+    assert "available under `skills/chatarch/`" in local_readme
+    assert "chatarch/package-review are available under skills/chatarch/" in result.output
+    assert "Skills README:" in result.output

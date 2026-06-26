@@ -237,6 +237,12 @@ def setup_workspace(
                 "Linked memory skill groups: "
                 f"{', '.join(item['linked_groups']) if item['linked_groups'] else 'none'}"
             )
+            click.echo(
+                "Memory skill topics such as chatarch/package-development and "
+                "chatarch/package-review are available under skills/chatarch/."
+            )
+            if item.get("readme_link"):
+                click.echo(f"Skills README: {item['readme_link']}")
             if item.get("local_group"):
                 click.echo(f"Local skill group: {item['local_group']}")
             if item["skipped_groups"]:
