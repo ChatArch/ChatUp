@@ -22,6 +22,8 @@ LOCAL_SKILL_GROUP_README = """# Local Skills
 Use this directory for machine-specific, workspace-specific, or private skills that should not be shared through ChatMemory.
 
 Shared skills should live in one of the linked ChatMemory groups: `chatarch`, `common`, or `agents`.
+
+Topic directories such as `chatarch/package-development` and `chatarch/package-review` are available under `skills/chatarch/`.
 """
 
 
@@ -161,6 +163,12 @@ def apply_memory_option(
             f"ChatMemory repo does not contain Skills/: {skills_root}"
         )
 
+    readme_link: Path | None = None
+    skills_readme = skills_root / "README.md"
+    if skills_readme.exists():
+        readme_link = workspace_dir / "skills" / "README.md"
+        _ensure_symlink(skills_readme, readme_link)
+
     linked_groups: list[str] = []
     skipped_groups: list[str] = []
     for group in DEFAULT_MEMORY_SKILL_GROUPS:
@@ -180,6 +188,7 @@ def apply_memory_option(
         "linked_groups": linked_groups,
         "skipped_groups": skipped_groups,
         "local_group": local_group,
+        "readme_link": readme_link,
     }
 
 
@@ -217,7 +226,7 @@ def prompt_optional_modules(language: str) -> dict[str, dict]:
         choices=[
             create_choice("ChatTool -> core/ChatTool", "chattool"),
             create_choice("ChatBlog -> core/ChatBlog + public/chatblog", "chatblog"),
-            create_choice("ChatMemory -> core/ChatMemory + skills/chatarch, skills/common, skills/agents + local", "memory"),
+            create_choice("ChatMemory -> core/ChatMemory + shared skill groups (chatarch/common/agents) + local", "memory"),
         ],
         default_values=[],
         instruction="",

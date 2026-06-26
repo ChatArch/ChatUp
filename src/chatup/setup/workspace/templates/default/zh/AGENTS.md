@@ -40,7 +40,7 @@ Workspace/
 - 需要修改的源码仓库放到 `core/`
 - 维护脚本统一放到 `scripts/`
 - workspace 根目录维护一个 `.trash/`，需要删除或清理文件时，默认优先移动到 `.trash/`
-- 导入的共享 skills 放到 `skills/`
+- 导入的共享 skills 放到 `skills/`；ChatMemory 默认链接 `chatarch`、`common`、`agents` 三个共享组，`package-development` / `package-review` 可通过 `skills/chatarch/` 使用
 - 对外发布产物放到 `public/`
 - 归档项目放到 `archive/YYYY-MM-DD/`
 
