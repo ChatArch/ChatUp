@@ -8,9 +8,12 @@ ChatUp is the standalone ChatArch setup CLI. It is the first-level replacement f
 chatup --help
 chatup doctor
 chatup uv
+chatup gitea --install-dir ~/.chatarch/bin --force
 ```
 
 `chatup uv` installs `uv` through the official installer when needed, then creates the ChatArch Python environment with pip. Defaults are `--venv ~/.chatarch/venv` and `--python 3.12`; override them when a different runtime path or Python minor version is required.
+
+`chatup gitea` installs the ChatArch-maintained Gitea binary from `ChatArch/gitea` GitHub Release assets. It defaults to version `1.0.0`, repository `ChatArch/gitea`, and install directory `~/.chatarch/bin`.
 
 ## Development
 

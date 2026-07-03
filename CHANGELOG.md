@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- Add `chatup gitea` to install the ChatArch-maintained Gitea binary from `ChatArch/gitea` GitHub Release assets, defaulting to version `1.0.0`.
+
 ## 0.2.1
 
 ### Added

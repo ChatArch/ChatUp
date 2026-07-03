@@ -1,3 +1,6 @@
+import hashlib
+
+import pytest
 from click.testing import CliRunner
 
 from chatup.cli import main
@@ -11,6 +14,7 @@ def test_chatup_root_help_lists_setup_commands_without_setup_group_or_alias():
         "workspace",
         "nodejs",
         "uv",
+        "gitea",
         "codex",
         "claude",
         "opencode",
@@ -43,6 +47,7 @@ def test_top_level_setup_commands_expose_help():
         "codex",
         "docker",
         "frp",
+        "gitea",
         "hermes",
         "lark-cli",
         "nodejs",
@@ -104,6 +109,189 @@ def test_cc_connect_installs_chatarch_package(monkeypatch):
 
     assert result.exit_code == 0, result.output
     assert commands == [["install", "-g", "@chatarch/cc-connect"]]
+
+
+def test_gitea_help_exposes_release_install_options():
+    result = CliRunner().invoke(main, ["gitea", "--help"])
+
+    assert result.exit_code == 0
+    assert "--version" in result.output
+    assert "1.0.0" in result.output
+    assert "--repo" in result.output
+    assert "ChatArch/gitea" in result.output
+    assert "--install-dir" in result.output
+    assert "--force" in result.output
+
+
+def test_gitea_setup_downloads_chatarch_release_asset(monkeypatch, tmp_path):
+    import chatup.setup.gitea as gitea_setup
+
+    installed = []
+    monkeypatch.setattr(
+        gitea_setup,
+        "select_gitea_asset_name",
+        lambda: "gitea-1.0.0-linux-amd64.xz",
+    )
+
+    def fake_install_release_binary(*, repo, version, install_dir, binary_name, force):
+        installed.append((repo, version, install_dir, binary_name, force))
+        target = install_dir / binary_name
+        install_dir.mkdir(parents=True, exist_ok=True)
+        target.write_text("fake gitea")
+        return target
+
+    monkeypatch.setattr(gitea_setup, "install_gitea_release_binary", fake_install_release_binary)
+    monkeypatch.setattr(gitea_setup, "verify_gitea_binary", lambda path, version: f"gitea version {version}")
+
+    result = CliRunner().invoke(
+        main,
+        ["gitea", "--install-dir", str(tmp_path / "bin"), "--force", "-I"],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert installed == [
+        ("ChatArch/gitea", "1.0.0", tmp_path / "bin", "gitea", True)
+    ]
+    assert "gitea version 1.0.0" in result.output
+
+
+
+
+def test_gitea_install_verifies_release_checksum(monkeypatch, tmp_path):
+    import chatup.setup.gitea as gitea_setup
+
+    archive_bytes = b"compressed-binary"
+    archive_hash = hashlib.sha256(archive_bytes).hexdigest()
+    requested = []
+
+    monkeypatch.setattr(
+        gitea_setup,
+        "select_gitea_asset_name",
+        lambda version="1.0.0": "gitea-1.0.0-linux-amd64.xz",
+    )
+
+    def fake_download(url, destination):
+        requested.append(url)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        if url.endswith(".sha256"):
+            destination.write_text(f"{archive_hash}  gitea-1.0.0-linux-amd64.xz\n")
+        else:
+            destination.write_bytes(archive_bytes)
+
+    monkeypatch.setattr(gitea_setup, "download_release_asset", fake_download)
+    monkeypatch.setattr(
+        gitea_setup,
+        "decompress_xz",
+        lambda source, destination: destination.write_text("decompressed"),
+    )
+
+    target = gitea_setup.install_gitea_release_binary(
+        repo="ChatArch/gitea",
+        version="1.0.0",
+        install_dir=tmp_path,
+        binary_name="gitea",
+        force=True,
+    )
+
+    assert target == tmp_path / "gitea"
+    assert target.read_text() == "decompressed"
+    assert requested == [
+        "https://github.com/ChatArch/gitea/releases/download/v1.0.0/gitea-1.0.0-linux-amd64.xz",
+        "https://github.com/ChatArch/gitea/releases/download/v1.0.0/gitea-1.0.0-linux-amd64.xz.sha256",
+    ]
+
+
+def test_gitea_install_keeps_existing_binary_when_decompress_fails(monkeypatch, tmp_path):
+    import chatup.setup.gitea as gitea_setup
+
+    archive_bytes = b"compressed-binary"
+    archive_hash = hashlib.sha256(archive_bytes).hexdigest()
+    target = tmp_path / "gitea"
+    target.write_text("old binary")
+
+    monkeypatch.setattr(
+        gitea_setup,
+        "select_gitea_asset_name",
+        lambda version="1.0.0": "gitea-1.0.0-linux-amd64.xz",
+    )
+
+    def fake_download(url, destination):
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        if url.endswith(".sha256"):
+            destination.write_text(f"{archive_hash}  gitea-1.0.0-linux-amd64.xz\n")
+        else:
+            destination.write_bytes(archive_bytes)
+
+    def fail_decompress(source, destination):
+        destination.write_text("partial new binary")
+        raise RuntimeError("bad archive")
+
+    monkeypatch.setattr(gitea_setup, "download_release_asset", fake_download)
+    monkeypatch.setattr(gitea_setup, "decompress_xz", fail_decompress)
+
+    with pytest.raises(RuntimeError):
+        gitea_setup.install_gitea_release_binary(
+            repo="ChatArch/gitea",
+            version="1.0.0",
+            install_dir=tmp_path,
+            binary_name="gitea",
+            force=True,
+        )
+
+    assert target.read_text() == "old binary"
+
+
+
+
+def test_gitea_install_creates_temp_dir_inside_install_dir(monkeypatch, tmp_path):
+    import chatup.setup.gitea as gitea_setup
+
+    archive_bytes = b"compressed-binary"
+    archive_hash = hashlib.sha256(archive_bytes).hexdigest()
+    temp_dirs = []
+
+    class FakeTemporaryDirectory:
+        def __init__(self, *, prefix, dir):
+            temp_dirs.append((prefix, dir))
+            self.path = dir / ".chatup-gitea-test"
+
+        def __enter__(self):
+            self.path.mkdir(parents=True, exist_ok=True)
+            return str(self.path)
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(gitea_setup.tempfile, "TemporaryDirectory", FakeTemporaryDirectory)
+    monkeypatch.setattr(
+        gitea_setup,
+        "select_gitea_asset_name",
+        lambda version="1.0.0": "gitea-1.0.0-linux-amd64.xz",
+    )
+
+    def fake_download(url, destination):
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        if url.endswith(".sha256"):
+            destination.write_text(f"{archive_hash}  gitea-1.0.0-linux-amd64.xz\n")
+        else:
+            destination.write_bytes(archive_bytes)
+
+    monkeypatch.setattr(gitea_setup, "download_release_asset", fake_download)
+    monkeypatch.setattr(
+        gitea_setup,
+        "decompress_xz",
+        lambda source, destination: destination.write_text("decompressed"),
+    )
+
+    gitea_setup.install_gitea_release_binary(
+        repo="ChatArch/gitea",
+        version="1.0.0",
+        install_dir=tmp_path,
+        binary_name="gitea",
+        force=True,
+    )
+
+    assert temp_dirs == [(".chatup-gitea-", tmp_path)]
 
 
 def test_uv_help_exposes_defaults():

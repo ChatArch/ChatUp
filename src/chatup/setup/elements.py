@@ -9,6 +9,12 @@ from chatup.setup.codex import setup_codex
 from chatup.setup.cc_connect import setup_cc_connect
 from chatup.setup.docker import setup_docker
 from chatup.setup.frp import setup_frp
+from chatup.setup.gitea import (
+    DEFAULT_GITEA_REPO,
+    DEFAULT_GITEA_VERSION,
+    DEFAULT_INSTALL_DIR,
+    setup_gitea,
+)
 from chatup.setup.hermes import setup_hermes
 from chatup.setup.lark_cli import setup_lark_cli
 from chatup.setup.opencode import setup_opencode
@@ -80,6 +86,17 @@ def codex_setup(api_key, base_url, model, env, interactive, install_only, log_le
 
 def cc_connect_setup(sudo=None, interactive=None, log_level="INFO"):
     setup_cc_connect(interactive=interactive, log_level=log_level)
+
+
+def gitea_setup(version, repo, install_dir, force, interactive, log_level):
+    setup_gitea(
+        version=version,
+        repo=repo,
+        install_dir=install_dir,
+        force=force,
+        interactive=interactive,
+        log_level=log_level,
+    )
 
 
 def claude_setup(auth_token, base_url, small_fast_model, interactive, install_only, log_level):
@@ -263,6 +280,53 @@ SETUP_COMMAND_ELEMENTS = (
                 kwargs={
                     "is_flag": True,
                     "help": "Reserved for compatibility; cc-connect setup does not currently require sudo.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--interactive/--no-interactive", "-i/-I"),
+                kwargs={
+                    "default": None,
+                    "help": INTERACTIVE_OPTION_HELP,
+                },
+            ),
+        ),
+    ),
+
+    SetupCommandElement(
+        name="gitea",
+        help="Install ChatArch Gitea from GitHub Release assets.",
+        callback=gitea_setup,
+        options=(
+            LOG_LEVEL_OPTION,
+            SetupOptionElement(
+                param_decls=("--version",),
+                kwargs={
+                    "default": DEFAULT_GITEA_VERSION,
+                    "show_default": True,
+                    "help": "ChatArch Gitea release version to install.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--repo",),
+                kwargs={
+                    "default": DEFAULT_GITEA_REPO,
+                    "show_default": True,
+                    "help": "GitHub repository that owns the Gitea release assets.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--install-dir",),
+                kwargs={
+                    "default": str(DEFAULT_INSTALL_DIR),
+                    "show_default": True,
+                    "help": "Directory where the gitea binary will be installed.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--force", "-f"),
+                kwargs={
+                    "is_flag": True,
+                    "help": "Replace an existing binary at the target path.",
                 },
             ),
             SetupOptionElement(
