@@ -6,6 +6,7 @@ from chatstyle import INTERACTIVE_OPTION_HELP
 from chatup.setup.chrome import setup_chrome_driver
 from chatup.setup.claude import setup_claude
 from chatup.setup.codex import setup_codex
+from chatup.setup.cursor_agent import setup_cursor_agent
 from chatup.setup.cc_connect import setup_cc_connect
 from chatup.setup.docker import setup_docker
 from chatup.setup.frp import setup_frp
@@ -78,6 +79,26 @@ def codex_setup(api_key, base_url, model, env, interactive, install_only, log_le
         base_url=base_url,
         model=model,
         env_ref=env,
+        interactive=interactive,
+        install_only=install_only,
+        log_level=log_level,
+    )
+
+
+def cursor_agent_setup(
+    auth_json,
+    auth_env,
+    cli_config,
+    api_key_env,
+    interactive,
+    install_only,
+    log_level,
+):
+    setup_cursor_agent(
+        auth_json=auth_json,
+        auth_env=auth_env,
+        cli_config=cli_config,
+        api_key_env=api_key_env,
         interactive=interactive,
         install_only=install_only,
         log_level=log_level,
@@ -522,6 +543,56 @@ SETUP_COMMAND_ELEMENTS = (
                 kwargs={
                     "is_flag": True,
                     "help": "Only install or upgrade the CLI and skip provider/model prompts; plugin presets may still update OpenCode config.",
+                },
+            ),
+        ),
+    ),
+    SetupCommandElement(
+        name="cursor-agent",
+        help="Install and configure Cursor Agent CLI without installing Cursor IDE.",
+        callback=cursor_agent_setup,
+        options=(
+            LOG_LEVEL_OPTION,
+            SetupOptionElement(
+                param_decls=("--interactive/--no-interactive", "-i/-I"),
+                kwargs={
+                    "default": None,
+                    "help": INTERACTIVE_OPTION_HELP,
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--auth-json",),
+                kwargs={
+                    "default": None,
+                    "help": "Copy a Cursor auth.json containing accessToken and refreshToken.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--auth-env", "-e"),
+                kwargs={
+                    "default": None,
+                    "help": "Load CURSOR_ACCESS_TOKEN/CURSOR_REFRESH_TOKEN from an env file.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--cli-config",),
+                kwargs={
+                    "default": None,
+                    "help": "Copy a Cursor Agent ~/.cursor/cli-config.json file.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--api-key-env",),
+                kwargs={
+                    "default": None,
+                    "help": "Read a Cursor API key from the named environment variable and run a bootstrap probe.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--install-only",),
+                kwargs={
+                    "is_flag": True,
+                    "help": "Only install or verify Cursor Agent CLI and skip auth/config writes.",
                 },
             ),
         ),
