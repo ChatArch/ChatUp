@@ -5,7 +5,7 @@
 ## 核心原则
 
 - 外层根目录只保留少量总控文件；真正执行任务时，应进入对应 project 目录埋头推进。
-- 所有实际工作统一放到 `projects/` 下；过时项目归档到 `archive/YYYY-MM-DD/`。
+- 所有实际工作统一放到 `projects/` 下；过时项目归档到 `archive/YYYY-MM-DD/`，其中 `YYYY-MM-DD` 是执行归档当天日期。
 - project 目录结构默认保持最小化，但命名规则允许更灵活的分组方式。
 - `PRD.md` 只记录稳定需求、范围、约束和完成标准；进展细节写入 `progress.md`。
 - `progress.md` 是任务连续性的主日志。每次完成实质动作后，都应及时更新。
@@ -23,9 +23,14 @@ Workspace/
   ARCHIVE.md
   .trash/
   projects/
+  discussion/
+    MM-DD-<topic>/
+      card.md
+      Items/
   archive/
     index.md
     YYYY-MM-DD/
+  discard/
   core/
   scripts/
   skills/
@@ -36,13 +41,14 @@ Workspace/
 
 ## 当前配置项
 
-- 已启用项：`archive/`、`ARCHIVE.md`、`archive/index.md`
+- 已启用项：`projects/`、`discussion/`、`archive/`、`discard/`、`ARCHIVE.md`、`archive/index.md`
 - 需要修改的源码仓库放到 `core/`
 - 维护脚本统一放到 `scripts/`
-- workspace 根目录维护一个 `.trash/`，需要删除或清理文件时，默认优先移动到 `.trash/`
+- workspace 根目录维护一个 `.trash/`，它是底层安全缓冲，不作为主任务列；普通任务删除优先移动到 `discard/`
 - 导入的共享 skills 放到 `skills/`；ChatMemory 默认链接 `chatarch`、`common`、`agents` 三个共享组，`package-development` / `package-review` 可通过 `skills/chatarch/` 使用
 - 对外发布产物放到 `public/`
-- 归档项目放到 `archive/YYYY-MM-DD/`
+- 目录协议的基本 item 是 Project item 和 Discussion item；二者都是 project-like 任务单元，只是处在不同阶段。活跃 Project item 放到 `projects/`；Discussion item 放到 `discussion/MM-DD-<topic>/`，自带 `card.md` 描述议题与分类逻辑，并可用 `Items/` 临时收纳其他 item
+- 归档项目放到 `archive/YYYY-MM-DD/`，日期取执行归档当天；软删除或无继续价值的任务放到 `discard/`，避免直接物理删除
 
 ## 工作流
 
@@ -54,20 +60,22 @@ Workspace/
 6. 项目调试临时文件不要写到 `/tmp`；默认写到当前 project 的 `playground/`。
 7. project 根目录默认只保留 `PRD.md`、`progress.md`、`memory.md` 等控制文件；报告放 `reports/`，脚本放 `scripts/`。
 8. 若使用 `projects/<topic>/<name>/` 主题分组结构，则 `projects/<topic>/` 根目录只作为索引层，默认只保留 `README.md`、`.trash/` 与子项目目录。
-9. 新建执行任务默认使用 `MM-DD-...` 日期前缀；只有明确的长期稳定子项目才可不带日期前缀。
-10. workspace 和 project 级别都应优先准备 `.trash/`；需要删除文件时，默认先移动到就近的 `.trash/`，而不是直接 `rm`。
-11. 如需从 project 根目录直接访问源码仓库，可按需手动创建到 `core/<repo-name>` 的符号链接，但不要复制仓库。
-12. 收尾时完成汇报；如有归档动作，同步更新 `archive/index.md`。
-13. 归档流程采用“脚本收集候选 + 模型审查 + 更新 `archive/index.md`”的方式，具体流程见根 `ARCHIVE.md`。
+9. 新建执行任务默认使用 `MM-DD-...` 日期前缀；Discussion topic 同样使用 `MM-DD-...` 前缀。
+10. 当多个 project 需要被一起消化、纠偏、分流或沉淀为 skill/blog/infra 时，新建 `discussion/MM-DD-<topic>/`，先写 `card.md` 说明议题、收纳目标和 item 分类逻辑，再把被收纳项目移动到它的 `Items/` 下。
+11. 用户删除或模型判断无继续价值的任务，移动到 `discard/`；`.trash/` 只作为底层文件操作安全缓冲。
+12. 如需在 project 中隔离修改源码仓库，优先从 `core/<repo-name>` 创建按需 Git worktree；任务结束后清理对应 worktree。不要复制仓库。
+13. 收尾时完成汇报；如有归档动作，同步更新 `archive/index.md`。
+14. 归档流程采用“脚本收集候选 + 模型审查 + 更新 `archive/index.md`”的方式，具体流程见根 `ARCHIVE.md`。
 
 ## 写入规则
 
 | 情况 | 写入位置 |
 |-----------|----------|
-| 任意实际工作单元 | `projects/<name>/` 或 `projects/<topic>/<name>/` |
-| 短期 project | 推荐 `MM-DD-<project-name>` |
-| 长期 project | 可直接使用稳定名称，不加日期前缀 |
-| 已不活跃的旧 project | `archive/YYYY-MM-DD/<project-name>/` |
+| 任意实际工作单元 | `projects/MM-DD-<project-name>/` 或 `projects/<topic>/MM-DD-<project-name>/` |
+| Project item | 必须使用 `MM-DD-<project-name>` 日期前缀 |
+| 已不活跃的旧 project | `archive/YYYY-MM-DD/<project-name>/`，`YYYY-MM-DD` 是归档当天日期 |
+| 需要一起消化/纠偏/分流的任务集合 | `discussion/MM-DD-<topic>/`，自带 `card.md`，被收纳任务放入 `Items/` |
+| 软删除或无继续价值的任务 | `discard/<project-name>/` |
 | 归档操作指南 | `ARCHIVE.md` |
 | 归档内容索引 | `archive/index.md` |
 | 需要修改的源码仓库 | `core/<repo-name>/` |

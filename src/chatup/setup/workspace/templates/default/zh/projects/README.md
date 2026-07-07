@@ -4,6 +4,8 @@
 
 ## 什么时候新开一个 project
 
+当前 workspace 的目录协议只有两类基本 item：Project item 和 Discussion item。二者都是 project-like 任务单元，只是处在不同状态/阶段。`projects/` 放当前活跃 Project item；`discussion/` 放需要一起消化、纠偏、分流或沉淀的 Discussion item；已完成或不活跃 item 归档到 `archive/`；软删除或无继续价值的 item 放入 `discard/`。
+
 当一项工作有自己明确的目标、上下文和交付物时，就应该新开一个 project。例如：
 
 - 一次调研
@@ -13,7 +15,7 @@
 
 ## 命名与分组规则
 
-默认推荐短期 project 使用日期前缀：
+每个 Project item 都必须使用日期前缀：
 
 ```text
 MM-DD-<project-name>
@@ -33,9 +35,9 @@ projects/chatrss/`date`-topic-auth-debug/
 ```
 
 建议：
-- **短期、一次性任务**：优先用 `MM-DD-<project-name>`
-- **集中处理同类任务**：可以按 topic 分组，再在 topic 下开子项目
-- **长期 project**：可以去掉日期前缀，直接使用稳定名称
+- **所有具体任务单元**：统一使用 `MM-DD-<project-name>`
+- **集中处理同类任务**：可以按 topic 分组，但 topic 下的具体任务仍然必须带日期前缀
+- **长期主题**：可以作为 `projects/<topic>/` 分组目录存在，但它只是索引层，不是具体执行 project
 
 ## topic 分组目录的推荐写法
 
@@ -49,8 +51,8 @@ projects/<topic>/<name>/
 - `topic/` 表示一个持续主题、领域或工作束，例如 `agent-collab/`、`chatrss/`、`feishu/`
 - `topic/` 根目录默认只做索引层，保持简洁；通常只保留 `README.md`、`.trash/` 和子项目目录
 - `<name>/` 表示这个主题下的具体任务单元，也是实际执行单元
-- 新建任务默认使用日期前缀，例如：`projects/feishu/05-25-doc-sync/`
-- 只有非常明确的长期子项目才使用稳定名称，而且它仍然是独立执行单元，不应把执行产物直接散放在 `topic/` 根目录
+- 新建任务必须使用日期前缀，例如：`projects/feishu/05-25-doc-sync/`
+- 不设置“长期子项目可省略日期”的例外；长期主题放在 `projects/<topic>/` 索引层，具体执行单元仍然带日期前缀
 
 推荐示例：
 
@@ -109,13 +111,24 @@ projects/chatrss/auth-debug/
 ## 归档
 
 - `projects/` 只保留当前活跃或近期仍在推进的工作
-- 对明显不再活跃的 project，归档到 `../archive/YYYY-MM-DD/`
+- 对明显不再活跃的 project，归档到 `../archive/YYYY-MM-DD/`；这里的 `YYYY-MM-DD` 是执行归档当天日期，不是 project 创建日期
 - 归档索引写入 `../archive/index.md`，归档流程见 `../ARCHIVE.md`
 - 归档不删除内容，只移动位置，并保留原 project 目录名
 - 归档过程应采用“脚本筛候选 + 模型审查”的方式，而不是纯脚本盲搬
 
+## Discussion 与 Discard
+
+- `../discussion/` 用于 Discussion item。Discussion 是 project-like 任务单元，不是完整聊天记录转储。
+- Discussion topic 使用 `MM-DD-<topic>/`，并自带 `card.md`；`card.md` 用来说明议题、收纳目标、当前判断和 `Items/` 分类逻辑。
+- Discussion 也可拥有自己的 `PRD.md`、`progress.md` 和 `reports/`，用于记录需求、过程和结论。
+- 被收纳的任务移动到 `discussion/MM-DD-<topic>/Items/<project-name>/`，避免同时出现在 `projects/`。
+- Discussion 适合记录用户纠偏、Agent 判断修正、任务分流、以及输出到 skill/blog/infra/archive/discard 的决策。开 Discussion 时应先 review 相关 project：已有 `card.md` 的先读 card 再按需核对项目材料；没有 `card.md` 的先浏览项目材料并补一张 card，再决定是否收纳。
+- Discussion 完成时，处理并清空 `Items/` 即可；具体可以归档、丢弃、拆回新 project，或在 `progress.md` / reports 中留下处理结果。Discussion 自己保留为一个普通 project-like 记录。
+- `../discard/` 是软删除/回收站区域；用户明确删除或模型判断无继续价值的任务移动到这里。
+- `.trash/` 仍可作为底层文件操作安全缓冲，但不作为主任务生命周期区域。
+
 ## 源码仓库访问
 
 - 真实源码仓库默认保留在 `core/`
-- 如果当前 project 需要更短的访问路径，可手动在 project 内创建符号链接，例如 `ln -s /path/to/ChatTool ./ChatTool`
-- 该符号链接是按需行为，不作为默认模板自动生成
+- 如果当前 project 需要隔离修改源码，优先从 `core/<repo-name>` 创建 Git worktree 到当前 project，例如 `git -C ../../core/ChatTool worktree add ./ChatTool <branch-name>`
+- worktree 是按需行为，不作为默认模板自动生成；任务结束后清理对应 worktree
