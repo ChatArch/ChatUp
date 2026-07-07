@@ -25,7 +25,6 @@ Workspace/
   projects/
   discussion/
     MM-DD-<topic>/
-      card.md
       Items/
   archive/
     index.md
@@ -47,7 +46,7 @@ Workspace/
 - workspace 根目录维护一个 `.trash/`，它是底层安全缓冲，不作为主任务列；普通任务删除优先移动到 `discard/`
 - 导入的共享 skills 放到 `skills/`；ChatMemory 默认链接 `chatarch`、`common`、`agents` 三个共享组，`package-development` / `package-review` 可通过 `skills/chatarch/` 使用
 - 对外发布产物放到 `public/`
-- 目录协议的基本 item 是 Project item 和 Discussion item；二者都是 project-like 任务单元，只是处在不同阶段。活跃 Project item 放到 `projects/`；Discussion item 放到 `discussion/MM-DD-<topic>/`，自带 `card.md` 描述议题与分类逻辑，并可用 `Items/` 临时收纳其他 item
+- 目录协议的基本 item 是 Project item 和 Discussion item；二者都是 project-like 任务单元，只是处在不同阶段。活跃 Project item 放到 `projects/`；Discussion item 放到 `discussion/MM-DD-<topic>/`，并可用 `Items/` 临时收纳其他 item
 - 归档项目放到 `archive/YYYY-MM-DD/`，日期取执行归档当天；软删除或无继续价值的任务放到 `discard/`，避免直接物理删除
 
 ## 工作流
@@ -61,7 +60,7 @@ Workspace/
 7. project 根目录默认只保留 `PRD.md`、`progress.md`、`memory.md` 等控制文件；报告放 `reports/`，脚本放 `scripts/`。
 8. 若使用 `projects/<topic>/<name>/` 主题分组结构，则 `projects/<topic>/` 根目录只作为索引层，默认只保留 `README.md`、`.trash/` 与子项目目录。
 9. 新建执行任务默认使用 `MM-DD-...` 日期前缀；Discussion topic 同样使用 `MM-DD-...` 前缀。
-10. 当多个 project 需要被一起消化、纠偏、分流或沉淀为 skill/blog/infra 时，新建 `discussion/MM-DD-<topic>/`，先写 `card.md` 说明议题、收纳目标和 item 分类逻辑，再把被收纳项目移动到它的 `Items/` 下。
+10. 当多个 project 需要被一起消化、纠偏、分流或沉淀为 skill/blog/infra 时，新建 `discussion/MM-DD-<topic>/`，并把被收纳项目移动到它的 `Items/` 下。
 11. 用户删除或模型判断无继续价值的任务，移动到 `discard/`；`.trash/` 只作为底层文件操作安全缓冲。
 12. 如需在 project 中隔离修改源码仓库，优先从 `core/<repo-name>` 创建按需 Git worktree；任务结束后清理对应 worktree。不要复制仓库。
 13. 收尾时完成汇报；如有归档动作，同步更新 `archive/index.md`。
@@ -74,7 +73,7 @@ Workspace/
 | 任意实际工作单元 | `projects/MM-DD-<project-name>/` 或 `projects/<topic>/MM-DD-<project-name>/` |
 | Project item | 必须使用 `MM-DD-<project-name>` 日期前缀 |
 | 已不活跃的旧 project | `archive/YYYY-MM-DD/<project-name>/`，`YYYY-MM-DD` 是归档当天日期 |
-| 需要一起消化/纠偏/分流的任务集合 | `discussion/MM-DD-<topic>/`，自带 `card.md`，被收纳任务放入 `Items/` |
+| 需要一起消化/纠偏/分流的任务集合 | `discussion/MM-DD-<topic>/`，被收纳任务放入 `Items/` |
 | 软删除或无继续价值的任务 | `discard/<project-name>/` |
 | 归档操作指南 | `ARCHIVE.md` |
 | 归档内容索引 | `archive/index.md` |

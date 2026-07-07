@@ -4,8 +4,6 @@ This directory contains all active work. Each project should be self-contained e
 
 ## When to create a new project
 
-The directory protocol has two basic item types: Project items and Discussion items. Both are project-like task units in different states or phases. Keep active Project items in `projects/`; put Discussion items that digest, correct, route, or synthesize multiple items under `discussion/`; archive completed or inactive items into `archive/`; move soft-deleted or no-longer-valuable items into `discard/`.
-
 Create a new project when the work has its own goal, context, and deliverables. Examples:
 
 - a research task
@@ -108,14 +106,8 @@ Notes:
 - archive by moving directories, not by deleting content
 - use “script candidate collection + model review” instead of blind script-only archiving
 
-## Discussion And Discard
+## Discard
 
-- `../discussion/` is for Discussion items. A Discussion is a project-like task unit, not a full chat transcript dump.
-- A Discussion topic uses `MM-DD-<topic>/` and includes its own `card.md`; `card.md` describes the topic, absorption goal, current judgment, and `Items/` classification logic.
-- A Discussion can also have its own `PRD.md`, `progress.md`, and `reports/` for requirements, process, and conclusions.
-- Absorbed tasks move to `discussion/MM-DD-<topic>/Items/<project-name>/` so they do not also appear in `projects/`.
-- Use Discussion for human correction, revised agent judgment, task routing, and decisions that may produce skill/blog/infra/archive/discard outcomes. When opening a Discussion, review related projects first: if an item already has `card.md`, read the card before inspecting project files as needed; if it has no `card.md`, browse the project materials and write a card before deciding whether to absorb it.
-- When a Discussion is completed, handle and clear `Items/`. Items may be archived, discarded, split back into new projects, or summarized in `progress.md` or reports. Keep the Discussion itself as a normal project-like record.
 - `../discard/` is the soft-delete/recycle area; tasks explicitly deleted by the user or judged no longer valuable should move there.
 - `.trash/` remains a low-level file-operation safety buffer, not a main lifecycle area.
 

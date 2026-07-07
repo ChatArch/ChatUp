@@ -40,6 +40,8 @@ include-package-data = true
     "assets/hermes/*.sh",
     "workspace/templates/default/zh/*.md",
     "workspace/templates/default/zh/projects/*.md",
+    "workspace/templates/default/zh/discussion/*.md",
     "workspace/templates/default/en/*.md",
     "workspace/templates/default/en/projects/*.md",
+    "workspace/templates/default/en/discussion/*.md",
 ]

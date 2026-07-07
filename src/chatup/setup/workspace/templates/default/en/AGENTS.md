@@ -25,7 +25,6 @@ Workspace/
   projects/
   discussion/
     MM-DD-<topic>/
-      card.md
       Items/
   archive/
     index.md
@@ -47,7 +46,7 @@ This workspace is an outer collaboration scaffold around source repositories.
 - The workspace root keeps a `.trash/` directory as a low-level safety buffer, not as a main task column; normal task deletion should move to `discard/`
 - Imported shared skills go under `skills/`; ChatMemory links the `chatarch`, `common`, and `agents` shared groups by default, and `package-development` / `package-review` are available under `skills/chatarch/`
 - Public publish output goes under `public/`
-- The directory protocol has two basic item types: Project items and Discussion items. Both are project-like task units in different lifecycle phases. Active Project items go under `projects/`; Discussion items go under `discussion/MM-DD-<topic>/`, include a `card.md` that describes the topic and item-classification logic, and can temporarily absorb other items under `Items/`
+- The directory protocol has two basic item types: Project items and Discussion items. Both are project-like task units in different lifecycle phases. Active Project items go under `projects/`; Discussion items go under `discussion/MM-DD-<topic>/` and can temporarily absorb other items under `Items/`
 - Archived projects go under `archive/YYYY-MM-DD/`, using the date when archiving happens; soft-deleted or no-longer-valuable tasks go under `discard/` instead of being physically deleted
 
 ## Workflow
@@ -61,7 +60,7 @@ This workspace is an outer collaboration scaffold around source repositories.
 7. Keep the project root minimal: control files at the root, reports under `reports/`, scripts under `scripts/`.
 8. If you use `projects/<topic>/<name>/`, keep `projects/<topic>/` as an index layer with only `README.md`, `.trash/`, and child project directories.
 9. Use `MM-DD-...` for new execution tasks by default; Discussion topics use the same prefix.
-10. When multiple projects need joint digestion, human correction, routing, or conversion into skill/blog/infra output, create `discussion/MM-DD-<topic>/`, write `card.md` for the topic, absorption goal, and item-classification logic, then move absorbed projects under its `Items/` directory.
+10. When multiple projects need joint digestion, human correction, routing, or conversion into skill/blog/infra output, create `discussion/MM-DD-<topic>/` and move absorbed projects under its `Items/` directory.
 11. Move user-deleted or no-longer-valuable tasks to `discard/`; `.trash/` is only a low-level file-operation safety buffer.
 12. If a project needs isolated source edits, prefer an on-demand Git worktree from `core/<repo-name>` and remove that worktree when the task is finished. Do not copy the repository.
 13. Finish with a report; if archiving happens, update `archive/index.md`.
@@ -74,7 +73,7 @@ This workspace is an outer collaboration scaffold around source repositories.
 | Any active work unit | `projects/MM-DD-<project-name>/` or `projects/<topic>/MM-DD-<project-name>/` |
 | Project item | Must use the `MM-DD-<project-name>` date prefix |
 | Inactive old project | `archive/YYYY-MM-DD/<project-name>/`, where `YYYY-MM-DD` is the archive date |
-| Tasks that need joint digestion/correction/routing | `discussion/MM-DD-<topic>/`, with its own `card.md` and absorbed tasks under `Items/` |
+| Tasks that need joint digestion/correction/routing | `discussion/MM-DD-<topic>/`, with absorbed tasks under `Items/` |
 | Soft-deleted or no-longer-valuable task | `discard/<project-name>/` |
 | Archive procedure guide | `ARCHIVE.md` |
 | Archived content index | `archive/index.md` |

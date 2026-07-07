@@ -4,8 +4,6 @@
 
 ## 什么时候新开一个 project
 
-当前 workspace 的目录协议只有两类基本 item：Project item 和 Discussion item。二者都是 project-like 任务单元，只是处在不同状态/阶段。`projects/` 放当前活跃 Project item；`discussion/` 放需要一起消化、纠偏、分流或沉淀的 Discussion item；已完成或不活跃 item 归档到 `archive/`；软删除或无继续价值的 item 放入 `discard/`。
-
 当一项工作有自己明确的目标、上下文和交付物时，就应该新开一个 project。例如：
 
 - 一次调研
@@ -116,14 +114,8 @@ projects/chatrss/auth-debug/
 - 归档不删除内容，只移动位置，并保留原 project 目录名
 - 归档过程应采用“脚本筛候选 + 模型审查”的方式，而不是纯脚本盲搬
 
-## Discussion 与 Discard
+## Discard
 
-- `../discussion/` 用于 Discussion item。Discussion 是 project-like 任务单元，不是完整聊天记录转储。
-- Discussion topic 使用 `MM-DD-<topic>/`，并自带 `card.md`；`card.md` 用来说明议题、收纳目标、当前判断和 `Items/` 分类逻辑。
-- Discussion 也可拥有自己的 `PRD.md`、`progress.md` 和 `reports/`，用于记录需求、过程和结论。
-- 被收纳的任务移动到 `discussion/MM-DD-<topic>/Items/<project-name>/`，避免同时出现在 `projects/`。
-- Discussion 适合记录用户纠偏、Agent 判断修正、任务分流、以及输出到 skill/blog/infra/archive/discard 的决策。开 Discussion 时应先 review 相关 project：已有 `card.md` 的先读 card 再按需核对项目材料；没有 `card.md` 的先浏览项目材料并补一张 card，再决定是否收纳。
-- Discussion 完成时，处理并清空 `Items/` 即可；具体可以归档、丢弃、拆回新 project，或在 `progress.md` / reports 中留下处理结果。Discussion 自己保留为一个普通 project-like 记录。
 - `../discard/` 是软删除/回收站区域；用户明确删除或模型判断无继续价值的任务移动到这里。
 - `.trash/` 仍可作为底层文件操作安全缓冲，但不作为主任务生命周期区域。
 

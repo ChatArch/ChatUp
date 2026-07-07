@@ -28,6 +28,10 @@ def render_projects_readme(language: str) -> str:
     return _read_template(language, "projects/README.md")
 
 
+def render_discussion_readme(language: str) -> str:
+    return _read_template(language, "discussion/README.md")
+
+
 def render_archive_index(language: str) -> str:
     if language == "en":
         return (
@@ -104,8 +108,8 @@ def render_workspace_maintenance_skill() -> tuple[str, str]:
         "# Workspace Maintenance\n\n"
         "Use this skill when maintaining the outer workspace rather than editing a source repository.\n\n"
         "- keep active work under `projects/` and archive inactive work into `archive/YYYY-MM-DD/`, using the date when archiving happens\n"
-        "- treat Project items and Discussion items as the two basic project-like item types; a Discussion item lives under `discussion/MM-DD-<topic>/`, includes `card.md`, and uses `Items/` when it temporarily absorbs other items\n"
-        "- when a discussion completes, handle and clear `Items/`; keep `card.md`, `progress.md`, or reports as the record\n"
+        "- treat Project items and Discussion items as the two basic project-like item types; use `discussion/MM-DD-<topic>/Items/` when a Discussion item temporarily absorbs other items\n"
+        "- when a discussion completes, handle and clear `Items/`; keep `progress.md` or reports as the record\n"
         "- move soft-deleted or no-longer-valuable tasks into `discard/`; keep `.trash/` as a low-level safety buffer only\n"
         "- use root `ARCHIVE.md` as the archive procedure guide, and update `archive/index.md` when projects are archived or restored\n"
         "- keep workspace-level scripts under `scripts/`\n"
@@ -121,8 +125,8 @@ def render_workspace_maintenance_skill() -> tuple[str, str]:
         "# Workspace Maintenance（中文）\n\n"
         "用于维护 workspace 外层结构，而不是直接修改源码仓库。\n\n"
         "- 活跃工作保留在 `projects/`，不活跃项目归档到 `archive/YYYY-MM-DD/`，日期取执行归档当天\n"
-        "- 将 Project item 和 Discussion item 作为两类基本 project-like item；Discussion item 放在 `discussion/MM-DD-<topic>/`，自带 `card.md`，需要临时收纳其他 item 时使用 `Items/`\n"
-        "- Discussion 完成后，处理并清空 `Items/`；用 `card.md`、`progress.md` 或 reports 保留处理记录\n"
+        "- 将 Project item 和 Discussion item 作为两类基本 project-like item；Discussion item 需要临时收纳其他 item 时使用 `discussion/MM-DD-<topic>/Items/`\n"
+        "- Discussion 完成后，处理并清空 `Items/`；用 `progress.md` 或 reports 保留处理记录\n"
         "- 将软删除或无继续价值的任务移动到 `discard/`；`.trash/` 只作为底层安全缓冲\n"
         "- 根 `ARCHIVE.md` 作为归档操作指南；发生归档或恢复时同步更新 `archive/index.md`\n"
         "- workspace 级维护脚本统一放到 `scripts/`\n"
@@ -162,6 +166,7 @@ def base_file_map(
         "TODO.md": render_todo_md(language),
         "ARCHIVE.md": render_archive_md(language),
         "projects/README.md": render_projects_readme(language),
+        "discussion/README.md": render_discussion_readme(language),
         "archive/index.md": render_archive_index(language),
         "scripts/README.md": render_scripts_readme(language),
         "public/README.md": render_public_readme(language),
