@@ -5,6 +5,31 @@ from click.testing import CliRunner
 from chatup.cli import main
 
 
+def test_workspace_template_includes_chatarch_lifecycle_dirs(tmp_path):
+    workspace_dir = tmp_path / "workspace"
+
+    result = CliRunner().invoke(main, ["workspace", str(workspace_dir), "-I"])
+
+    assert result.exit_code == 0, result.output
+    for relative in ["projects", "discussion", "archive", "discard", ".trash"]:
+        assert (workspace_dir / relative).is_dir()
+    agents = (workspace_dir / "AGENTS.md").read_text(encoding="utf-8")
+    projects_readme = (workspace_dir / "projects" / "README.md").read_text(encoding="utf-8")
+    discussion_readme = (workspace_dir / "discussion" / "README.md").read_text(encoding="utf-8")
+    skill = (workspace_dir / "skills" / "local" / "workspace-maintenance" / "SKILL.md").read_text(encoding="utf-8")
+    assert "discussion/MM-DD-<topic>/" in agents
+    assert "card.md" not in agents
+    assert "worktree" in agents
+    assert "`discard/`" in agents
+    assert "## Discard" in projects_readme
+    assert "discussion" not in projects_readme.lower()
+    assert "card.md" not in projects_readme
+    assert "card.md" in discussion_readme
+    assert "Review 流程" in discussion_readme
+    assert "version: 0.2.2" in skill
+    assert "card.md" not in skill
+
+
 def test_workspace_chatblog_missing_docs_creates_placeholder_and_public_link(tmp_path, monkeypatch):
     workspace_dir = tmp_path / "workspace"
 

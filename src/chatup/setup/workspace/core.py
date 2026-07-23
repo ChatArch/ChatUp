@@ -38,7 +38,9 @@ PROFILES: dict[str, WorkspaceProfile] = {
 BASE_DIRS = [
     ".trash",
     "projects",
+    "discussion",
     "archive",
+    "discard",
     "core",
     "scripts",
     "skills",
