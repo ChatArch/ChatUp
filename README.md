@@ -1,39 +1,47 @@
-# chatup
+# ChatUp
 
-ChatUp is the standalone ChatArch setup CLI. It is the first-level replacement for `chattool setup`: commands such as `chattool setup workspace` become `chatup workspace` while preserving the same interactive/non-interactive CLI conventions.
+ChatUp 是 ChatArch 的独立环境与工具安装 CLI。它承接原来 `chattool setup` 的职责，把常用开发环境、Agent CLI、工作区脚手架和本地服务安装整理成一级命令，例如 `chattool setup workspace` 对应 `chatup workspace`。
 
-## Quick Start
+- 文档站：<https://arch.gh.wzhecnu.cn/ChatUp/>
+- English README: [README.en.md](README.en.md)
+- Source: <https://github.com/ChatArch/ChatUp>
+
+## 快速开始
 
 ```bash
 chatup --help
 chatup doctor
 chatup uv
+chatup workspace default ~/Playground
+```
+
+常见安装命令：
+
+```bash
 chatup gitea --install-dir ~/.chatarch/bin --force
 chatup crs --install-dir ~/.chatarch/crs/local --port 12392 --redis-port 6379
 ```
 
-`chatup uv` installs `uv` through the official installer when needed, then creates the ChatArch Python environment with pip. Defaults are `--venv ~/.chatarch/venv` and `--python 3.12`; override them when a different runtime path or Python minor version is required.
+## 当前能力
 
-`chatup gitea` installs the ChatArch-maintained Gitea binary from `ChatArch/gitea` GitHub Release assets. It defaults to version `1.0.0`, repository `ChatArch/gitea`, and install directory `~/.chatarch/bin`.
+- `chatup uv`：安装 `uv`，并创建 ChatArch Python 运行环境。默认目标是 `~/.chatarch/venv`，默认 Python 版本是 3.12。
+- `chatup workspace`：初始化人类-AI 协作工作区，包括 `AGENTS.md`、`projects/`、`archive/`、`core/`、`skills/`、`public/` 等约定目录。
+- `chatup gitea`：从 `ChatArch/gitea` GitHub Release 安装 ChatArch 维护的 Gitea 二进制。
+- `chatup crs`：安装 canonical `@chatarch/claude-relay-service` npm 包，准备本地 Redis 组件，生成本地配置和 secret 文件，构建 admin SPA，启动 CRS，并执行本地 smoke check。
+- `chatup cc-connect`、`chatup claude`、`chatup codex`、`chatup opencode`、`chatup hermes`、`chatup lark-cli`：配置 ChatArch 常用 Agent、模型与飞书工具链。
+- `chatup nodejs`、`chatup docker`、`chatup zsh`、`chatup chrome`、`chatup frp`：准备常用系统运行环境。
 
-`chatup crs` installs the canonical `@chatarch/claude-relay-service` npm package, prepares a local Redis component with task/app-local config, writes local secrets without printing them, builds the admin SPA, starts CRS, and runs a local smoke check. It does not register Redis as a Homebrew/system service.
-
-## Development
+## 开发
 
 ```bash
 python -m pytest -q
 python -m build
 python -m twine check dist/*
+mkdocs build --strict
 ```
 
-## Layout
+更多使用说明见文档站的 [快速开始](https://arch.gh.wzhecnu.cn/ChatUp/quickstart/) 和 [命令参考](https://arch.gh.wzhecnu.cn/ChatUp/commands/)。
 
-- `src/chatup/`: package source code
-- `tests/`: package tests
-- `cli-tests/`: real CLI tests, doc-first
-- `mock-cli-tests/`: mock/fake CLI tests, doc-first
-- `docs/`: long-lived project docs
+## 发布
 
-## Release
-
-Release is tag-driven. A `vX.Y.Z` tag must match `src/chatup/__init__.py::__version__`; the publish workflow builds and publishes to PyPI through Trusted Publishing/OIDC when the PyPI project is configured for `ChatArch/ChatUp`, workflow `.github/workflows/publish.yml`, environment `pypi`.
+发布由 tag 驱动。`vX.Y.Z` tag 必须与 `src/chatup/__init__.py::__version__` 一致；发布 workflow 会通过 PyPI Trusted Publishing/OIDC 构建并发布到 PyPI。

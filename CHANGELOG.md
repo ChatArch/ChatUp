@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- Add ChatArch-standard MkDocs documentation with Chinese/English pages, docs metadata, CI docs build, preview docs workflow, and deploy docs workflow.
 - Add `chatup crs` to install the canonical `@chatarch/claude-relay-service` npm package, prepare a local Redis component without registering a system service, generate local secrets/config, build the admin SPA, start CRS, and run a local smoke check.
 - Add `chatup gitea` to install the ChatArch-maintained Gitea binary from `ChatArch/gitea` GitHub Release assets, defaulting to version `1.0.0`.
 
