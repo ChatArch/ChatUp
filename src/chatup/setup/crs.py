@@ -10,6 +10,7 @@ from pathlib import Path
 import click
 
 from chatup.interaction import abort_if_force_without_tty, resolve_interactive_mode
+from chatup.setup.nodejs import ensure_nodejs_requirement
 from chatup.utils.custom_logger import setup_logger
 
 logger = setup_logger("setup_crs")
@@ -38,6 +39,24 @@ def run_command(args, *, cwd: Path | None = None, env: dict[str, str] | None = N
         stdout=subprocess.PIPE if capture else None,
         stderr=subprocess.PIPE if capture else None,
     )
+
+
+def npm_command(runtime: dict[str, object], *args: str) -> list[str]:
+    npm_bin = runtime.get("npm_bin")
+    if not isinstance(npm_bin, str) or not npm_bin:
+        raise click.ClickException("npm is required. Please run: chatup nodejs")
+    return [npm_bin, *args]
+
+
+def env_with_node_path(
+    runtime: dict[str, object], env: dict[str, str] | None = None
+) -> dict[str, str]:
+    merged = os.environ.copy() if env is None else env.copy()
+    npm_bin = runtime.get("npm_bin")
+    if isinstance(npm_bin, str) and npm_bin:
+        node_bin_dir = str(Path(npm_bin).expanduser().resolve().parent)
+        merged["PATH"] = f"{node_bin_dir}{os.pathsep}{merged.get('PATH', '')}"
+    return merged
 
 
 def ensure_redis_binary() -> None:
@@ -213,6 +232,16 @@ def setup_crs(
     )
     abort_if_force_without_tty(force_interactive, can_prompt, usage)
 
+    if smoke and not start:
+        raise click.ClickException("--smoke requires --start; pass --no-smoke when using --no-start.")
+
+    node_runtime = ensure_nodejs_requirement(
+        interactive=interactive,
+        can_prompt=can_prompt,
+        log_level=log_level,
+    )
+    npm_env = env_with_node_path(node_runtime)
+
     install_path = Path(install_dir).expanduser().resolve()
     app_root = install_path / "app"
     install_path.mkdir(parents=True, exist_ok=True)
@@ -221,8 +250,25 @@ def setup_crs(
     redis_info = start_local_redis(install_path, redis_port)
 
     if not (app_root / "package.json").exists():
-        run_command(["npm", "init", "-y"], cwd=app_root, timeout=120, capture=True)
-    run_command(["npm", "install", package, "--registry", "https://registry.npmjs.org/", "--no-audit"], cwd=app_root)
+        run_command(
+            npm_command(node_runtime, "init", "-y"),
+            cwd=app_root,
+            env=npm_env,
+            timeout=120,
+            capture=True,
+        )
+    run_command(
+        npm_command(
+            node_runtime,
+            "install",
+            package,
+            "--registry",
+            "https://registry.npmjs.org/",
+            "--no-audit",
+        ),
+        cwd=app_root,
+        env=npm_env,
+    )
 
     crs_root = package_root(app_root)
     if not crs_root.exists():
@@ -238,7 +284,7 @@ def setup_crs(
     write_env_file(crs_root, port=port, redis_port=redis_port, secrets_values=secrets_values)
 
     setup_log = install_path / "setup.raw.log"
-    env = os.environ.copy()
+    env = env_with_node_path(node_runtime)
     env.update(
         {
             "ADMIN_USERNAME": secrets_values["ADMIN_USERNAME"],
@@ -247,7 +293,7 @@ def setup_crs(
     )
     with setup_log.open("w", encoding="utf-8") as log_file:
         subprocess.run(
-            ["npm", "run", "setup"],
+            npm_command(node_runtime, "run", "setup"),
             cwd=crs_root,
             env=env,
             check=True,
@@ -258,11 +304,16 @@ def setup_crs(
         )
     setup_log.chmod(0o600)
 
-    run_command(["npm", "run", "install:web"], cwd=crs_root)
-    run_command(["npm", "run", "build:web"], cwd=crs_root)
+    run_command(npm_command(node_runtime, "run", "install:web"), cwd=crs_root, env=npm_env)
+    run_command(npm_command(node_runtime, "run", "build:web"), cwd=crs_root, env=npm_env)
 
     if start:
-        run_command(["npm", "run", "service:start:daemon"], cwd=crs_root, timeout=120)
+        run_command(
+            npm_command(node_runtime, "run", "service:start:daemon"),
+            cwd=crs_root,
+            env=npm_env,
+            timeout=120,
+        )
     if smoke:
         smoke_crs(port)
 
