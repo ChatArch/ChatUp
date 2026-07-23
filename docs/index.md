@@ -4,6 +4,29 @@ ChatUp 是 ChatArch 的独立安装与初始化 CLI，用来把一台机器整�
 
 它的目标不是成为通用包管理器，而是把 ChatArch 常用的环境准备步骤收敛成可复用、可测试、可审查的一级命令。
 
+站点入口：https://arch.gh.wzhecnu.cn/ChatUp/
+
+## 按场景选择文档
+
+| 场景 | 文档 |
+| --- | --- |
+| 从空机器验证 ChatUp、Python runtime 和 workspace | [快速开始](quickstart.md) |
+| 查看完整 CLI 树、命令分组、参数边界和服务默认路径 | [命令参考](commands.md) |
+| 校对哪些 ChatArch setup 流程已经有一等命令 | [CLI 能力地图](capability-map.md) |
+| 理解 `chatup workspace` 创建的目录和项目记录约定 | [工作区脚手架](workspace.md) |
+| 安装 ChatTea-compatible Gitea、ChatData-compatible MySQL、user-level NGINX 和 CRS | [命令参考](commands.md) |
+| 确认 ChatArch 默认目录、安全边界和交互约定 | [CLI 能力地图](capability-map.md) |
+
+## 文档栏目组织
+
+当前文档按任务和能力拆成多个入口，避免把所有安装步骤写成一条线性清单：
+
+- **入门**：从安装 ChatUp、`doctor`、`uv` 和 workspace 初始化开始。
+- **CLI / 能力地图**：列出真实已实现命令、命令分组和当前边界。
+- **本地服务**：说明 Gitea、MySQL、NGINX、CRS 的 user-level 默认目录和安全约定。
+- **工作区**：说明 ChatArch workspace scaffold 和项目记录结构。
+- **安全边界**：说明本地监听、secret 文件、`~/.chatarch/...` 默认路径和不负责的系统级范围。
+
 ## 核心入口
 
 <div class="grid cards" markdown>
@@ -19,6 +42,12 @@ ChatUp 是 ChatArch 的独立安装与初始化 CLI，用来把一台机器整�
     查看带注释的 CLI 树、命令分组、服务安装默认路径和本地安全约定。
 
     [查看命令参考](commands.md)
+
+- **CLI 能力地图**
+
+    像 ChatTea 的能力地图一样，按职责校对当前一等命令、默认目录和不负责的边界。
+
+    [查看能力地图](capability-map.md)
 
 - **工作区脚手架**
 
@@ -67,6 +96,17 @@ ChatUp 是 ChatArch 的独立安装与初始化 CLI，用来把一台机器整�
     ChatUp 可以生成本地配置和 secret 文件，但不会把敏感值打印到终端。
 
 </div>
+
+## CLI
+
+```bash
+chatup --help
+chatup gitea --help
+chatup mysql --help
+chatup nginx --help
+```
+
+完整带注释 CLI 树见 [命令参考](commands.md)，按能力分组的简明地图见 [CLI 能力地图](capability-map.md)。
 
 ## 设计边界
 

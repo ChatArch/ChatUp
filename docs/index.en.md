@@ -4,6 +4,29 @@ ChatUp is the standalone ChatArch setup CLI. It prepares a machine for ChatArch 
 
 It is not a general-purpose package manager. Its job is to capture ChatArch's common machine bootstrap and local service setup steps in a stable CLI surface.
 
+Site entry: https://arch.gh.wzhecnu.cn/ChatUp/en/
+
+## Choose Documentation by Scenario
+
+| Scenario | Document |
+| --- | --- |
+| Verify ChatUp, the Python runtime, and a workspace on a new machine | [Quick Start](quickstart.md) |
+| Read the full CLI tree, command groups, option boundaries, and service defaults | [Command Reference](commands.md) |
+| Check which ChatArch setup flows have first-class commands | [CLI Capability Map](capability-map.md) |
+| Understand the directories and project-record conventions created by `chatup workspace` | [Workspace Scaffold](workspace.md) |
+| Install ChatTea-compatible Gitea, ChatData-compatible MySQL, user-level NGINX, and CRS | [Command Reference: Local Services](commands.md#local-services) |
+| Confirm ChatArch default paths, safety boundaries, and interactive conventions | [CLI Capability Map: Out of Scope](capability-map.md#out-of-scope) |
+
+## Documentation Organization
+
+The docs are organized by task and capability so the site does not collapse into one linear setup checklist:
+
+- **Getting started**: install ChatUp, run `doctor`, create the Python runtime, and initialize a workspace.
+- **CLI / capability map**: list implemented commands, command groups, and current boundaries.
+- **Local services**: explain user-level defaults for Gitea, MySQL, NGINX, and CRS.
+- **Workspace**: explain the ChatArch workspace scaffold and project-record layout.
+- **Safety boundary**: explain local listeners, secret files, `~/.chatarch/...` defaults, and system-level out-of-scope areas.
+
 ## Primary Entry Points
 
 <div class="grid cards" markdown>
@@ -19,6 +42,12 @@ It is not a general-purpose package manager. Its job is to capture ChatArch's co
     Read the annotated CLI tree, command groups, service install defaults, and local safety contracts.
 
     [Open Command Reference](commands.md)
+
+- **CLI Capability Map**
+
+    Like ChatTea's capability map, this page checks first-class commands, default directories, and out-of-scope boundaries by responsibility.
+
+    [Open Capability Map](capability-map.md)
 
 - **Workspace Scaffold**
 
@@ -67,6 +96,17 @@ It is not a general-purpose package manager. Its job is to capture ChatArch's co
     ChatUp can write local config and secret files, but it must not print sensitive values.
 
 </div>
+
+## CLI
+
+```bash
+chatup --help
+chatup gitea --help
+chatup mysql --help
+chatup nginx --help
+```
+
+See [Command Reference](commands.md) for the complete annotated CLI tree, and [CLI Capability Map](capability-map.md) for the concise responsibility map.
 
 ## Boundaries
 
