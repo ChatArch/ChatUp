@@ -28,6 +28,28 @@ chatup
 `-- lark-cli    # 配置官方 lark-cli，并复用 ChatEnv 飞书配置
 ```
 
+## 命令分组速览
+
+<div class="grid cards" markdown>
+
+- **基础环境**
+
+    `doctor`、`uv`、`nodejs`、`docker`、`zsh`、`chrome`、`frp` 负责机器级运行环境准备和检查。
+
+- **本地服务**
+
+    `gitea`、`mysql`、`nginx`、`crs` 负责 ChatArch 常用本地服务，默认落在 `~/.chatarch/...`。
+
+- **Agent 工具链**
+
+    `claude`、`codex`、`opencode`、`hermes`、`cc-connect`、`lark-cli` 负责模型、Agent 和飞书工具链配置。
+
+- **工作区**
+
+    `workspace` 创建 ChatArch 人类-AI 协作目录结构和项目记录入口。
+
+</div>
+
 ## 基础命令
 
 | 命令 | 当前能力 |

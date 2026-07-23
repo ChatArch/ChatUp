@@ -1,5 +1,23 @@
 # 快速开始
 
+## 推荐路径
+
+<div class="grid cards" markdown>
+
+- **基础环境**
+
+    先安装 ChatUp，再用 `chatup doctor`、`chatup uv` 检查 CLI 和 Python 运行环境。
+
+- **工作区**
+
+    用 `chatup workspace default ~/Playground` 初始化 ChatArch 协作目录。
+
+- **本地服务**
+
+    按需准备 `gitea`、`mysql`、`nginx` 和 `crs`，默认都走 `~/.chatarch/...` 本地路径。
+
+</div>
+
 ## 安装
 
 从源码开发或本地验证时，使用 editable install：

@@ -1,5 +1,23 @@
 # Quick Start
 
+## Recommended Paths
+
+<div class="grid cards" markdown>
+
+- **Base Runtime**
+
+    Install ChatUp, then run `chatup doctor` and `chatup uv` to verify the CLI and Python runtime.
+
+- **Workspace**
+
+    Use `chatup workspace default ~/Playground` to initialize the ChatArch collaboration layout.
+
+- **Local Services**
+
+    Prepare `gitea`, `mysql`, `nginx`, and `crs` as needed; defaults stay under `~/.chatarch/...`.
+
+</div>
+
 ## Install
 
 For source development or local validation, use an editable install:

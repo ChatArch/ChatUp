@@ -28,6 +28,28 @@ chatup
 `-- lark-cli    # Configure official lark-cli with ChatEnv Feishu config
 ```
 
+## Command Group Overview
+
+<div class="grid cards" markdown>
+
+- **Base Runtime**
+
+    `doctor`, `uv`, `nodejs`, `docker`, `zsh`, `chrome`, and `frp` prepare and check machine-level runtime basics.
+
+- **Local Services**
+
+    `gitea`, `mysql`, `nginx`, and `crs` prepare common ChatArch local services under `~/.chatarch/...` by default.
+
+- **Agent Toolchains**
+
+    `claude`, `codex`, `opencode`, `hermes`, `cc-connect`, and `lark-cli` configure model, agent, and Feishu/Lark tooling.
+
+- **Workspace**
+
+    `workspace` creates the ChatArch human-AI collaboration layout and project-record entry points.
+
+</div>
+
 ## Base Commands
 
 | Command | Current capability |
