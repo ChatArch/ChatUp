@@ -8,24 +8,24 @@ ChatUp currently uses a first-level command structure. There is no `chatup setup
 
 ```text
 chatup
-|-- doctor
-|-- uv
-|-- workspace
-|-- nodejs
-|-- docker
-|-- zsh
-|-- chrome
-|-- frp
-|-- gitea
-|-- mysql
-|-- nginx
-|-- crs
-|-- cc-connect
-|-- claude
-|-- codex
-|-- opencode
-|-- hermes
-`-- lark-cli
+|-- doctor      # Check that ChatUp is callable
+|-- uv          # Install uv and create the default ChatArch Python runtime
+|-- workspace   # Initialize the ChatArch workspace scaffold
+|-- nodejs      # Install nvm and the default LTS Node.js
+|-- docker      # Check Docker and show sudo guidance when needed
+|-- zsh         # Configure zsh / oh-my-zsh / plugins / aliases
+|-- chrome      # Install Chrome and Chromedriver
+|-- frp         # Install FRP Client/Server
+|-- gitea       # Install ChatTea-compatible Gitea runtime/config/service
+|-- mysql       # Install ChatData-compatible MySQL runtime/instance/service
+|-- nginx       # Prepare user-level NGINX runtime and entry templates
+|-- crs         # Install local Claude Relay Service + Redis + smoke check
+|-- cc-connect  # Install CC Connect CLI and runtime dependencies
+|-- claude      # Configure Claude Code CLI and config files
+|-- codex       # Configure Codex CLI and config files
+|-- opencode    # Configure OpenCode CLI and config files
+|-- hermes      # Install Hermes Agent and optional WebUI
+`-- lark-cli    # Configure official lark-cli with ChatEnv Feishu config
 ```
 
 ## Base Commands

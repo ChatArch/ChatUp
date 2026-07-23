@@ -8,24 +8,24 @@ ChatUp 当前采用一级命令结构，没有 `chatup setup ...` 子树。所�
 
 ```text
 chatup
-|-- doctor
-|-- uv
-|-- workspace
-|-- nodejs
-|-- docker
-|-- zsh
-|-- chrome
-|-- frp
-|-- gitea
-|-- mysql
-|-- nginx
-|-- crs
-|-- cc-connect
-|-- claude
-|-- codex
-|-- opencode
-|-- hermes
-`-- lark-cli
+|-- doctor      # 检查 ChatUp 是否可调用
+|-- uv          # 安装 uv，并创建默认 ChatArch Python 运行环境
+|-- workspace   # 初始化 ChatArch workspace scaffold
+|-- nodejs      # 安装 nvm 和默认 LTS Node.js
+|-- docker      # 检查 Docker 环境，并提示 sudo 配置
+|-- zsh         # 配置 zsh / oh-my-zsh / 插件 / alias
+|-- chrome      # 安装 Chrome 和 Chromedriver
+|-- frp         # 安装 FRP Client/Server
+|-- gitea       # 安装 ChatTea-compatible Gitea runtime/config/service
+|-- mysql       # 安装 ChatData-compatible MySQL runtime/instance/service
+|-- nginx       # 准备 user-level NGINX runtime，并生成入口模板
+|-- crs         # 安装本地 Claude Relay Service + Redis + smoke check
+|-- cc-connect  # 安装 CC Connect CLI 和运行依赖
+|-- claude      # 配置 Claude Code CLI 和配置文件
+|-- codex       # 配置 Codex CLI 和配置文件
+|-- opencode    # 配置 OpenCode CLI 和配置文件
+|-- hermes      # 安装 Hermes Agent 和可选 WebUI
+`-- lark-cli    # 配置官方 lark-cli，并复用 ChatEnv 飞书配置
 ```
 
 ## 基础命令
