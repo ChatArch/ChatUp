@@ -2,6 +2,30 @@
 
 This page lists the currently implemented first-level `chatup` commands. Runtime help from `chatup <command> --help` is authoritative.
 
+## CLI Tree
+
+ChatUp currently uses a first-level command structure. There is no `chatup setup ...` subtree; installation, initialization, and configuration capabilities are exposed directly under `chatup`:
+
+```text
+chatup
+|-- doctor
+|-- uv
+|-- workspace
+|-- nodejs
+|-- docker
+|-- zsh
+|-- chrome
+|-- frp
+|-- gitea
+|-- crs
+|-- cc-connect
+|-- claude
+|-- codex
+|-- opencode
+|-- hermes
+`-- lark-cli
+```
+
 ## Base Commands
 
 | Command | Current capability |

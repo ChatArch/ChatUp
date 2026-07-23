@@ -2,6 +2,30 @@
 
 本页只列当前已经实现的 `chatup` 一级命令。运行时以 `chatup <command> --help` 为准。
 
+## CLI 树
+
+ChatUp 当前采用一级命令结构，没有 `chatup setup ...` 子树。所有安装、初始化和配置能力都直接挂在 `chatup` 下：
+
+```text
+chatup
+|-- doctor
+|-- uv
+|-- workspace
+|-- nodejs
+|-- docker
+|-- zsh
+|-- chrome
+|-- frp
+|-- gitea
+|-- crs
+|-- cc-connect
+|-- claude
+|-- codex
+|-- opencode
+|-- hermes
+`-- lark-cli
+```
+
 ## 基础命令
 
 | 命令 | 当前能力 |
