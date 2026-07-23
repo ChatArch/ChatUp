@@ -47,3 +47,11 @@ def test_setup_package_data_includes_assets_and_workspace_templates():
     assert "workspace/templates/default/en/*.md" in package_data
     assert "workspace/templates/default/en/projects/*.md" in package_data
     assert "workspace/templates/default/en/discussion/*.md" in package_data
+
+
+def test_project_metadata_points_to_chatup_docs_site():
+    data = _pyproject()
+
+    assert data["project"]["urls"]["Documentation"] == "https://arch.gh.wzhecnu.cn/ChatUp/"
+    assert data["project"]["urls"]["Source"] == "https://github.com/ChatArch/ChatUp"
+    assert "mkdocs-static-i18n>=1.3,<2.0" in data["project"]["optional-dependencies"]["docs"]
