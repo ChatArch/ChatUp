@@ -9,11 +9,14 @@ chatup --help
 chatup doctor
 chatup uv
 chatup gitea --install-dir ~/.chatarch/bin --force
+chatup crs --install-dir ~/.chatarch/crs/local --port 12392 --redis-port 6379
 ```
 
 `chatup uv` installs `uv` through the official installer when needed, then creates the ChatArch Python environment with pip. Defaults are `--venv ~/.chatarch/venv` and `--python 3.12`; override them when a different runtime path or Python minor version is required.
 
 `chatup gitea` installs the ChatArch-maintained Gitea binary from `ChatArch/gitea` GitHub Release assets. It defaults to version `1.0.0`, repository `ChatArch/gitea`, and install directory `~/.chatarch/bin`.
+
+`chatup crs` installs the canonical `@chatarch/claude-relay-service` npm package, prepares a local Redis component with task/app-local config, writes local secrets without printing them, builds the admin SPA, starts CRS, and runs a local smoke check. It does not register Redis as a Homebrew/system service.
 
 ## Development
 

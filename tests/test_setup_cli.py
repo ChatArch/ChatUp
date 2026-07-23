@@ -20,6 +20,7 @@ def test_chatup_root_help_lists_setup_commands_without_setup_group_or_alias():
         "opencode",
         "hermes",
         "lark-cli",
+        "crs",
         "docker",
         "zsh",
     ]:
@@ -45,6 +46,7 @@ def test_top_level_setup_commands_expose_help():
         "chrome",
         "claude",
         "codex",
+        "crs",
         "docker",
         "frp",
         "gitea",

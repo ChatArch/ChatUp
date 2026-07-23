@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Callable, Sequence
 import click
 
@@ -7,6 +8,13 @@ from chatup.setup.chrome import setup_chrome_driver
 from chatup.setup.claude import setup_claude
 from chatup.setup.codex import setup_codex
 from chatup.setup.cc_connect import setup_cc_connect
+import chatup.setup.crs as crs_module
+from chatup.setup.crs import (
+    DEFAULT_CRS_PACKAGE,
+    DEFAULT_CRS_PORT,
+    DEFAULT_INSTALL_DIR as DEFAULT_CRS_INSTALL_DIR,
+    DEFAULT_REDIS_PORT,
+)
 from chatup.setup.docker import setup_docker
 from chatup.setup.frp import setup_frp
 from chatup.setup.gitea import (
@@ -97,6 +105,21 @@ def gitea_setup(version, repo, install_dir, force, interactive, log_level):
         interactive=interactive,
         log_level=log_level,
     )
+
+
+def crs_setup(package, install_dir, redis_port, port, start, smoke, interactive, log_level):
+    result = crs_module.setup_crs(
+        package=package,
+        install_dir=install_dir,
+        redis_port=redis_port,
+        port=port,
+        start=start,
+        smoke=smoke,
+        interactive=interactive,
+        log_level=log_level,
+    )
+    if isinstance(result, dict) and result.get("crs_url"):
+        click.echo(f"CRS URL: {result['crs_url']}")
 
 
 def claude_setup(auth_token, base_url, small_fast_model, interactive, install_only, log_level):
@@ -327,6 +350,72 @@ SETUP_COMMAND_ELEMENTS = (
                 kwargs={
                     "is_flag": True,
                     "help": "Replace an existing binary at the target path.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--interactive/--no-interactive", "-i/-I"),
+                kwargs={
+                    "default": None,
+                    "help": INTERACTIVE_OPTION_HELP,
+                },
+            ),
+        ),
+    ),
+    SetupCommandElement(
+        name="crs",
+        help="Install and bootstrap local ChatArch Claude Relay Service.",
+        callback=crs_setup,
+        options=(
+            LOG_LEVEL_OPTION,
+            SetupOptionElement(
+                param_decls=("--package",),
+                kwargs={
+                    "default": DEFAULT_CRS_PACKAGE,
+                    "show_default": True,
+                    "help": f"Canonical CRS npm package to install. Default: {DEFAULT_CRS_PACKAGE}.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--install-dir",),
+                kwargs={
+                    "default": str(DEFAULT_CRS_INSTALL_DIR),
+                    "show_default": True,
+                    "type": click.Path(path_type=Path),
+                    "help": "Install root for CRS app, Redis runtime/data, and local secrets.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--redis-port",),
+                kwargs={
+                    "default": DEFAULT_REDIS_PORT,
+                    "show_default": True,
+                    "type": int,
+                    "help": "Local Redis port managed by ChatUp without registering a system service.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--port",),
+                kwargs={
+                    "default": DEFAULT_CRS_PORT,
+                    "show_default": True,
+                    "type": int,
+                    "help": "Local CRS HTTP port.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--start/--no-start",),
+                kwargs={
+                    "default": True,
+                    "show_default": True,
+                    "help": "Start CRS after install.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--smoke/--no-smoke",),
+                kwargs={
+                    "default": True,
+                    "show_default": True,
+                    "help": "Run local health/admin route smoke after setup.",
                 },
             ),
             SetupOptionElement(
