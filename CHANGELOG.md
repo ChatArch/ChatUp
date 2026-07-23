@@ -3,9 +3,14 @@
 ## Unreleased
 
 ### Added
+- Add `chatup mysql` to install and prepare a ChatData-compatible user-level MySQL runtime, instance layout, `my.cnf`, user-level systemd service, and optional start/smoke flow.
+- Add `chatup nginx` to prepare a user-level NGINX runtime under `~/.chatarch/nginx` and generate common reverse-proxy, HTTPS proxy, WebSocket proxy, static root, and redirect templates.
 - Add ChatArch-standard MkDocs documentation with Chinese/English pages, docs metadata, CI docs build, preview docs workflow, and deploy docs workflow.
 - Add `chatup crs` to install the canonical `@chatarch/claude-relay-service` npm package, prepare a local Redis component without registering a system service, generate local secrets/config, build the admin SPA, start CRS, and run a local smoke check.
-- Add `chatup gitea` to install the ChatArch-maintained Gitea binary from `ChatArch/gitea` GitHub Release assets, defaulting to version `1.0.0`.
+- Add `chatup gitea` to install the ChatArch-maintained Gitea binary from `ChatArch/gitea` GitHub Release assets.
+
+### Changed
+- Align `chatup gitea` with ChatTea defaults: resolve the latest ChatArch Gitea release by default, install under the ChatTea runtime directory, and optionally generate local `app.ini` plus a user-level systemd service.
 
 ## 0.2.1
 

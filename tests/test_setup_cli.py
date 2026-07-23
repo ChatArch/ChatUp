@@ -15,6 +15,8 @@ def test_chatup_root_help_lists_setup_commands_without_setup_group_or_alias():
         "nodejs",
         "uv",
         "gitea",
+        "mysql",
+        "nginx",
         "codex",
         "claude",
         "opencode",
@@ -50,6 +52,8 @@ def test_top_level_setup_commands_expose_help():
         "docker",
         "frp",
         "gitea",
+        "mysql",
+        "nginx",
         "hermes",
         "lark-cli",
         "nodejs",
@@ -118,10 +122,13 @@ def test_gitea_help_exposes_release_install_options():
 
     assert result.exit_code == 0
     assert "--version" in result.output
-    assert "1.0.0" in result.output
+    assert "latest" in result.output
     assert "--repo" in result.output
     assert "ChatArch/gitea" in result.output
     assert "--install-dir" in result.output
+    assert "chattea/bin" in result.output
+    assert "--init" in result.output
+    assert "--service" in result.output
     assert "--force" in result.output
 
 
@@ -140,7 +147,7 @@ def test_gitea_setup_downloads_chatarch_release_asset(monkeypatch, tmp_path):
         target = install_dir / binary_name
         install_dir.mkdir(parents=True, exist_ok=True)
         target.write_text("fake gitea")
-        return target
+        return target, "1.0.0"
 
     monkeypatch.setattr(gitea_setup, "install_gitea_release_binary", fake_install_release_binary)
     monkeypatch.setattr(gitea_setup, "verify_gitea_binary", lambda path, version: f"gitea version {version}")
@@ -152,7 +159,7 @@ def test_gitea_setup_downloads_chatarch_release_asset(monkeypatch, tmp_path):
 
     assert result.exit_code == 0, result.output
     assert installed == [
-        ("ChatArch/gitea", "1.0.0", tmp_path / "bin", "gitea", True)
+        ("ChatArch/gitea", "latest", tmp_path / "bin", "gitea", True)
     ]
     assert "gitea version 1.0.0" in result.output
 
@@ -187,7 +194,7 @@ def test_gitea_install_verifies_release_checksum(monkeypatch, tmp_path):
         lambda source, destination: destination.write_text("decompressed"),
     )
 
-    target = gitea_setup.install_gitea_release_binary(
+    target, resolved_version = gitea_setup.install_gitea_release_binary(
         repo="ChatArch/gitea",
         version="1.0.0",
         install_dir=tmp_path,
@@ -196,6 +203,7 @@ def test_gitea_install_verifies_release_checksum(monkeypatch, tmp_path):
     )
 
     assert target == tmp_path / "gitea"
+    assert resolved_version == "1.0.0"
     assert target.read_text() == "decompressed"
     assert requested == [
         "https://github.com/ChatArch/gitea/releases/download/v1.0.0/gitea-1.0.0-linux-amd64.xz",
@@ -294,6 +302,169 @@ def test_gitea_install_creates_temp_dir_inside_install_dir(monkeypatch, tmp_path
     )
 
     assert temp_dirs == [(".chatup-gitea-", tmp_path)]
+
+
+def test_gitea_init_writes_chattea_compatible_config(monkeypatch, tmp_path):
+    import chatup.setup.gitea as gitea_setup
+
+    def fake_install_release_binary(*, repo, version, install_dir, binary_name, force):
+        target = install_dir / binary_name
+        install_dir.mkdir(parents=True, exist_ok=True)
+        target.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+        target.chmod(0o755)
+        return target, "1.0.0"
+
+    monkeypatch.setattr(gitea_setup, "install_gitea_release_binary", fake_install_release_binary)
+    monkeypatch.setattr(gitea_setup, "verify_gitea_binary", lambda path, version: f"gitea version {version}")
+    monkeypatch.setattr(gitea_setup, "generate_secret", lambda size=48: f"secret-{size}")
+
+    work_dir = tmp_path / "chattea" / "gitea"
+    result = CliRunner().invoke(
+        main,
+        [
+            "gitea",
+            "--install-dir",
+            str(tmp_path / "chattea" / "bin"),
+            "--init",
+            "--work-dir",
+            str(work_dir),
+            "--base-url",
+            "http://127.0.0.1:3010",
+            "--port",
+            "3010",
+            "-I",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    config = work_dir / "custom" / "conf" / "app.ini"
+    text = config.read_text(encoding="utf-8")
+    assert f"WORK_PATH = {work_dir}" in text
+    assert "HTTP_ADDR = 127.0.0.1" in text
+    assert "HTTP_PORT = 3010" in text
+    assert "DB_TYPE = sqlite3" in text
+    assert "SECRET_KEY = secret-48" in text
+    assert config.stat().st_mode & 0o777 == 0o600
+
+
+def test_mysql_help_exposes_chatdata_runtime_defaults():
+    result = CliRunner().invoke(main, ["mysql", "--help"])
+
+    assert result.exit_code == 0
+    assert "8.4.6" in result.output
+    assert "3307" in result.output
+    assert "127.0.0.1" in result.output
+    assert "--start / --no-start" in result.output
+    assert "--smoke / --no-smoke" in result.output
+
+
+def test_mysql_setup_prepares_chatdata_compatible_layout(monkeypatch, tmp_path):
+    import chatup.setup.mysql as mysql_setup
+
+    calls = []
+    monkeypatch.setattr(
+        mysql_setup,
+        "export_layout",
+        lambda **kwargs: {"instance": str(tmp_path / "instances" / "mysql" / kwargs["name"])},
+    )
+    monkeypatch.setattr(
+        mysql_setup,
+        "install_mysql",
+        lambda **kwargs: calls.append(("install", kwargs))
+        or {"runtime": str(tmp_path / "runtimes" / "mysql" / kwargs["version"]), "reused": False},
+    )
+    monkeypatch.setattr(
+        mysql_setup,
+        "init_instance",
+        lambda **kwargs: calls.append(("init", kwargs))
+        or {"config": str(tmp_path / "instances" / "mysql" / kwargs["name"] / "my.cnf")},
+    )
+    monkeypatch.setattr(
+        mysql_setup,
+        "install_service",
+        lambda **kwargs: calls.append(("service", kwargs))
+        or {"unit": f"chatdata-mysql-{kwargs['name']}.service"},
+    )
+
+    result = CliRunner().invoke(
+        main,
+        ["mysql", "--home", str(tmp_path), "--name", "dev", "--port", "3310", "--no-start"],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert [name for name, _ in calls] == ["install", "init", "service"]
+    assert calls[1][1]["name"] == "dev"
+    assert calls[1][1]["port"] == 3310
+    assert "chatdata-mysql-dev.service" in result.output
+
+
+def test_mysql_smoke_requires_start():
+    result = CliRunner().invoke(main, ["mysql", "--no-install", "--no-init", "--no-service", "--smoke"])
+
+    assert result.exit_code != 0
+    assert "--smoke requires --start" in result.output
+
+
+def test_nginx_lists_and_renders_templates(tmp_path):
+    list_result = CliRunner().invoke(main, ["nginx", "--list"])
+
+    assert list_result.exit_code == 0
+    assert "proxy-pass" in list_result.output
+    assert "static-root" in list_result.output
+
+    output = tmp_path / "app.conf"
+    render_result = CliRunner().invoke(
+        main,
+        [
+            "nginx",
+            "proxy-pass",
+            str(output),
+            "--set",
+            "SERVER_NAME=app.local.example.invalid",
+            "--set",
+            "PROXY_PASS=http://127.0.0.1:12392",
+        ],
+    )
+
+    assert render_result.exit_code == 0, render_result.output
+    text = output.read_text(encoding="utf-8")
+    assert "server_name app.local.example.invalid;" in text
+    assert "proxy_pass http://127.0.0.1:12392;" in text
+
+
+def test_nginx_prepares_user_level_chatarch_runtime(tmp_path):
+    home = tmp_path / "nginx"
+    result = CliRunner().invoke(
+        main,
+        [
+            "nginx",
+            "--home",
+            str(home),
+            "--no-install",
+            "--no-service",
+            "--port",
+            "18080",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert (home / "conf" / "nginx.conf").exists()
+    assert (home / "conf" / "sites-available" / "default.conf").exists()
+    assert (home / "logs").is_dir()
+    assert (home / "run").is_dir()
+    assert (home / "temp" / "client_body").is_dir()
+    config = (home / "conf" / "nginx.conf").read_text(encoding="utf-8")
+    site = (home / "conf" / "sites-available" / "default.conf").read_text(encoding="utf-8")
+    assert str(home / "logs" / "error.log") in config
+    assert str(home / "conf" / "sites-enabled") in config
+    assert "listen 127.0.0.1:18080;" in site
+
+
+def test_nginx_smoke_requires_start():
+    result = CliRunner().invoke(main, ["nginx", "--no-install", "--no-init", "--no-service", "--smoke"])
+
+    assert result.exit_code != 0
+    assert "--smoke requires --start" in result.output
 
 
 def test_uv_help_exposes_defaults():

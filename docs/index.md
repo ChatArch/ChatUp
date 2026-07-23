@@ -9,7 +9,7 @@ ChatUp 是 ChatArch 的独立安装与初始化 CLI，用来把一台机器整�
 - 新机器初始化：安装 Python/Node.js 等基础运行环境。
 - 工作区初始化：生成人类-AI 协作 workspace 结构。
 - Agent 工具链配置：配置 Claude Code、Codex、OpenCode、Hermes、CC Connect 等工具。
-- 本地服务准备：安装 ChatArch Gitea、Claude Relay Service、FRP 等组件。
+- 本地服务准备：安装 ChatArch Gitea、ChatData-compatible MySQL、Claude Relay Service、FRP 等组件，准备 user-level NGINX，并生成入口模板。
 
 ## 设计边界
 

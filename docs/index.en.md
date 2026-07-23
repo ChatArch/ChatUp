@@ -9,7 +9,7 @@ It is not a general-purpose package manager. Its job is to capture ChatArch's co
 - New machine bootstrap: install Python, Node.js, and other base runtimes.
 - Workspace initialization: generate the human-AI collaboration workspace scaffold.
 - Agent toolchain setup: configure Claude Code, Codex, OpenCode, Hermes, CC Connect, and related tools.
-- Local services: install ChatArch Gitea, Claude Relay Service, FRP, and other local components.
+- Local services: install ChatArch Gitea, ChatData-compatible MySQL, Claude Relay Service, FRP, and other local components, prepare user-level NGINX, and generate entry templates.
 
 ## Boundaries
 

@@ -58,7 +58,29 @@ public/
 安装 ChatArch Gitea：
 
 ```bash
-chatup gitea --install-dir ~/.chatarch/bin --force
+chatup gitea --force
+chatup gitea --init --service --base-url http://127.0.0.1:3000
+```
+
+准备 ChatData-compatible MySQL：
+
+```bash
+chatup mysql
+chatup mysql --start --smoke
+```
+
+准备 user-level NGINX：
+
+```bash
+chatup nginx
+```
+
+生成 NGINX 反向代理配置：
+
+```bash
+chatup nginx proxy-pass ./gitea-local.conf \
+  --set SERVER_NAME=gitea.local.example.invalid \
+  --set PROXY_PASS=http://127.0.0.1:3000
 ```
 
 安装本地 Claude Relay Service：

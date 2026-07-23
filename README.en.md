@@ -18,7 +18,10 @@ chatup workspace default ~/Playground
 Common install commands:
 
 ```bash
-chatup gitea --install-dir ~/.chatarch/bin --force
+chatup gitea --force
+chatup mysql
+chatup nginx
+chatup nginx proxy-pass ./gitea-local.conf --set SERVER_NAME=gitea.local.example.invalid --set PROXY_PASS=http://127.0.0.1:3000
 chatup crs --install-dir ~/.chatarch/crs/local --port 12392 --redis-port 6379
 ```
 
@@ -26,7 +29,9 @@ chatup crs --install-dir ~/.chatarch/crs/local --port 12392 --redis-port 6379
 
 - `chatup uv`: installs `uv` and creates the ChatArch Python runtime. Defaults are `~/.chatarch/venv` and Python 3.12.
 - `chatup workspace`: initializes the human-AI collaboration workspace scaffold with `AGENTS.md`, `projects/`, `archive/`, `core/`, `skills/`, and `public/`.
-- `chatup gitea`: installs the ChatArch-maintained Gitea binary from GitHub Release assets in `ChatArch/gitea`.
+- `chatup gitea`: installs the ChatArch-maintained Gitea from GitHub Release assets in `ChatArch/gitea`; defaults to latest and can write a ChatTea-compatible `app.ini` plus user-level systemd service.
+- `chatup mysql`: installs and prepares a ChatData-compatible user-level MySQL runtime, instance layout, `my.cnf`, and optional user-level systemd service.
+- `chatup nginx`: prepares a user-level NGINX runtime/config/log/run/temp layout under `~/.chatarch/nginx`, and can also generate NGINX reverse-proxy, HTTPS proxy, WebSocket proxy, static root, and redirect config templates.
 - `chatup crs`: installs the canonical `@chatarch/claude-relay-service` npm package, prepares a local Redis component, writes local config and secret files, builds the admin SPA, starts CRS, and runs a local smoke check.
 - `chatup cc-connect`, `chatup claude`, `chatup codex`, `chatup opencode`, `chatup hermes`, and `chatup lark-cli`: configure common ChatArch agent, model, and Feishu/Lark toolchains.
 - `chatup nodejs`, `chatup docker`, `chatup zsh`, `chatup chrome`, and `chatup frp`: prepare common system runtimes.

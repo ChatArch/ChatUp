@@ -17,6 +17,8 @@ chatup
 |-- chrome
 |-- frp
 |-- gitea
+|-- mysql
+|-- nginx
 |-- crs
 |-- cc-connect
 |-- claude
@@ -53,7 +55,9 @@ chatup
 
 | 命令 | 当前能力 |
 |---|---|
-| `chatup gitea` | 从 `ChatArch/gitea` Release assets 安装 ChatArch Gitea 二进制。 |
+| `chatup gitea` | 从 `ChatArch/gitea` Release assets 安装 ChatArch Gitea；默认跟随 latest，可选生成 ChatTea-compatible `app.ini` 和 user-level systemd service。 |
+| `chatup mysql` | 安装并准备 ChatData-compatible user-level MySQL runtime、实例目录、`my.cnf` 和可选 user-level systemd service。 |
+| `chatup nginx` | 准备 `~/.chatarch/nginx` 下的 user-level NGINX runtime/config/log/run/temp 布局，也可生成 reverse-proxy、HTTPS proxy、WebSocket proxy、static root 和 redirect 模板。 |
 | `chatup crs` | 安装本地 Claude Relay Service，准备 Redis、配置、secret、admin SPA 和 smoke check。 |
 
 ## 工作区
@@ -61,6 +65,73 @@ chatup
 | 命令 | 当前能力 |
 |---|---|
 | `chatup workspace` | 初始化 ChatArch 人类-AI 协作 workspace。 |
+
+## Gitea 命令约定
+
+`chatup gitea` 对齐 ChatTea 的本地 Gitea 布局：
+
+- 默认 release：`latest`，从 `ChatArch/gitea` 最新 GitHub Release 解析。
+- 默认 binary：`~/.chatarch/chattea/bin/gitea`。
+- 默认 work path：`~/.chatarch/chattea/gitea`。
+- 可选 `--init` 会生成 `custom/conf/app.ini`，权限为 `0600`。
+- 可选 `--service` 会写入 user-level systemd service。
+- Gitea 默认监听 `127.0.0.1:3000`，公网或本地域名入口交给 NGINX/public-entry 层。
+
+常用形式：
+
+```bash
+chatup gitea --force
+chatup gitea --init --service --base-url http://127.0.0.1:3000
+chatup gitea --init --database-backend mysql --database-host ~/.chatarch/chatdata/instances/mysql/default/run/mysql.sock
+```
+
+## MySQL 命令约定
+
+`chatup mysql` 复用 ChatData 第一版 no-sudo runtime 模型：
+
+- 默认 MySQL 版本：`8.4.6`。
+- 默认 home：`~/.chatarch/chatdata`。
+- 默认实例：`default`。
+- 默认端口：`3307`。
+- 默认绑定：`127.0.0.1`。
+- 默认会下载 runtime、初始化实例目录、生成 `my.cnf` 并写入 user-level systemd service，但不会启动服务。
+- `--smoke` 和 `--database` 需要 `--start`，避免在未启动服务时延迟失败。
+
+常用形式：
+
+```bash
+chatup mysql
+chatup mysql --start --smoke
+chatup mysql --start --database gitea
+chatup mysql --home ~/.chatarch/chatdata --name default --port 3307
+```
+
+## NGINX 命令约定
+
+`chatup nginx` 默认准备 user-level NGINX，而不是修改系统 NGINX：
+
+- 默认 home：`~/.chatarch/nginx`。
+- 默认 binary：复制已有 `nginx` 到 `~/.chatarch/nginx/bin/nginx`；如系统 PATH 中没有 `nginx`，可用 `--binary PATH` 指定已有二进制。
+- 默认 config：`~/.chatarch/nginx/conf/nginx.conf`。
+- 默认 logs/run/temp：`~/.chatarch/nginx/logs`、`~/.chatarch/nginx/run`、`~/.chatarch/nginx/temp`。
+- 默认站点目录：`~/.chatarch/nginx/conf/sites-available` 和 `~/.chatarch/nginx/conf/sites-enabled`。
+- 默认监听：`127.0.0.1:8080`。
+- 默认写入 user-level systemd service；不会写 `/etc/nginx`，不会重载系统服务。
+
+```bash
+chatup nginx
+chatup nginx --home ~/.chatarch/nginx --binary /usr/sbin/nginx --port 8080
+chatup nginx --start --smoke
+```
+
+`chatup nginx` 也保留模板生成模式：
+
+```bash
+chatup nginx --list
+chatup nginx proxy-pass ./gitea-local.conf --set SERVER_NAME=gitea.local.example.invalid --set PROXY_PASS=http://127.0.0.1:3000
+chatup nginx websocket-proxy ./ws.conf --set SERVER_NAME=ws.local.example.invalid --set PROXY_PASS=http://127.0.0.1:3000
+chatup nginx static-root ./site.conf --set SERVER_NAME=site.local.example.invalid --set ROOT_DIR=/srv/site
+```
 
 ## CRS 命令约定
 
