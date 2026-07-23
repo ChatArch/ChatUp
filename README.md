@@ -6,6 +6,16 @@ ChatUp 是 ChatArch 的独立环境与工具安装 CLI。它承接原来 `chatto
 - English README: [README.en.md](README.en.md)
 - Source: <https://github.com/ChatArch/ChatUp>
 
+按场景选择文档：
+
+| 场景 | 文档 |
+| --- | --- |
+| 从空机器验证 ChatUp、Python runtime 和 workspace | `docs/quickstart.md` |
+| 查看完整 CLI 树、命令分组、参数边界和服务默认路径 | `docs/commands.md` |
+| 校对哪些 ChatArch setup 流程已经有一等命令 | `docs/capability-map.md` |
+| 理解 `chatup workspace` 创建的目录和项目记录约定 | `docs/workspace.md` |
+| 安装 ChatTea-compatible Gitea、ChatData-compatible MySQL、user-level NGINX 和 CRS | `docs/commands.md` |
+
 ## 快速开始
 
 ```bash
@@ -18,18 +28,23 @@ chatup workspace default ~/Playground
 常见安装命令：
 
 ```bash
-chatup gitea --install-dir ~/.chatarch/bin --force
+chatup gitea --force
+chatup mysql
+chatup nginx
+chatup nginx proxy-pass ./gitea-local.conf --set SERVER_NAME=gitea.local.example.invalid --set PROXY_PASS=http://127.0.0.1:3000
 chatup crs --install-dir ~/.chatarch/crs/local --port 12392 --redis-port 6379
 ```
 
 ## 当前能力
 
-- `chatup uv`：安装 `uv`，并创建 ChatArch Python 运行环境。默认目标是 `~/.chatarch/venv`，默认 Python 版本是 3.12。
-- `chatup workspace`：初始化人类-AI 协作工作区，包括 `AGENTS.md`、`projects/`、`archive/`、`core/`、`skills/`、`public/` 等约定目录。
-- `chatup gitea`：从 `ChatArch/gitea` GitHub Release 安装 ChatArch 维护的 Gitea 二进制。
-- `chatup crs`：安装 canonical `@chatarch/claude-relay-service` npm 包，准备本地 Redis 组件，生成本地配置和 secret 文件，构建 admin SPA，启动 CRS，并执行本地 smoke check。
-- `chatup cc-connect`、`chatup claude`、`chatup codex`、`chatup opencode`、`chatup hermes`、`chatup lark-cli`：配置 ChatArch 常用 Agent、模型与飞书工具链。
-- `chatup nodejs`、`chatup docker`、`chatup zsh`、`chatup chrome`、`chatup frp`：准备常用系统运行环境。
+| 能力组 | 命令 |
+| --- | --- |
+| 基础运行环境 | `doctor`、`uv`、`nodejs`、`docker`、`zsh`、`chrome`、`frp` |
+| 工作区脚手架 | `workspace` |
+| 本地服务安装 | `gitea`、`mysql`、`nginx`、`crs` |
+| Agent 工具链 | `cc-connect`、`claude`、`codex`、`opencode`、`hermes`、`lark-cli` |
+
+所有新增服务类默认目录都收敛到 `~/.chatarch/...`，例如 `~/.chatarch/chattea`、`~/.chatarch/chatdata`、`~/.chatarch/nginx` 和 `~/.chatarch/crs/local`。更完整的能力边界见 `docs/capability-map.md`。
 
 ## 开发
 
@@ -40,7 +55,7 @@ python -m twine check dist/*
 mkdocs build --strict
 ```
 
-更多使用说明见文档站的 [快速开始](https://arch.gh.wzhecnu.cn/ChatUp/quickstart/) 和 [命令参考](https://arch.gh.wzhecnu.cn/ChatUp/commands/)。
+更多使用说明见文档站的 [快速开始](https://arch.gh.wzhecnu.cn/ChatUp/quickstart/)、[命令参考](https://arch.gh.wzhecnu.cn/ChatUp/commands/) 和 [CLI 能力地图](https://arch.gh.wzhecnu.cn/ChatUp/capability-map/)。
 
 ## 发布
 

@@ -18,13 +18,32 @@ from chatup.setup.crs import (
 from chatup.setup.docker import setup_docker
 from chatup.setup.frp import setup_frp
 from chatup.setup.gitea import (
+    DEFAULT_BASE_URL as DEFAULT_GITEA_BASE_URL,
+    DEFAULT_DATABASE_BACKEND as DEFAULT_GITEA_DATABASE_BACKEND,
+    DEFAULT_DATABASE_NAME as DEFAULT_GITEA_DATABASE_NAME,
     DEFAULT_GITEA_REPO,
     DEFAULT_GITEA_VERSION,
+    DEFAULT_HTTP_PORT as DEFAULT_GITEA_HTTP_PORT,
     DEFAULT_INSTALL_DIR,
+    DEFAULT_LISTEN_ADDR as DEFAULT_GITEA_LISTEN_ADDR,
+    DEFAULT_WORK_DIR as DEFAULT_GITEA_WORK_DIR,
     setup_gitea,
 )
 from chatup.setup.hermes import setup_hermes
 from chatup.setup.lark_cli import setup_lark_cli
+from chatup.setup.mysql import (
+    DEFAULT_MYSQL_BIND_ADDRESS,
+    DEFAULT_MYSQL_INSTANCE,
+    DEFAULT_MYSQL_PORT,
+    DEFAULT_MYSQL_VERSION,
+    setup_mysql,
+)
+from chatup.setup.nginx import (
+    DEFAULT_NGINX_BIND_ADDRESS,
+    DEFAULT_NGINX_HOME,
+    DEFAULT_NGINX_PORT,
+    setup_nginx,
+)
 from chatup.setup.opencode import setup_opencode
 from chatup.setup.zsh import setup_zsh
 from chatup.setup.nodejs import setup_nodejs
@@ -96,14 +115,115 @@ def cc_connect_setup(sudo=None, interactive=None, log_level="INFO"):
     setup_cc_connect(interactive=interactive, log_level=log_level)
 
 
-def gitea_setup(version, repo, install_dir, force, interactive, log_level):
+def gitea_setup(
+    version,
+    repo,
+    install_dir,
+    init,
+    service,
+    work_dir,
+    config_path,
+    base_url,
+    listen_addr,
+    port,
+    database_backend,
+    database_host,
+    database_name,
+    database_user,
+    database_password_env,
+    force,
+    interactive,
+    log_level,
+):
     setup_gitea(
         version=version,
         repo=repo,
         install_dir=install_dir,
+        init=init,
+        service=service,
+        work_dir=work_dir,
+        config_path=config_path,
+        base_url=base_url,
+        listen_addr=listen_addr,
+        port=port,
+        database_backend=database_backend,
+        database_host=database_host,
+        database_name=database_name,
+        database_user=database_user,
+        database_password_env=database_password_env,
         force=force,
         interactive=interactive,
         log_level=log_level,
+    )
+
+
+def mysql_setup(
+    version,
+    home,
+    name,
+    port,
+    bind_address,
+    install,
+    init,
+    initialize,
+    service,
+    start,
+    smoke,
+    database,
+    force,
+    log_level,
+):
+    setup_mysql(
+        version=version,
+        home=home,
+        name=name,
+        port=port,
+        bind_address=bind_address,
+        install=install,
+        init=init,
+        initialize=initialize,
+        service=service,
+        start=start,
+        smoke=smoke,
+        database=database,
+        force=force,
+        log_level=log_level,
+    )
+
+
+def nginx_setup(
+    template,
+    output_file,
+    set_values,
+    list_templates,
+    home,
+    binary,
+    install,
+    init,
+    service,
+    start,
+    smoke,
+    port,
+    bind_address,
+    force,
+    interactive,
+):
+    setup_nginx(
+        template=template,
+        output_file=output_file,
+        set_values=set_values,
+        list_templates_flag=list_templates,
+        home=home,
+        binary=binary,
+        install=install,
+        init=init,
+        service=service,
+        start=start,
+        smoke=smoke,
+        port=port,
+        bind_address=bind_address,
+        force=force,
+        interactive=interactive,
     )
 
 
@@ -317,7 +437,7 @@ SETUP_COMMAND_ELEMENTS = (
 
     SetupCommandElement(
         name="gitea",
-        help="Install ChatArch Gitea from GitHub Release assets.",
+        help="Install ChatArch Gitea and optionally write a local app.ini/user service.",
         callback=gitea_setup,
         options=(
             LOG_LEVEL_OPTION,
@@ -326,7 +446,7 @@ SETUP_COMMAND_ELEMENTS = (
                 kwargs={
                     "default": DEFAULT_GITEA_VERSION,
                     "show_default": True,
-                    "help": "ChatArch Gitea release version to install.",
+                    "help": "ChatArch Gitea release version to install; use latest for the newest release.",
                 },
             ),
             SetupOptionElement(
@@ -342,14 +462,106 @@ SETUP_COMMAND_ELEMENTS = (
                 kwargs={
                     "default": str(DEFAULT_INSTALL_DIR),
                     "show_default": True,
+                    "type": click.Path(path_type=Path),
                     "help": "Directory where the gitea binary will be installed.",
                 },
+            ),
+            SetupOptionElement(
+                param_decls=("--init/--no-init",),
+                kwargs={
+                    "default": False,
+                    "show_default": True,
+                    "help": "Generate a ChatTea-compatible local Gitea app.ini.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--service/--no-service",),
+                kwargs={
+                    "default": False,
+                    "show_default": True,
+                    "help": "Write a user-level systemd service for the managed Gitea instance.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--work-dir",),
+                kwargs={
+                    "default": str(DEFAULT_GITEA_WORK_DIR),
+                    "show_default": True,
+                    "type": click.Path(path_type=Path),
+                    "help": "ChatTea-compatible Gitea WORK_PATH.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--config-path",),
+                kwargs={
+                    "default": None,
+                    "type": click.Path(path_type=Path),
+                    "help": "Optional app.ini path. Defaults to WORK_PATH/custom/conf/app.ini.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--base-url",),
+                kwargs={
+                    "default": DEFAULT_GITEA_BASE_URL,
+                    "show_default": True,
+                    "help": "Gitea ROOT_URL used in generated app.ini.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--listen-addr",),
+                kwargs={
+                    "default": DEFAULT_GITEA_LISTEN_ADDR,
+                    "show_default": True,
+                    "help": "Loopback address for generated app.ini.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--port",),
+                kwargs={
+                    "default": DEFAULT_GITEA_HTTP_PORT,
+                    "show_default": True,
+                    "type": int,
+                    "help": "Gitea HTTP port for generated app.ini.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--database-backend",),
+                kwargs={
+                    "default": DEFAULT_GITEA_DATABASE_BACKEND,
+                    "show_default": True,
+                    "type": click.Choice(["sqlite3", "mysql"]),
+                    "help": "Database backend for generated app.ini.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--database-host",),
+                kwargs={"default": None, "help": "MySQL host/socket for generated app.ini."},
+            ),
+            SetupOptionElement(
+                param_decls=("--database-name",),
+                kwargs={
+                    "default": DEFAULT_GITEA_DATABASE_NAME,
+                    "show_default": True,
+                    "help": "Database name for generated app.ini.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--database-user",),
+                kwargs={
+                    "default": "root",
+                    "show_default": True,
+                    "help": "Database user for generated app.ini.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--database-password-env",),
+                kwargs={"default": None, "help": "Env var name that contains the database password."},
             ),
             SetupOptionElement(
                 param_decls=("--force", "-f"),
                 kwargs={
                     "is_flag": True,
-                    "help": "Replace an existing binary at the target path.",
+                    "help": "Replace an existing binary/config at the target path.",
                 },
             ),
             SetupOptionElement(
@@ -358,6 +570,163 @@ SETUP_COMMAND_ELEMENTS = (
                     "default": None,
                     "help": INTERACTIVE_OPTION_HELP,
                 },
+            ),
+        ),
+    ),
+    SetupCommandElement(
+        name="mysql",
+        help="Install and prepare a ChatData-compatible user-level MySQL runtime.",
+        callback=mysql_setup,
+        options=(
+            LOG_LEVEL_OPTION,
+            SetupOptionElement(
+                param_decls=("--version",),
+                kwargs={"default": DEFAULT_MYSQL_VERSION, "show_default": True},
+            ),
+            SetupOptionElement(
+                param_decls=("--home",),
+                kwargs={
+                    "default": None,
+                    "type": click.Path(path_type=Path),
+                    "help": "ChatData home. Defaults to ~/.chatarch/chatdata.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--name",),
+                kwargs={"default": DEFAULT_MYSQL_INSTANCE, "show_default": True},
+            ),
+            SetupOptionElement(
+                param_decls=("--port",),
+                kwargs={"default": DEFAULT_MYSQL_PORT, "show_default": True, "type": int},
+            ),
+            SetupOptionElement(
+                param_decls=("--bind-address",),
+                kwargs={"default": DEFAULT_MYSQL_BIND_ADDRESS, "show_default": True},
+            ),
+            SetupOptionElement(
+                param_decls=("--install/--no-install",),
+                kwargs={"default": True, "show_default": True, "help": "Download and verify the MySQL runtime."},
+            ),
+            SetupOptionElement(
+                param_decls=("--init/--no-init",),
+                kwargs={"default": True, "show_default": True, "help": "Create the instance directories and my.cnf."},
+            ),
+            SetupOptionElement(
+                param_decls=("--initialize/--no-initialize",),
+                kwargs={"default": True, "show_default": True, "help": "Run mysqld --initialize-insecure."},
+            ),
+            SetupOptionElement(
+                param_decls=("--service/--no-service",),
+                kwargs={"default": True, "show_default": True, "help": "Install a user-level systemd service."},
+            ),
+            SetupOptionElement(
+                param_decls=("--start/--no-start",),
+                kwargs={"default": False, "show_default": True, "help": "Start the user-level MySQL service."},
+            ),
+            SetupOptionElement(
+                param_decls=("--smoke/--no-smoke",),
+                kwargs={"default": False, "show_default": True, "help": "Ping and query MySQL after starting it."},
+            ),
+            SetupOptionElement(
+                param_decls=("--database",),
+                kwargs={"default": None, "help": "Create a database after starting MySQL."},
+            ),
+            SetupOptionElement(
+                param_decls=("--force", "-f"),
+                kwargs={"is_flag": True, "help": "Replace existing runtime/config/data where supported."},
+            ),
+        ),
+    ),
+    SetupCommandElement(
+        name="nginx",
+        help="Prepare user-level NGINX under ChatArch home and render config templates.",
+        callback=nginx_setup,
+        options=(
+            SetupOptionElement(param_decls=("template",), kwargs={"required": False}),
+            SetupOptionElement(param_decls=("output_file",), kwargs={"required": False}),
+            SetupOptionElement(
+                param_decls=("--set", "set_values"),
+                kwargs={
+                    "multiple": True,
+                    "help": "Override template variable, e.g. --set SERVER_NAME=app.example.com.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--list", "list_templates"),
+                kwargs={"is_flag": True, "help": "List available NGINX templates."},
+            ),
+            SetupOptionElement(
+                param_decls=("--home",),
+                kwargs={
+                    "default": str(DEFAULT_NGINX_HOME),
+                    "show_default": True,
+                    "type": click.Path(path_type=Path),
+                    "help": "ChatArch-managed NGINX home.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--binary",),
+                kwargs={
+                    "default": None,
+                    "type": click.Path(path_type=Path),
+                    "help": "Existing nginx binary to copy into HOME/bin/nginx.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--install/--no-install",),
+                kwargs={
+                    "default": True,
+                    "show_default": True,
+                    "help": "Copy an existing nginx binary into ChatArch home.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--init/--no-init",),
+                kwargs={
+                    "default": True,
+                    "show_default": True,
+                    "help": "Create user-level config, logs, run, temp, and sites directories.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--service/--no-service",),
+                kwargs={
+                    "default": True,
+                    "show_default": True,
+                    "help": "Write a user-level systemd service for ChatUp NGINX.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--start/--no-start",),
+                kwargs={
+                    "default": False,
+                    "show_default": True,
+                    "help": "Start the user-level NGINX runtime after setup.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--smoke/--no-smoke",),
+                kwargs={
+                    "default": False,
+                    "show_default": True,
+                    "help": "HTTP smoke check after starting NGINX.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--port",),
+                kwargs={"default": DEFAULT_NGINX_PORT, "show_default": True, "type": int},
+            ),
+            SetupOptionElement(
+                param_decls=("--bind-address",),
+                kwargs={"default": DEFAULT_NGINX_BIND_ADDRESS, "show_default": True},
+            ),
+            SetupOptionElement(
+                param_decls=("--force", "-f"),
+                kwargs={"is_flag": True, "help": "Overwrite existing binary/config/output file."},
+            ),
+            SetupOptionElement(
+                param_decls=("--interactive/--no-interactive", "-i/-I"),
+                kwargs={"default": None, "help": INTERACTIVE_OPTION_HELP},
             ),
         ),
     ),

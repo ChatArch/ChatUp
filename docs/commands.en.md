@@ -8,23 +8,47 @@ ChatUp currently uses a first-level command structure. There is no `chatup setup
 
 ```text
 chatup
-|-- doctor
-|-- uv
-|-- workspace
-|-- nodejs
-|-- docker
-|-- zsh
-|-- chrome
-|-- frp
-|-- gitea
-|-- crs
-|-- cc-connect
-|-- claude
-|-- codex
-|-- opencode
-|-- hermes
-`-- lark-cli
+|-- doctor      # Check that ChatUp is callable
+|-- uv          # Install uv and create the default ChatArch Python runtime
+|-- workspace   # Initialize the ChatArch workspace scaffold
+|-- nodejs      # Install nvm and the default LTS Node.js
+|-- docker      # Check Docker and show sudo guidance when needed
+|-- zsh         # Configure zsh / oh-my-zsh / plugins / aliases
+|-- chrome      # Install Chrome and Chromedriver
+|-- frp         # Install FRP Client/Server
+|-- gitea       # Install ChatTea-compatible Gitea runtime/config/service
+|-- mysql       # Install ChatData-compatible MySQL runtime/instance/service
+|-- nginx       # Prepare user-level NGINX runtime and entry templates
+|-- crs         # Install local Claude Relay Service + Redis + smoke check
+|-- cc-connect  # Install CC Connect CLI and runtime dependencies
+|-- claude      # Configure Claude Code CLI and config files
+|-- codex       # Configure Codex CLI and config files
+|-- opencode    # Configure OpenCode CLI and config files
+|-- hermes      # Install Hermes Agent and optional WebUI
+`-- lark-cli    # Configure official lark-cli with ChatEnv Feishu config
 ```
+
+## Command Group Overview
+
+<div class="grid cards" markdown>
+
+- **Base Runtime**
+
+    `doctor`, `uv`, `nodejs`, `docker`, `zsh`, `chrome`, and `frp` prepare and check machine-level runtime basics.
+
+- **Local Services**
+
+    `gitea`, `mysql`, `nginx`, and `crs` prepare common ChatArch local services under `~/.chatarch/...` by default.
+
+- **Agent Toolchains**
+
+    `claude`, `codex`, `opencode`, `hermes`, `cc-connect`, and `lark-cli` configure model, agent, and Feishu/Lark tooling.
+
+- **Workspace**
+
+    `workspace` creates the ChatArch human-AI collaboration layout and project-record entry points.
+
+</div>
 
 ## Base Commands
 
@@ -53,7 +77,9 @@ chatup
 
 | Command | Current capability |
 |---|---|
-| `chatup gitea` | Install the ChatArch Gitea binary from `ChatArch/gitea` release assets. |
+| `chatup gitea` | Install ChatArch Gitea from `ChatArch/gitea` release assets; defaults to latest and can generate a ChatTea-compatible `app.ini` plus user-level systemd service. |
+| `chatup mysql` | Install and prepare a ChatData-compatible user-level MySQL runtime, instance layout, `my.cnf`, and optional user-level systemd service. |
+| `chatup nginx` | Prepare a user-level NGINX runtime/config/log/run/temp layout under `~/.chatarch/nginx`, and also render reverse-proxy, HTTPS proxy, WebSocket proxy, static root, and redirect templates. |
 | `chatup crs` | Install local Claude Relay Service with Redis, config, secrets, admin SPA, and smoke checks. |
 
 ## Workspace
@@ -61,6 +87,73 @@ chatup
 | Command | Current capability |
 |---|---|
 | `chatup workspace` | Initialize the ChatArch human-AI collaboration workspace. |
+
+## Gitea Command Contract
+
+`chatup gitea` aligns with ChatTea's local Gitea layout:
+
+- Default release: `latest`, resolved from the newest `ChatArch/gitea` GitHub Release.
+- Default binary: `~/.chatarch/chattea/bin/gitea`.
+- Default work path: `~/.chatarch/chattea/gitea`.
+- Optional `--init` writes `custom/conf/app.ini` with `0600` permissions.
+- Optional `--service` writes a user-level systemd service.
+- Gitea binds to `127.0.0.1:3000` by default; public or local domain entry belongs to NGINX/public-entry.
+
+Common forms:
+
+```bash
+chatup gitea --force
+chatup gitea --init --service --base-url http://127.0.0.1:3000
+chatup gitea --init --database-backend mysql --database-host ~/.chatarch/chatdata/instances/mysql/default/run/mysql.sock
+```
+
+## MySQL Command Contract
+
+`chatup mysql` reuses the first ChatData no-sudo runtime model:
+
+- Default MySQL version: `8.4.6`.
+- Default home: `~/.chatarch/chatdata`.
+- Default instance: `default`.
+- Default port: `3307`.
+- Default bind address: `127.0.0.1`.
+- By default it downloads the runtime, initializes the instance layout, writes `my.cnf`, and writes a user-level systemd service, but it does not start the service.
+- `--smoke` and `--database` require `--start` to avoid delayed failures when the service is not running.
+
+Common forms:
+
+```bash
+chatup mysql
+chatup mysql --start --smoke
+chatup mysql --start --database gitea
+chatup mysql --home ~/.chatarch/chatdata --name default --port 3307
+```
+
+## NGINX Command Contract
+
+`chatup nginx` prepares user-level NGINX by default instead of changing system NGINX:
+
+- Default home: `~/.chatarch/nginx`.
+- Default binary: copy an existing `nginx` into `~/.chatarch/nginx/bin/nginx`; if PATH has no `nginx`, pass `--binary PATH`.
+- Default config: `~/.chatarch/nginx/conf/nginx.conf`.
+- Default logs/run/temp: `~/.chatarch/nginx/logs`, `~/.chatarch/nginx/run`, and `~/.chatarch/nginx/temp`.
+- Default site directories: `~/.chatarch/nginx/conf/sites-available` and `~/.chatarch/nginx/conf/sites-enabled`.
+- Default listener: `127.0.0.1:8080`.
+- By default it writes a user-level systemd service; it does not write `/etc/nginx` or reload system services.
+
+```bash
+chatup nginx
+chatup nginx --home ~/.chatarch/nginx --binary /usr/sbin/nginx --port 8080
+chatup nginx --start --smoke
+```
+
+`chatup nginx` also keeps template rendering mode:
+
+```bash
+chatup nginx --list
+chatup nginx proxy-pass ./gitea-local.conf --set SERVER_NAME=gitea.local.example.invalid --set PROXY_PASS=http://127.0.0.1:3000
+chatup nginx websocket-proxy ./ws.conf --set SERVER_NAME=ws.local.example.invalid --set PROXY_PASS=http://127.0.0.1:3000
+chatup nginx static-root ./site.conf --set SERVER_NAME=site.local.example.invalid --set ROOT_DIR=/srv/site
+```
 
 ## CRS Command Contract
 

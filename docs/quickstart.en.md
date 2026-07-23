@@ -1,5 +1,23 @@
 # Quick Start
 
+## Recommended Paths
+
+<div class="grid cards" markdown>
+
+- **Base Runtime**
+
+    Install ChatUp, then run `chatup doctor` and `chatup uv` to verify the CLI and Python runtime.
+
+- **Workspace**
+
+    Use `chatup workspace default ~/Playground` to initialize the ChatArch collaboration layout.
+
+- **Local Services**
+
+    Prepare `gitea`, `mysql`, `nginx`, and `crs` as needed; defaults stay under `~/.chatarch/...`.
+
+</div>
+
 ## Install
 
 For source development or local validation, use an editable install:
@@ -58,7 +76,29 @@ public/
 Install ChatArch Gitea:
 
 ```bash
-chatup gitea --install-dir ~/.chatarch/bin --force
+chatup gitea --force
+chatup gitea --init --service --base-url http://127.0.0.1:3000
+```
+
+Prepare a ChatData-compatible MySQL runtime:
+
+```bash
+chatup mysql
+chatup mysql --start --smoke
+```
+
+Prepare user-level NGINX:
+
+```bash
+chatup nginx
+```
+
+Generate an NGINX reverse-proxy config:
+
+```bash
+chatup nginx proxy-pass ./gitea-local.conf \
+  --set SERVER_NAME=gitea.local.example.invalid \
+  --set PROXY_PASS=http://127.0.0.1:3000
 ```
 
 Install a local Claude Relay Service:

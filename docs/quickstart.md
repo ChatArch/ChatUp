@@ -1,5 +1,23 @@
 # 快速开始
 
+## 推荐路径
+
+<div class="grid cards" markdown>
+
+- **基础环境**
+
+    先安装 ChatUp，再用 `chatup doctor`、`chatup uv` 检查 CLI 和 Python 运行环境。
+
+- **工作区**
+
+    用 `chatup workspace default ~/Playground` 初始化 ChatArch 协作目录。
+
+- **本地服务**
+
+    按需准备 `gitea`、`mysql`、`nginx` 和 `crs`，默认都走 `~/.chatarch/...` 本地路径。
+
+</div>
+
 ## 安装
 
 从源码开发或本地验证时，使用 editable install：
@@ -58,7 +76,29 @@ public/
 安装 ChatArch Gitea：
 
 ```bash
-chatup gitea --install-dir ~/.chatarch/bin --force
+chatup gitea --force
+chatup gitea --init --service --base-url http://127.0.0.1:3000
+```
+
+准备 ChatData-compatible MySQL：
+
+```bash
+chatup mysql
+chatup mysql --start --smoke
+```
+
+准备 user-level NGINX：
+
+```bash
+chatup nginx
+```
+
+生成 NGINX 反向代理配置：
+
+```bash
+chatup nginx proxy-pass ./gitea-local.conf \
+  --set SERVER_NAME=gitea.local.example.invalid \
+  --set PROXY_PASS=http://127.0.0.1:3000
 ```
 
 安装本地 Claude Relay Service：
