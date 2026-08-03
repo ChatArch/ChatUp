@@ -11,7 +11,7 @@ ChatUp 是 ChatArch 的独立环境与工具安装 CLI。它承接原来 `chatto
 | 场景 | 文档 |
 | --- | --- |
 | 从空机器验证 ChatUp、Python runtime 和 workspace | `docs/quickstart.md` |
-| 查看完整一级 CLI 树与 CFT/ChromeDriver 独立 contract | `docs/cli-tree.md` |
+| 阅读完整顶层 CLI 树和独立 CFT/ChromeDriver/Playwright contract | `docs/cli-tree.md` |
 | 查看命令分组、参数边界和服务默认路径 | `docs/commands.md` |
 | 校对哪些 ChatArch setup 流程已经有一等命令 | `docs/capability-map.md` |
 | 理解 `chatup workspace` 创建的目录和项目记录约定 | `docs/workspace.md` |
@@ -24,6 +24,7 @@ chatup --help
 chatup doctor
 chatup uv
 chatup chrome-for-testing install --channel stable -I
+chatup playwright install 1.61.1 -I
 chatup workspace default ~/Playground
 ```
 
@@ -41,12 +42,12 @@ chatup crs --install-dir ~/.chatarch/crs/local --port 12392 --redis-port 6379
 
 | 能力组 | 命令 |
 | --- | --- |
-| 基础运行环境 | `doctor`、`uv`、`nodejs`、`docker`、`zsh`、`chrome-for-testing`、`chromedriver`、`frp` |
+| 基础运行环境 | `doctor`、`uv`、`nodejs`、`docker`、`zsh`、`chrome-for-testing`、`chromedriver`、`playwright`、`frp` |
 | 工作区脚手架 | `workspace` |
 | 本地服务安装 | `gitea`、`mysql`、`nginx`、`crs` |
 | Agent 工具链 | `cc-connect`、`claude`、`codex`、`opencode`、`hermes`、`lark-cli` |
 
-所有新增安装项默认目录都收敛到 `~/.chatarch/...`，例如 `~/.chatarch/chrome-for-testing`、`~/.chatarch/chromedriver`、`~/.chatarch/chattea`、`~/.chatarch/chatdata`、`~/.chatarch/nginx` 和 `~/.chatarch/crs/local`。更完整的能力边界见 `docs/capability-map.md`。
+所有新增安装项默认目录都收敛到 `~/.chatarch/...`，例如 `~/.chatarch/chrome-for-testing`、`~/.chatarch/chromedriver`、`~/.chatarch/playwright`、`~/.chatarch/chattea`、`~/.chatarch/chatdata`、`~/.chatarch/nginx` 和 `~/.chatarch/crs/local`。更完整的能力边界见 `docs/capability-map.md`。
 
 ## 开发
 

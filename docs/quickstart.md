@@ -6,7 +6,7 @@
 
 - **基础环境**
 
-    先安装 ChatUp，再用 `chatup doctor`、`chatup uv` 检查 CLI 和 Python 运行环境；需要浏览器自动化时再安装精确的 Chrome for Testing backend。
+    先安装 ChatUp，再用 `chatup doctor`、`chatup uv` 检查 CLI 和 Python 运行环境；需要浏览器自动化时，按消费方选择精确的 Chrome for Testing 或 Playwright backend。
 
 - **工作区**
 
@@ -64,6 +64,16 @@ chatup chrome-for-testing install --channel stable -I
 ```bash
 chatup chrome-for-testing install --version 145.0.7632.6 --output json -I
 ```
+
+历史任务依赖 Playwright 管理的浏览器时，安装精确 Playwright 版本：
+
+```bash
+chatup nodejs -I
+chatup playwright install 1.61.1 --output json -I
+chatup playwright path 1.61.1 -I
+```
+
+Playwright package 与 browser cache 都进入 `~/.chatarch/playwright`，不需要 Docker。Profile、扩展和账号仍由 ChatPost 等消费方管理。
 
 只有 Selenium/WebDriver 类消费者才需要独立的 ChromeDriver：
 

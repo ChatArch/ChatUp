@@ -1,6 +1,6 @@
 # CLI Tree
 
-ChatUp uses first-class top-level commands without forcing unlike browser artifacts into one `browser` abstraction. The Chrome for Testing browser and the ChromeDriver WebDriver server own independent command sets, Python APIs, metadata, and storage roots.
+ChatUp uses first-class top-level commands without forcing unlike browser artifacts and toolchains into one `browser` abstraction. Chrome for Testing, ChromeDriver, and Playwright own independent command sets, Python APIs, metadata, and storage roots.
 
 ## Top-Level Commands
 
@@ -14,6 +14,7 @@ chatup
 ├── zsh                 # Configure zsh, plugins, and aliases
 ├── chrome-for-testing  # Manage Google Chrome for Testing browsers
 ├── chromedriver        # Manage ChromeDriver WebDriver servers
+├── playwright          # Manage Playwright packages and Chromium browsers
 ├── frp                 # Install FRP Client/Server
 ├── gitea               # Install ChatTea-compatible Gitea
 ├── mysql               # Install ChatData-compatible MySQL
@@ -35,8 +36,9 @@ See [Command Reference](commands.md) for complete options.
 | --- | --- | --- |
 | `chrome-for-testing` | Google Chrome for Testing | Launchable browser with extension and CDP support |
 | `chromedriver` | ChromeDriver | WebDriver protocol server; not a browser |
+| `playwright` | Playwright package + Playwright Chromium | Pins package, revision, browser version, and executable path |
 
-`Chrome for Testing` is Google's official distribution name. The `for-testing` suffix identifies the artifact; it does not expose a ChatUp `test` operation. Neither backend has a `test` subcommand. Health checks are named `doctor`.
+`Chrome for Testing` is Google's official distribution name. The `for-testing` suffix identifies the artifact; it does not expose a ChatUp `test` operation. None of the three backends has a `test` subcommand. Health checks are named `doctor`.
 
 `chatup chromium` is intentionally unregistered. ChatUp will add an independent Chromium backend only after selecting and verifying a real Chromium source, revision contract, platform layout, and acceptance path.
 
@@ -103,6 +105,30 @@ chatup chromedriver install --match-cft-version 145.0.7632.6 -I
 chatup chromedriver install --match-browser /path/to/browser --output json -I
 ```
 
+## Playwright
+
+```text
+chatup playwright
+├── install [VERSION]
+│   ├── --browser chromium
+│   ├── --home PATH
+│   ├── --force
+│   ├── --doctor / --no-doctor
+│   ├── --output text|json
+│   └── -i / -I
+├── path [VERSION] [--browser chromium] [--output text|json] [-i|-I]
+└── doctor [VERSION] [--execute|--no-execute] [--output text|json] [-i|-I]
+```
+
+The Playwright backend accepts an exact three-component package version. `install` uses an available Node.js/npm runtime to install that package and download its declared Chromium revision into the same ChatArch-owned installation. `path` returns the executable resolved by Playwright itself. This backend creates no profile, launches no browser, and installs no ChromeDriver.
+
+```bash
+chatup nodejs -I
+chatup playwright install 1.61.1 --output json -I
+chatup playwright path 1.61.1 -I
+chatup playwright doctor 1.61.1 --output json -I
+```
+
 ## Independent Storage
 
 ```text
@@ -111,13 +137,18 @@ chatup chromedriver install --match-browser /path/to/browser --output json -I
 │   └── <version>/<platform>/
 │       ├── installation.json
 │       └── <Google archive tree>/
-└── chromedriver/
-    └── <version>/<platform>/
+├── chromedriver/
+│   └── <version>/<platform>/
+│       ├── installation.json
+│       └── <Google archive tree>/
+└── playwright/
+    └── <playwright-version>/<browser>/
         ├── installation.json
-        └── <Google archive tree>/
+        ├── package/
+        └── browsers/
 ```
 
-Both backends enforce official HTTPS provenance, optional SHA-256 verification, bounded ZIP extraction, and atomic directory replacement. They do not modify system Chrome, create profiles, store cookies, or manage accounts/extensions.
+Chrome for Testing and ChromeDriver enforce official Google HTTPS provenance, optional SHA-256 verification, bounded ZIP extraction, and atomic directory replacement. Playwright uses npm package integrity and Playwright's browser manifest/download flow with the same atomic installation boundary. None modifies system Chrome, creates profiles, stores cookies, or manages accounts/extensions.
 
 `remove` requires explicit `--yes`. `gc` defaults to dry-run and only targets backend temporary/backup directories older than the minimum age; deletion requires `--apply --yes`.
 
@@ -138,11 +169,14 @@ Consumers choose an exact backend module instead of a generic Browser base:
 ```python
 from chatup.chrome_for_testing import resolve as resolve_cft
 from chatup.chromedriver import resolve as resolve_driver
+from chatup.playwright import resolve as resolve_playwright
 
 browser = resolve_cft("145.0.7632.6")
 driver = resolve_driver("145.0.7632.6")
+playwright_browser = resolve_playwright("1.61.1", browser="chromium")
 print(browser.binary_path)
 print(driver.binary_path)
+print(playwright_browser.binary_path)
 ```
 
-ChatPost currently depends only on `chatup.chrome_for_testing`. It still owns isolated user-data directories, runner processes, CDP/bridge endpoints, extensions, manual login, account mapping, and the publication ledger.
+ChatPost can select either a `chatup.chrome_for_testing` or `chatup.playwright` descriptor according to the proven task. It still owns isolated user-data directories, runner processes, CDP/bridge endpoints, extensions, manual login, account mapping, and the publication ledger.

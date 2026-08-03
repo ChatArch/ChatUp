@@ -14,7 +14,9 @@ chatup
 |-- nodejs      # 安装 nvm 和默认 LTS Node.js
 |-- docker      # 检查 Docker 环境，并提示 sudo 配置
 |-- zsh         # 配置 zsh / oh-my-zsh / 插件 / alias
-|-- chrome      # 安装 ChatArch 内部 Chrome for Testing
+|-- chrome-for-testing # 管理 Google Chrome for Testing 浏览器
+|-- chromedriver       # 管理 ChromeDriver WebDriver server
+|-- playwright         # 管理 Playwright package 与 Chromium browser
 |-- frp         # 安装 FRP Client/Server
 |-- gitea       # 安装 ChatTea-compatible Gitea runtime/config/service
 |-- mysql       # 安装 ChatData-compatible MySQL runtime/instance/service
@@ -34,7 +36,7 @@ chatup
 
 - **基础运行环境**
 
-    `uv`、`nodejs`、`docker`、`zsh`、`chrome`、`frp` 面向一台新机器的基础依赖准备。`doctor` 用来做最小健康检查。
+    `uv`、`nodejs`、`docker`、`zsh`、`chrome-for-testing`、`chromedriver`、`playwright`、`frp` 面向一台新机器的基础依赖准备。`doctor` 用来做最小健康检查。
 
 - **本地服务安装**
 
@@ -60,10 +62,11 @@ chatup docker              # 检查 Docker daemon 和当前用户权限
 chatup zsh                 # 配置 zsh / oh-my-zsh / 插件 / alias
 chatup chrome-for-testing  # 管理 versioned Google Chrome for Testing 浏览器
 chatup chromedriver        # 管理 ChromeDriver WebDriver server
+chatup playwright          # 管理 Playwright package 与 Chromium browser
 chatup frp                 # 安装 FRP Client/Server
 ```
 
-这些命令只承诺把 ChatArch 常用基础依赖准备好；它们不是通用系统包管理器，也不替代发行版的软件源策略。`chatup chrome-for-testing` 提供机器可读浏览器 descriptor，供 ChatPost 等扩展/CDP 消费方复用；`chatup chromedriver` 为 WebDriver 消费方独立提供 driver descriptor。Profile、账号和 Cookie 始终由消费方管理。
+这些命令只承诺把 ChatArch 常用基础依赖准备好；它们不是通用系统包管理器，也不替代发行版的软件源策略。`chatup chrome-for-testing` 提供机器可读浏览器 descriptor，供 ChatPost 等扩展/CDP 消费方复用；`chatup chromedriver` 为 WebDriver 消费方独立提供 driver descriptor。`chatup playwright` 则固定 Playwright package、browser revision/version 和 executable path。Profile、账号和 Cookie 始终由消费方管理。
 
 ## 本地服务安装
 

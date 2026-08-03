@@ -16,6 +16,7 @@ chatup
 |-- zsh         # 配置 zsh / oh-my-zsh / 插件 / alias
 |-- chrome-for-testing # 管理 Google Chrome for Testing 浏览器
 |-- chromedriver       # 管理 ChromeDriver WebDriver server
+|-- playwright         # 管理 Playwright package 与 Chromium browser
 |-- frp         # 安装 FRP Client/Server
 |-- gitea       # 安装 ChatTea-compatible Gitea runtime/config/service
 |-- mysql       # 安装 ChatData-compatible MySQL runtime/instance/service
@@ -35,7 +36,7 @@ chatup
 
 - **基础环境**
 
-    `doctor`、`uv`、`nodejs`、`docker`、`zsh`、`chrome-for-testing`、`chromedriver`、`frp` 负责机器级运行环境准备和检查。
+    `doctor`、`uv`、`nodejs`、`docker`、`zsh`、`chrome-for-testing`、`chromedriver`、`playwright`、`frp` 负责机器级运行环境准备和检查。
 
 - **本地服务**
 
@@ -62,6 +63,7 @@ chatup
 | `chatup zsh` | 配置 zsh、oh-my-zsh、插件、主题和 shell alias。 |
 | `chatup chrome-for-testing` | 独立管理 Google Chrome for Testing 浏览器及其 JSON/Python descriptor。 |
 | `chatup chromedriver` | 独立管理 ChromeDriver WebDriver server，可匹配 CFT 或指定浏览器版本。 |
+| `chatup playwright` | 安装精确 Playwright package 与其管理的 Chromium，并输出可复用 descriptor。 |
 | `chatup frp` | 安装 FRP Client/Server。 |
 
 ## Agent 与工具链
@@ -96,7 +98,8 @@ ChatUp 不提供通用 `browser` group，也不再提供含义模糊的 `chrome`
 
 - `chatup chrome-for-testing` 管理真正可启动的 Google Chrome for Testing 浏览器，默认 home 为 `~/.chatarch/chrome-for-testing`；
 - `chatup chromedriver` 管理 ChromeDriver WebDriver server，默认 home 为 `~/.chatarch/chromedriver`；
-- 两者各自提供 `install/list/show/path/doctor/remove/gc`；
+- `chatup playwright` 管理精确 Playwright package 与 Playwright Chromium，默认 home 为 `~/.chatarch/playwright`；
+- Chrome for Testing 与 ChromeDriver 各自提供完整制品生命周期；Playwright 仅提供本任务实际使用的 `install/path/doctor`；
 - `Chrome for Testing` 中的 Testing 是官方制品名，不是用户 CLI 的 `test` 操作；
 - `chromium` 尚无已验证 provider，因此不注册命令；
 - 安装使用官方 HTTPS manifest、可选 SHA-256、受限 ZIP 解压、`installation.json` 和原子目录替换；
@@ -108,6 +111,8 @@ chatup chrome-for-testing install --channel stable -I
 chatup chrome-for-testing path 145.0.7632.6 -I
 chatup chromedriver install --match-cft-version 145.0.7632.6 -I
 chatup chromedriver doctor 145.0.7632.6 --output json -I
+chatup playwright install 1.61.1 --output json -I
+chatup playwright path 1.61.1 -I
 ```
 
 完整子命令、ChatStyle 行为和 Python contract 见 [CLI 树](cli-tree.md)。

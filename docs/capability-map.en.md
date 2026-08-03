@@ -14,7 +14,9 @@ chatup
 |-- nodejs      # Install nvm and the default LTS Node.js
 |-- docker      # Check Docker and show sudo guidance when needed
 |-- zsh         # Configure zsh / oh-my-zsh / plugins / aliases
-|-- chrome      # Install ChatArch-internal Chrome for Testing
+|-- chrome-for-testing # Manage Google Chrome for Testing browsers
+|-- chromedriver       # Manage ChromeDriver WebDriver servers
+|-- playwright         # Manage Playwright packages and Chromium browsers
 |-- frp         # Install FRP Client/Server
 |-- gitea       # Install ChatTea-compatible Gitea runtime/config/service
 |-- mysql       # Install ChatData-compatible MySQL runtime/instance/service
@@ -34,7 +36,7 @@ chatup
 
 - **Base Runtime**
 
-    `uv`, `nodejs`, `docker`, `zsh`, `chrome`, and `frp` prepare common dependencies for a new machine. `doctor` is the minimum health check.
+    `uv`, `nodejs`, `docker`, `zsh`, `chrome-for-testing`, `chromedriver`, `playwright`, and `frp` prepare common dependencies for a new machine. `doctor` is the minimum health check.
 
 - **Local Services**
 
@@ -60,10 +62,11 @@ chatup docker              # Check Docker daemon and current-user permissions
 chatup zsh                 # Configure zsh / oh-my-zsh / plugins / aliases
 chatup chrome-for-testing  # Manage versioned Google Chrome for Testing browsers
 chatup chromedriver        # Manage ChromeDriver WebDriver servers
+chatup playwright          # Manage Playwright packages and Chromium browsers
 chatup frp                 # Install FRP Client/Server
 ```
 
-These commands only prepare the dependencies ChatArch commonly needs. They are not a general-purpose OS package-management layer. `chatup chrome-for-testing` exposes a machine-readable browser descriptor for extension/CDP consumers such as ChatPost; `chatup chromedriver` exposes an independent driver descriptor for WebDriver consumers. Profiles, accounts, and cookies remain consumer-owned.
+These commands only prepare the dependencies ChatArch commonly needs. They are not a general-purpose OS package-management layer. `chatup chrome-for-testing` exposes a machine-readable browser descriptor for extension/CDP consumers such as ChatPost; `chatup chromedriver` exposes an independent driver descriptor for WebDriver consumers. `chatup playwright` pins the Playwright package, browser revision/version, and executable path. Profiles, accounts, and cookies remain consumer-owned.
 
 ## Local Services
 

@@ -16,6 +16,7 @@ chatup
 |-- zsh         # Configure zsh / oh-my-zsh / plugins / aliases
 |-- chrome-for-testing # Manage Google Chrome for Testing browsers
 |-- chromedriver       # Manage ChromeDriver WebDriver servers
+|-- playwright         # Manage Playwright packages and Chromium browsers
 |-- frp         # Install FRP Client/Server
 |-- gitea       # Install ChatTea-compatible Gitea runtime/config/service
 |-- mysql       # Install ChatData-compatible MySQL runtime/instance/service
@@ -35,7 +36,7 @@ chatup
 
 - **Base Runtime**
 
-    `doctor`, `uv`, `nodejs`, `docker`, `zsh`, `chrome-for-testing`, `chromedriver`, and `frp` prepare and check machine-level runtime basics.
+    `doctor`, `uv`, `nodejs`, `docker`, `zsh`, `chrome-for-testing`, `chromedriver`, `playwright`, and `frp` prepare and check machine-level runtime basics.
 
 - **Local Services**
 
@@ -62,6 +63,7 @@ chatup
 | `chatup zsh` | Configure zsh, oh-my-zsh, plugins, theme, and shell aliases. |
 | `chatup chrome-for-testing` | Independently manage Google Chrome for Testing browsers and JSON/Python descriptors. |
 | `chatup chromedriver` | Independently manage ChromeDriver WebDriver servers and match CFT/browser versions. |
+| `chatup playwright` | Install an exact Playwright package plus its managed Chromium and return a reusable descriptor. |
 | `chatup frp` | Install FRP Client/Server. |
 
 ## Agents and Toolchains
@@ -96,7 +98,8 @@ ChatUp exposes neither a generic `browser` group nor the ambiguous `chrome` comm
 
 - `chatup chrome-for-testing` manages the launchable Google Chrome for Testing browser under `~/.chatarch/chrome-for-testing` by default;
 - `chatup chromedriver` manages the ChromeDriver WebDriver server under `~/.chatarch/chromedriver` by default;
-- each backend owns `install/list/show/path/doctor/remove/gc`;
+- `chatup playwright` manages an exact Playwright package and Playwright Chromium under `~/.chatarch/playwright` by default;
+- Chrome for Testing and ChromeDriver own full artifact lifecycles; Playwright exposes only the task-required `install/path/doctor`;
 - Testing in `Chrome for Testing` is the official artifact name, not a user-facing `test` operation;
 - `chromium` remains unregistered until a provider is verified;
 - installations use official HTTPS manifests, optional SHA-256, bounded ZIP extraction, `installation.json`, and atomic directory replacement;
@@ -108,6 +111,8 @@ chatup chrome-for-testing install --channel stable -I
 chatup chrome-for-testing path 145.0.7632.6 -I
 chatup chromedriver install --match-cft-version 145.0.7632.6 -I
 chatup chromedriver doctor 145.0.7632.6 --output json -I
+chatup playwright install 1.61.1 --output json -I
+chatup playwright path 1.61.1 -I
 ```
 
 See [CLI Tree](cli-tree.md) for the full subcommand tree, ChatStyle behavior, and Python contract.
