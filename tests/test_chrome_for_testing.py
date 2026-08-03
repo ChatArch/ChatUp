@@ -281,6 +281,46 @@ def test_force_install_rejects_symlink_root(tmp_path):
         )
 
 
+def test_install_rejects_untrusted_resolver_identity_and_parent_symlink(tmp_path):
+    home = tmp_path / "chrome-for-testing"
+    downloaded = False
+
+    def downloader(_url: str, _destination: Path):
+        nonlocal downloaded
+        downloaded = True
+
+    def invalid_resolver(_version: str, *, cft_platform: str | None = None):
+        return (
+            "../../escape",
+            cft_platform or "mac-arm64",
+            "https://storage.googleapis.com/chrome-for-testing-public/chrome.zip",
+        )
+
+    with pytest.raises(ChromeForTestingError, match="invalid version"):
+        install_chrome_for_testing(
+            "stable",
+            home=home,
+            cft_platform="mac-arm64",
+            resolver=invalid_resolver,
+            downloader=downloader,
+        )
+    assert not downloaded
+
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    home.mkdir()
+    (home / "145.0.1.2").symlink_to(outside, target_is_directory=True)
+    with pytest.raises(ChromeForTestingError, match="escapes its managed home"):
+        install_chrome_for_testing(
+            "stable",
+            home=home,
+            cft_platform="mac-arm64",
+            resolver=_resolver,
+            downloader=downloader,
+        )
+    assert not downloaded
+
+
 def test_force_failure_preserves_existing_installation(tmp_path):
     first_archive = _archive(tmp_path / "first.zip", payload=b"first")
     bad_archive = _archive(tmp_path / "bad.zip", payload=b"bad")

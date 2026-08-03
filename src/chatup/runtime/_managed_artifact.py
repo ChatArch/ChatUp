@@ -91,7 +91,9 @@ def safe_extract_zip(
                 permissions = mode & 0o777
                 if permissions and os.name != "nt":
                     target.chmod(permissions)
-    except zipfile.BadZipFile as exc:
+    except ManagedArtifactError:
+        raise
+    except (OSError, RuntimeError, zipfile.BadZipFile) as exc:
         raise ManagedArtifactError(f"Invalid {label} archive: {archive}: {exc}") from exc
 
 

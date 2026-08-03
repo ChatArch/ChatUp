@@ -418,6 +418,48 @@ def test_chromedriver_force_install_rejects_symlink_root(tmp_path):
         )
 
 
+def test_driver_install_rejects_untrusted_resolver_identity_and_parent_symlink(
+    tmp_path,
+):
+    home = tmp_path / "chromedriver"
+    downloaded = False
+
+    def downloader(_url: str, _destination: Path):
+        nonlocal downloaded
+        downloaded = True
+
+    def invalid_resolver(_version: str, *, driver_platform: str | None = None):
+        return (
+            "../../escape",
+            driver_platform or "mac-arm64",
+            "https://storage.googleapis.com/chrome-for-testing-public/chromedriver.zip",
+        )
+
+    with pytest.raises(ChromeDriverError, match="invalid version"):
+        install_chromedriver(
+            "stable",
+            home=home,
+            driver_platform="mac-arm64",
+            resolver=invalid_resolver,
+            downloader=downloader,
+        )
+    assert not downloaded
+
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    home.mkdir()
+    (home / "145.0.1.2").symlink_to(outside, target_is_directory=True)
+    with pytest.raises(ChromeDriverError, match="escapes its managed home"):
+        install_chromedriver(
+            "stable",
+            home=home,
+            driver_platform="mac-arm64",
+            resolver=_resolver,
+            downloader=downloader,
+        )
+    assert not downloaded
+
+
 def test_install_rejects_non_official_url_before_download(tmp_path):
     called = False
 

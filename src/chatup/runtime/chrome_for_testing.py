@@ -219,6 +219,7 @@ def install_chrome_for_testing(
         version,
         cft_platform=cft_platform,
     )
+    _validate_resolved_identity(resolved_version, platform_name)
     _validate_download_url(source_url)
     home_path = (
         Path(home).expanduser()
@@ -226,13 +227,14 @@ def install_chrome_for_testing(
         else DEFAULT_CHROME_FOR_TESTING_HOME
     )
     install_dir = home_path / resolved_version / platform_name
-    metadata_path = install_dir / METADATA_NAME
-    normalized_expected = _normalize_sha256(expected_sha256)
-
     if install_dir.is_symlink():
         raise ChromeForTestingError(
             f"Refusing to use a symlink as a Chrome for Testing installation root: {install_dir}"
         )
+    _validate_install_location(home_path, install_dir)
+    metadata_path = install_dir / METADATA_NAME
+    normalized_expected = _normalize_sha256(expected_sha256)
+
     if metadata_path.is_file() and not force:
         runtime = load_chrome_for_testing(metadata_path)
         if normalized_expected and runtime.archive_sha256 != normalized_expected:
@@ -325,6 +327,7 @@ def list_chrome_for_testing(
         return installations
     for metadata_path in sorted(home_path.glob(f"*/*/{METADATA_NAME}")):
         try:
+            _validate_install_location(home_path, metadata_path.parent)
             installations.append(load_chrome_for_testing(metadata_path))
         except ChromeForTestingError:
             continue
@@ -347,7 +350,9 @@ def resolve_chrome_for_testing(
         if home is not None
         else DEFAULT_CHROME_FOR_TESTING_HOME
     )
-    metadata_path = home_path / version / platform_name / METADATA_NAME
+    install_dir = home_path / version / platform_name
+    _validate_install_location(home_path, install_dir)
+    metadata_path = install_dir / METADATA_NAME
     if not metadata_path.is_file():
         raise ChromeForTestingError(
             f"Chrome for Testing is not installed: {version} ({platform_name})"
@@ -522,6 +527,27 @@ def _validate_download_url(url: str) -> None:
         raise ChromeForTestingError(
             "Chrome for Testing download must use the official Google storage prefix: "
             f"{url}"
+        )
+
+
+def _validate_resolved_identity(version: str, platform_name: str) -> None:
+    if not re.fullmatch(r"\d+\.\d+\.\d+\.\d+", version):
+        raise ChromeForTestingError(
+            f"Chrome for Testing resolver returned an invalid version: {version}"
+        )
+    if platform_name not in SUPPORTED_CFT_PLATFORMS:
+        raise ChromeForTestingError(
+            "Chrome for Testing resolver returned an unsupported platform: "
+            f"{platform_name}"
+        )
+
+
+def _validate_install_location(home: Path, install_dir: Path) -> None:
+    home_resolved = home.expanduser().resolve()
+    install_resolved = install_dir.expanduser().resolve()
+    if not install_resolved.is_relative_to(home_resolved):
+        raise ChromeForTestingError(
+            f"Chrome for Testing installation escapes its managed home: {install_dir}"
         )
 
 
