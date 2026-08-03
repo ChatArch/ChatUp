@@ -6,7 +6,7 @@
 
 - **Base Runtime**
 
-    Install ChatUp, then run `chatup doctor` and `chatup uv` to verify the CLI and Python runtime.
+    Install ChatUp, then run `chatup doctor` and `chatup uv` to verify the CLI and Python runtime; run `chatup chrome` only when browser automation is needed.
 
 - **Workspace**
 
@@ -52,6 +52,20 @@ To customize the target:
 ```bash
 chatup uv --venv ~/.chatarch/venv --python-version 3.12
 ```
+
+## Install the Chrome Environment
+
+```bash
+chatup chrome
+```
+
+This installs Chrome for Testing under `~/.chatarch/chrome` without modifying system Chrome. Use JSON when handing the result to another program:
+
+```bash
+chatup chrome --version stable --output json -I
+```
+
+See [CLI Tree](cli-tree.md) for all options and the Python API.
 
 ## Initialize a Workspace
 

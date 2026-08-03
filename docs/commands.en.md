@@ -14,7 +14,7 @@ chatup
 |-- nodejs      # Install nvm and the default LTS Node.js
 |-- docker      # Check Docker and show sudo guidance when needed
 |-- zsh         # Configure zsh / oh-my-zsh / plugins / aliases
-|-- chrome      # Install Chrome and Chromedriver
+|-- chrome      # Install Chrome for Testing under ~/.chatarch/chrome
 |-- frp         # Install FRP Client/Server
 |-- gitea       # Install ChatTea-compatible Gitea runtime/config/service
 |-- mysql       # Install ChatData-compatible MySQL runtime/instance/service
@@ -59,7 +59,7 @@ chatup
 | `chatup nodejs` | Install nvm and the default LTS Node.js. |
 | `chatup docker` | Check the Docker environment and show sudo guidance when needed. |
 | `chatup zsh` | Configure zsh, oh-my-zsh, plugins, theme, and shell aliases. |
-| `chatup chrome` | Install Chrome and Chromedriver. |
+| `chatup chrome` | Install versioned Chrome for Testing under `~/.chatarch/chrome` with JSON/Python resolution contracts. |
 | `chatup frp` | Install FRP Client/Server. |
 
 ## Agents and Toolchains
@@ -87,6 +87,27 @@ chatup
 | Command | Current capability |
 |---|---|
 | `chatup workspace` | Initialize the ChatArch human-AI collaboration workspace. |
+
+## Chrome Command Contract
+
+`chatup chrome` is an independent machine-environment installer, not part of an upper-level product's Browser Runner:
+
+- default home: `~/.chatarch/chrome`;
+- default channel: `stable`, with beta/dev/canary or an exact version accepted;
+- supports `mac-arm64`, `mac-x64`, `linux64`, and `win64`;
+- downloads to staging and checks optional SHA-256 plus ZIP path traversal before install;
+- writes `runtime.json` and atomically switches the installation directory;
+- `--output json` returns binary, version, platform, root, source, and digest;
+- `--doctor` runs the binary version probe;
+- never changes system Chrome, writes `~/.local/bin`, or creates profiles/cookies.
+
+```bash
+chatup chrome
+chatup chrome --version 145.0.7632.6 --output json -I
+chatup chrome --home ~/.chatarch/chrome --force --doctor
+```
+
+See [CLI Tree](cli-tree.md) for the full option tree and Python contract.
 
 ## Gitea Command Contract
 

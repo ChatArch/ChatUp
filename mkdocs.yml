@@ -33,6 +33,7 @@ plugins:
           nav_translations:
             首页: Home
             快速开始: Quick Start
+            CLI 树: CLI Tree
             命令参考: Command Reference
             能力地图: Capability Map
             工作区脚手架: Workspace Scaffold
@@ -60,6 +61,7 @@ extra:
 nav:
   - 首页: index.md
   - 快速开始: quickstart.md
+  - CLI 树: cli-tree.md
   - 命令参考: commands.md
   - 能力地图: capability-map.md
   - 工作区脚手架: workspace.md

@@ -11,7 +11,8 @@ ChatUp 是 ChatArch 的独立安装与初始化 CLI，用来把一台机器整�
 | 场景 | 文档 |
 | --- | --- |
 | 从空机器验证 ChatUp、Python runtime 和 workspace | [快速开始](quickstart.md) |
-| 查看完整 CLI 树、命令分组、参数边界和服务默认路径 | [命令参考](commands.md) |
+| 查看完整一级 CLI 树和 `chatup chrome` option/Python contract | [CLI 树](cli-tree.md) |
+| 查看命令分组、参数边界和服务默认路径 | [命令参考](commands.md) |
 | 校对哪些 ChatArch setup 流程已经有一等命令 | [CLI 能力地图](capability-map.md) |
 | 理解 `chatup workspace` 创建的目录和项目记录约定 | [工作区脚手架](workspace.md) |
 | 安装 ChatTea-compatible Gitea、ChatData-compatible MySQL、user-level NGINX 和 CRS | [命令参考](commands.md) |
@@ -43,6 +44,12 @@ ChatUp 是 ChatArch 的独立安装与初始化 CLI，用来把一台机器整�
 
     [查看命令参考](commands.md)
 
+- **CLI 树**
+
+    查看全部一级命令，以及独立 `chatup chrome` 安装、JSON 输出和 Python descriptor 契约。
+
+    [查看 CLI 树](cli-tree.md)
+
 - **CLI 能力地图**
 
     像 ChatTea 的能力地图一样，按职责校对当前一等命令、默认目录和不负责的边界。
@@ -63,7 +70,7 @@ ChatUp 是 ChatArch 的独立安装与初始化 CLI，用来把一台机器整�
 
 - **新机器初始化**
 
-    安装 Python、Node.js、Docker 检查、Chrome/Chromedriver 和 shell 基础环境。
+    安装 Python、Node.js、Docker 检查、`~/.chatarch/chrome` 内的 Chrome for Testing 和 shell 基础环境。
 
 - **工作区初始化**
 
@@ -101,12 +108,13 @@ ChatUp 是 ChatArch 的独立安装与初始化 CLI，用来把一台机器整�
 
 ```bash
 chatup --help
+chatup chrome --help
 chatup gitea --help
 chatup mysql --help
 chatup nginx --help
 ```
 
-完整带注释 CLI 树见 [命令参考](commands.md)，按能力分组的简明地图见 [CLI 能力地图](capability-map.md)。
+完整一级命令树见 [CLI 树](cli-tree.md)，详细命令约定见 [命令参考](commands.md)，按能力分组的简明地图见 [CLI 能力地图](capability-map.md)。
 
 ## 设计边界
 

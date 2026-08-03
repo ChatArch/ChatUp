@@ -4,7 +4,11 @@ from typing import Callable, Sequence
 import click
 
 from chatstyle import INTERACTIVE_OPTION_HELP
-from chatup.setup.chrome import setup_chrome_driver
+from chatup.setup.chrome import (
+    DEFAULT_CHROME_HOME,
+    SUPPORTED_CFT_PLATFORMS,
+    setup_chrome,
+)
 from chatup.setup.claude import setup_claude
 from chatup.setup.codex import setup_codex
 from chatup.setup.cc_connect import setup_cc_connect
@@ -69,8 +73,26 @@ class SetupCommandElement:
     options: Sequence[SetupOptionElement] = field(default_factory=tuple)
 
 
-def chrome_setup(update, interactive):
-    setup_chrome_driver(interactive=interactive, update=update)
+def chrome_setup(
+    version,
+    home,
+    platform,
+    expected_sha256,
+    force,
+    doctor,
+    output,
+    interactive,
+):
+    setup_chrome(
+        version=version,
+        home=home,
+        platform=platform,
+        expected_sha256=expected_sha256,
+        force=force,
+        doctor=doctor,
+        output=output,
+        interactive=interactive,
+    )
 
 
 def frp_setup(interactive):
@@ -835,14 +857,63 @@ SETUP_COMMAND_ELEMENTS = (
     ),
     SetupCommandElement(
         name="chrome",
-        help="Install Chrome and Chromedriver.",
+        help="Install ChatArch-managed Chrome for Testing under ~/.chatarch/chrome.",
         callback=chrome_setup,
         options=(
             SetupOptionElement(
-                param_decls=("--update",),
+                param_decls=("--version",),
+                kwargs={
+                    "default": "stable",
+                    "show_default": True,
+                    "help": "Chrome for Testing channel or exact version.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--home",),
+                kwargs={
+                    "type": click.Path(path_type=Path, file_okay=False),
+                    "default": DEFAULT_CHROME_HOME,
+                    "show_default": True,
+                    "help": "ChatArch-internal Chrome installation root.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--platform",),
+                kwargs={
+                    "type": click.Choice(SUPPORTED_CFT_PLATFORMS, case_sensitive=False),
+                    "default": None,
+                    "help": "Override automatic Chrome for Testing platform detection.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--sha256", "expected_sha256"),
+                kwargs={
+                    "default": None,
+                    "help": "Optional expected archive SHA-256.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--force",),
                 kwargs={
                     "is_flag": True,
-                    "help": "Update existing Chromedriver installation instead of exiting when already installed.",
+                    "help": "Atomically replace an existing installation.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--doctor/--no-doctor",),
+                kwargs={
+                    "default": True,
+                    "show_default": True,
+                    "help": "Run the installed binary version probe.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--output",),
+                kwargs={
+                    "type": click.Choice(["text", "json"], case_sensitive=False),
+                    "default": "text",
+                    "show_default": True,
+                    "help": "Select human-readable or machine-readable output.",
                 },
             ),
             SetupOptionElement(

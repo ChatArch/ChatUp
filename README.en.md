@@ -11,7 +11,8 @@ Choose documentation by scenario:
 | Scenario | Document |
 | --- | --- |
 | Verify ChatUp, the Python runtime, and a workspace on a new machine | `docs/quickstart.en.md` |
-| Read the full CLI tree, command groups, option boundaries, and service defaults | `docs/commands.en.md` |
+| Read the complete top-level CLI tree and Chrome install/Python contract | `docs/cli-tree.en.md` |
+| Read command groups, option boundaries, and service defaults | `docs/commands.en.md` |
 | Check which ChatArch setup flows have first-class commands | `docs/capability-map.en.md` |
 | Understand the directories and project-record conventions created by `chatup workspace` | `docs/workspace.en.md` |
 | Install ChatTea-compatible Gitea, ChatData-compatible MySQL, user-level NGINX, and CRS | `docs/commands.en.md` |
@@ -22,6 +23,7 @@ Choose documentation by scenario:
 chatup --help
 chatup doctor
 chatup uv
+chatup chrome
 chatup workspace default ~/Playground
 ```
 
@@ -44,7 +46,7 @@ chatup crs --install-dir ~/.chatarch/crs/local --port 12392 --redis-port 6379
 | Local service installers | `gitea`, `mysql`, `nginx`, `crs` |
 | Agent toolchains | `cc-connect`, `claude`, `codex`, `opencode`, `hermes`, `lark-cli` |
 
-New service defaults stay under `~/.chatarch/...`, for example `~/.chatarch/chattea`, `~/.chatarch/chatdata`, `~/.chatarch/nginx`, and `~/.chatarch/crs/local`. See `docs/capability-map.en.md` for the full capability boundary.
+New install targets stay under `~/.chatarch/...`, for example `~/.chatarch/chrome`, `~/.chatarch/chattea`, `~/.chatarch/chatdata`, `~/.chatarch/nginx`, and `~/.chatarch/crs/local`. See `docs/capability-map.en.md` for the full capability boundary.
 
 ## Development
 

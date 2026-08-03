@@ -14,7 +14,7 @@ chatup
 |-- nodejs      # Install nvm and the default LTS Node.js
 |-- docker      # Check Docker and show sudo guidance when needed
 |-- zsh         # Configure zsh / oh-my-zsh / plugins / aliases
-|-- chrome      # Install Chrome and Chromedriver
+|-- chrome      # Install ChatArch-internal Chrome for Testing
 |-- frp         # Install FRP Client/Server
 |-- gitea       # Install ChatTea-compatible Gitea runtime/config/service
 |-- mysql       # Install ChatData-compatible MySQL runtime/instance/service
@@ -58,11 +58,11 @@ chatup uv                  # Install/reuse uv and create ~/.chatarch/venv
 chatup nodejs              # Install nvm and the default LTS Node.js
 chatup docker              # Check Docker daemon and current-user permissions
 chatup zsh                 # Configure zsh / oh-my-zsh / plugins / aliases
-chatup chrome              # Install Chrome and Chromedriver
+chatup chrome              # Install versioned Chrome for Testing under ~/.chatarch/chrome
 chatup frp                 # Install FRP Client/Server
 ```
 
-These commands only prepare the dependencies ChatArch commonly needs. They are not a general-purpose OS package-management layer.
+These commands only prepare the dependencies ChatArch commonly needs. They are not a general-purpose OS package-management layer. `chatup chrome` additionally exposes a machine-readable descriptor for consumers such as ChatPost, while profiles/accounts remain consumer-owned.
 
 ## Local Services
 
