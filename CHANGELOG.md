@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.3
+## 0.2.2
 
 ### Added
 - Add a complete bilingual top-level CLI tree and the independent `chatup chrome` contract.
@@ -14,6 +14,7 @@
 - Add `chatup crs` to install the canonical `@chatarch/claude-relay-service` npm package, prepare local Redis, write local configuration and secrets, build the admin SPA, start the service, and run a smoke check.
 
 ### Changed
+- Align `publish.yml` with the active PyPI Trusted Publisher's blank environment while retaining job-level OIDC permission.
 - Replace the legacy system-Chrome/Chromedriver flow with a ChatArch-internal, versioned Chrome for Testing installation while keeping `chatup chrome` as the flat command.
 - Align `chatup gitea` with ChatTea defaults: resolve the latest ChatArch Gitea release by default, install under the ChatTea runtime directory, and optionally generate local `app.ini` plus a user-level systemd service.
 
