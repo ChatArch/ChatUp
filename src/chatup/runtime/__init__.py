@@ -1,27 +1,5 @@
-from chatup.runtime.browser import (
-    BrowserRuntime,
-    BrowserRuntimeError,
-    CHROME_FOR_TESTING,
-    DEFAULT_BROWSER_HOME,
-    doctor_browser_runtime,
-    ensure_chrome_for_testing,
-    install_chrome_for_testing,
-    list_browser_runtimes,
-    normalize_cft_platform,
-    resolve_browser_runtime,
-    resolve_chrome_for_testing_download,
-)
+"""Internal implementations for backend-specific ChatUp artifacts.
 
-__all__ = [
-    "BrowserRuntime",
-    "BrowserRuntimeError",
-    "CHROME_FOR_TESTING",
-    "DEFAULT_BROWSER_HOME",
-    "doctor_browser_runtime",
-    "ensure_chrome_for_testing",
-    "install_chrome_for_testing",
-    "list_browser_runtimes",
-    "normalize_cft_platform",
-    "resolve_browser_runtime",
-    "resolve_chrome_for_testing_download",
-]
+Public consumers should import :mod:`chatup.chrome_for_testing` or
+:mod:`chatup.chromedriver` instead of this internal package.
+"""

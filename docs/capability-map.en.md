@@ -58,11 +58,12 @@ chatup uv                  # Install/reuse uv and create ~/.chatarch/venv
 chatup nodejs              # Install nvm and the default LTS Node.js
 chatup docker              # Check Docker daemon and current-user permissions
 chatup zsh                 # Configure zsh / oh-my-zsh / plugins / aliases
-chatup chrome              # Install versioned Chrome for Testing under ~/.chatarch/chrome
+chatup chrome-for-testing  # Manage versioned Google Chrome for Testing browsers
+chatup chromedriver        # Manage ChromeDriver WebDriver servers
 chatup frp                 # Install FRP Client/Server
 ```
 
-These commands only prepare the dependencies ChatArch commonly needs. They are not a general-purpose OS package-management layer. `chatup chrome` additionally exposes a machine-readable descriptor for consumers such as ChatPost, while profiles/accounts remain consumer-owned.
+These commands only prepare the dependencies ChatArch commonly needs. They are not a general-purpose OS package-management layer. `chatup chrome-for-testing` exposes a machine-readable browser descriptor for extension/CDP consumers such as ChatPost; `chatup chromedriver` exposes an independent driver descriptor for WebDriver consumers. Profiles, accounts, and cookies remain consumer-owned.
 
 ## Local Services
 

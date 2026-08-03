@@ -11,7 +11,7 @@ Site entry: https://arch.gh.wzhecnu.cn/ChatUp/en/
 | Scenario | Document |
 | --- | --- |
 | Verify ChatUp, the Python runtime, and a workspace on a new machine | [Quick Start](quickstart.md) |
-| Read the complete top-level tree and `chatup chrome` option/Python contract | [CLI Tree](cli-tree.md) |
+| Read the complete top-level tree and independent CFT/ChromeDriver contracts | [CLI Tree](cli-tree.md) |
 | Read command groups, option boundaries, and service defaults | [Command Reference](commands.md) |
 | Check which ChatArch setup flows have first-class commands | [CLI Capability Map](capability-map.md) |
 | Understand the directories and project-record conventions created by `chatup workspace` | [Workspace Scaffold](workspace.md) |
@@ -46,7 +46,7 @@ The docs are organized by task and capability so the site does not collapse into
 
 - **CLI Tree**
 
-    Inspect every first-level command and the independent `chatup chrome` install, JSON output, and Python descriptor contract.
+    Inspect every first-level command and the independent CFT/ChromeDriver install, JSON output, and Python descriptor contracts.
 
     [Open CLI Tree](cli-tree.md)
 
@@ -70,7 +70,7 @@ The docs are organized by task and capability so the site does not collapse into
 
 - **New Machine Bootstrap**
 
-    Install Python, Node.js, Docker checks, Chrome for Testing under `~/.chatarch/chrome`, and shell basics.
+    Install Python, Node.js, Docker checks, independent Chrome for Testing/ChromeDriver backends, and shell basics.
 
 - **Workspace Initialization**
 
@@ -108,7 +108,8 @@ The docs are organized by task and capability so the site does not collapse into
 
 ```bash
 chatup --help
-chatup chrome --help
+chatup chrome-for-testing --help
+chatup chromedriver --help
 chatup gitea --help
 chatup mysql --help
 chatup nginx --help

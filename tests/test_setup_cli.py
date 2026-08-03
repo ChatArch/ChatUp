@@ -25,6 +25,8 @@ def test_chatup_root_help_lists_setup_commands_without_setup_group_or_alias():
         "crs",
         "docker",
         "zsh",
+        "chrome-for-testing",
+        "chromedriver",
     ]:
         assert command in result.output
     assert "setup" not in result.output
@@ -45,7 +47,8 @@ def test_chatup_workspace_help_keeps_interactive_flags():
 def test_top_level_setup_commands_expose_help():
     commands = [
         "cc-connect",
-        "chrome",
+        "chrome-for-testing",
+        "chromedriver",
         "claude",
         "codex",
         "crs",

@@ -1,144 +1,148 @@
 # CLI Tree
 
-ChatUp uses flat, first-class installer commands. Each top-level command owns one machine environment, toolchain, or local service; there is no extra `setup` or `browser` layer.
+ChatUp uses first-class top-level commands without forcing unlike browser artifacts into one `browser` abstraction. The Chrome for Testing browser and the ChromeDriver WebDriver server own independent command sets, Python APIs, metadata, and storage roots.
 
 ## Top-Level Commands
 
 ```text
 chatup
-├── doctor       # Verify that ChatUp is callable
-├── uv           # Install uv and ~/.chatarch/venv
-├── workspace    # Initialize a ChatArch workspace
-├── nodejs       # Install nvm and default LTS Node.js
-├── docker       # Check Docker and permissions
-├── zsh          # Configure zsh, plugins, and aliases
-├── chrome       # Install ChatArch-internal Chrome for Testing
-├── frp          # Install FRP Client/Server
-├── gitea        # Install ChatTea-compatible Gitea
-├── mysql        # Install ChatData-compatible MySQL
-├── nginx        # Prepare user-level NGINX
-├── crs          # Install local Claude Relay Service plus Redis
-├── cc-connect   # Install ChatArch CC Connect
-├── claude       # Install/configure Claude Code
-├── codex        # Install/configure Codex CLI
-├── opencode     # Install/configure OpenCode
-├── hermes       # Install Hermes Agent and optional WebUI
-└── lark-cli     # Configure official lark-cli with ChatEnv
+├── doctor              # Verify that ChatUp is callable
+├── uv                  # Install uv and ~/.chatarch/venv
+├── workspace           # Initialize a ChatArch workspace
+├── nodejs              # Install nvm and default LTS Node.js
+├── docker              # Check Docker and permissions
+├── zsh                 # Configure zsh, plugins, and aliases
+├── chrome-for-testing  # Manage Google Chrome for Testing browsers
+├── chromedriver        # Manage ChromeDriver WebDriver servers
+├── frp                 # Install FRP Client/Server
+├── gitea               # Install ChatTea-compatible Gitea
+├── mysql               # Install ChatData-compatible MySQL
+├── nginx               # Prepare user-level NGINX
+├── crs                 # Install local Claude Relay Service plus Redis
+├── cc-connect          # Install ChatArch CC Connect
+├── claude              # Install/configure Claude Code
+├── codex               # Install/configure Codex CLI
+├── opencode            # Install/configure OpenCode
+├── hermes              # Install Hermes Agent and optional WebUI
+└── lark-cli            # Configure official lark-cli with ChatEnv
 ```
 
 See [Command Reference](commands.md) for complete options.
 
-## Why Chrome Is Independent
+## Artifact Identity
 
-Chrome is a machine dependency at the same level as `uv`, `nodejs`, and `docker`. ChatUp installs it; consumers resolve the result.
+| Backend | Actual artifact | Role |
+| --- | --- | --- |
+| `chrome-for-testing` | Google Chrome for Testing | Launchable browser with extension and CDP support |
+| `chromedriver` | ChromeDriver | WebDriver protocol server; not a browser |
 
-Do not design:
+`Chrome for Testing` is Google's official distribution name. The `for-testing` suffix identifies the artifact; it does not expose a ChatUp `test` operation. Neither backend has a `test` subcommand. Health checks are named `doctor`.
+
+`chatup chromium` is intentionally unregistered. ChatUp will add an independent Chromium backend only after selecting and verifying a real Chromium source, revision contract, platform layout, and acceptance path.
+
+## Chrome for Testing
 
 ```text
-chatup browser install chrome
-chatpost browser install chrome
+chatup chrome-for-testing
+├── install
+│   ├── --version VERSION
+│   ├── --channel stable|beta|dev|canary
+│   ├── --platform PLATFORM
+│   ├── --home PATH
+│   ├── --sha256 HEX
+│   ├── --force
+│   ├── --doctor / --no-doctor
+│   ├── --output text|json
+│   └── -i / -I
+├── list [--home PATH] [--output text|json]
+├── show [VERSION] [--platform PLATFORM] [--output text|json] [-i|-I]
+├── path [VERSION] [--platform PLATFORM] [--output text|json] [-i|-I]
+├── doctor [VERSION] [--execute|--no-execute] [--output text|json] [-i|-I]
+├── remove [VERSION] --yes [--output text|json] [-i|-I]
+└── gc [--dry-run|--apply] [--yes] [--minimum-age-hours HOURS]
 ```
 
-Use one command instead:
+`--version` and `--channel` are mutually exclusive for installation. Stable is the default when neither is given. Resolve-style operations require an exact four-component version; channels and old `chrome@...` / `cft@...` references are rejected.
 
 ```bash
-chatup chrome
+chatup chrome-for-testing install --channel stable -I
+chatup chrome-for-testing install --version 145.0.7632.6 --output json -I
+chatup chrome-for-testing path 145.0.7632.6 -I
+chatup chrome-for-testing doctor 145.0.7632.6 --output json -I
 ```
 
-ChatPost, ChatBlog automation, and future packages can reuse one environment without coupling installation to a product-specific Browser Runner model.
-
-## `chatup chrome` Contract
+## ChromeDriver
 
 ```text
-chatup chrome
-├── --version VERSION          # stable/beta/dev/canary or exact version
-├── --home PATH                # default ~/.chatarch/chrome
-├── --platform PLATFORM        # auto-detected by default
-├── --sha256 HEX               # optional expected archive digest
-├── --force                    # atomically replace the same version
-├── --doctor / --no-doctor     # run the version probe or not
-├── --output text|json         # human or machine output
-└── -i / -I                    # ChatStyle interaction policy
+chatup chromedriver
+├── install
+│   ├── --version VERSION
+│   ├── --channel stable|beta|dev|canary
+│   ├── --match-browser PATH
+│   ├── --match-cft-version VERSION
+│   ├── --platform PLATFORM
+│   ├── --home PATH
+│   ├── --sha256 HEX
+│   ├── --force
+│   ├── --doctor / --no-doctor
+│   ├── --output text|json
+│   └── -i / -I
+├── list [--home PATH] [--output text|json]
+├── show [VERSION] [--platform PLATFORM] [--output text|json] [-i|-I]
+├── path [VERSION] [--platform PLATFORM] [--output text|json] [-i|-I]
+├── doctor [VERSION] [--execute|--no-execute] [--output text|json] [-i|-I]
+├── remove [VERSION] --yes [--output text|json] [-i|-I]
+└── gc [--dry-run|--apply] [--yes] [--minimum-age-hours HOURS]
 ```
 
-Default layout:
+The four install selectors are mutually exclusive. `--match-browser` reads `--version` from the supplied browser binary, resolves Google's build manifest first, and falls back to the milestone manifest; the browser and driver patch components need not match. `--match-cft-version` uses an exact CFT version directly. ChromeDriver is not involved in ChatPost's current extension/CDP Zhihu path.
+
+```bash
+chatup chromedriver install --channel stable -I
+chatup chromedriver install --match-cft-version 145.0.7632.6 -I
+chatup chromedriver install --match-browser /path/to/browser --output json -I
+```
+
+## Independent Storage
 
 ```text
-~/.chatarch/chrome/
-└── chrome-for-testing/
-    └── <version>/
-        └── <platform>/
-            ├── runtime.json
-            └── <vendor archive tree>/
+~/.chatarch/
+├── chrome-for-testing/
+│   └── <version>/<platform>/
+│       ├── installation.json
+│       └── <Google archive tree>/
+└── chromedriver/
+    └── <version>/<platform>/
+        ├── installation.json
+        └── <Google archive tree>/
 ```
 
-The command:
+Both backends enforce official HTTPS provenance, optional SHA-256 verification, bounded ZIP extraction, and atomic directory replacement. They do not modify system Chrome, create profiles, store cookies, or manage accounts/extensions.
 
-- resolves a channel or exact version from the official Chrome for Testing manifest;
-- supports `mac-arm64`, `mac-x64`, `linux64`, and `win64`;
-- downloads into staging and checks HTTPS provenance, optional SHA-256, and ZIP path safety;
-- atomically switches directories without destroying a working installation first;
-- never modifies system Chrome;
-- never installs into `~/.local/bin`;
-- requires no Docker;
-- creates no browser profile, extension, or cookie state.
+`remove` requires explicit `--yes`. `gc` defaults to dry-run and only targets backend temporary/backup directories older than the minimum age; deletion requires `--apply --yes`.
 
-## JSON Output
+## ChatStyle Interaction
 
-`--output json` is the stable downstream boundary:
+Recoverable missing inputs use ChatStyle `CommandSchema`:
 
-```json
-{
-  "ref": "chrome-for-testing@<resolved-version>",
-  "kind": "chrome-for-testing",
-  "version": "<resolved-version>",
-  "platform": "mac-arm64",
-  "root_dir": "~/.chatarch/chrome/chrome-for-testing/<version>/mac-arm64",
-  "binary_path": "<absolute executable path>",
-  "source_url": "https://...",
-  "archive_sha256": "<sha256>",
-  "installed_at": "<timestamp>",
-  "status": "ready"
-}
-```
-
-Machines must not scrape colored text or logs to find the executable.
+- `-i` forces missing-value prompts for the current subcommand;
+- `-I` disables prompts and fails fast when required values are absent;
+- `CHATARCH_AUTO_PROMPT=0/false/no/off` disables automatic prompting;
+- CLI and prompted values receive the same validation;
+- destructive remove/gc paths still require `--yes` and are never relaxed by a default prompt.
 
 ## Python API
 
-Python consumers should import the API rather than shell out:
+Consumers choose an exact backend module instead of a generic Browser base:
 
 ```python
-from chatup.chrome import ensure_chrome, resolve_chrome
+from chatup.chrome_for_testing import resolve as resolve_cft
+from chatup.chromedriver import resolve as resolve_driver
 
-runtime = ensure_chrome(version="<tested-version>")
-print(runtime.binary_path)
+browser = resolve_cft("145.0.7632.6")
+driver = resolve_driver("145.0.7632.6")
+print(browser.binary_path)
+print(driver.binary_path)
 ```
 
-`ensure_chrome` may install a missing exact version. `resolve_chrome` reads existing `runtime.json` without a network write.
-
-## ChatPost Boundary
-
-ChatUp returns:
-
-```text
-binary_path
-version
-platform
-runtime root
-provenance/digest
-health status
-```
-
-ChatPost still owns:
-
-```text
-isolated user-data-dir
-runner process / port / lock
-extension and bridge
-manual login checkpoint
-platform account mapping
-publication ledger
-```
-
-Chrome installation is no longer part of the ChatPost CLI.
+ChatPost currently depends only on `chatup.chrome_for_testing`. It still owns isolated user-data directories, runner processes, CDP/bridge endpoints, extensions, manual login, account mapping, and the publication ledger.
