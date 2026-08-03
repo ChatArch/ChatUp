@@ -1,188 +1,127 @@
 from __future__ import annotations
 
-import os
-import re
-import shutil
-import subprocess
-import zipfile
-import io
-import stat
+import json
 from pathlib import Path
+
 import click
-from chatup.interaction import (
-    ask_confirm,
-    ask_path,
-    abort_if_force_without_tty,
-    resolve_interactive_mode,
+
+from chatup.interaction import abort_if_force_without_tty, resolve_interactive_mode
+from chatup.runtime.browser import (
+    BrowserRuntime as ChromeInstallation,
+    BrowserRuntimeError as ChromeInstallError,
+    DEFAULT_BROWSER_HOME as DEFAULT_CHROME_HOME,
+    SUPPORTED_CFT_PLATFORMS,
+    doctor_browser_runtime,
+    ensure_chrome_for_testing,
+    install_chrome_for_testing,
+    resolve_browser_runtime,
 )
-from chatup.utils.custom_logger import setup_logger
-
-logger = setup_logger("setup_chrome")
 
 
-def get_chrome_version():
-    """Detect installed Chrome version."""
-    try:
-        # Try common chrome executables
-        for cmd in [
-            "google-chrome",
-            "google-chrome-stable",
-            "chromium",
-            "chromium-browser",
-        ]:
-            if shutil.which(cmd):
-                result = subprocess.run(
-                    [cmd, "--version"], capture_output=True, text=True, check=True
-                )
-                # Output example: "Google Chrome 141.0.7390.54 "
-                version_match = re.search(r"(\d+\.\d+\.\d+\.\d+)", result.stdout)
-                if version_match:
-                    return version_match.group(1)
-    except Exception as e:
-        logger.error(f"Failed to detect Chrome version: {e}")
-    return None
+def install_chrome(
+    version: str = "stable",
+    *,
+    home: Path | str | None = None,
+    platform: str | None = None,
+    expected_sha256: str | None = None,
+    force: bool = False,
+) -> ChromeInstallation:
+    """Install one ChatArch-managed Chrome for Testing build."""
+
+    return install_chrome_for_testing(
+        version,
+        home=home,
+        cft_platform=platform,
+        expected_sha256=expected_sha256,
+        force=force,
+    )
 
 
-def get_chromedriver_url(version):
-    """Get the download URL for the matching Chromedriver."""
-    import httpx
+def ensure_chrome(
+    version: str,
+    *,
+    home: Path | str | None = None,
+    platform: str | None = None,
+    expected_sha256: str | None = None,
+) -> ChromeInstallation:
+    """Resolve an exact build or install it when missing."""
 
-    major_version = version.split(".")[0]
-
-    # For older versions (< 115), use the old repository
-    if int(major_version) < 115:
-        try:
-            # First get the specific latest release for this version
-            # This is the user requested method
-            release_url = f"https://chromedriver.storage.googleapis.com/LATEST_RELEASE_{major_version}"
-            resp = httpx.get(release_url)
-            if resp.status_code == 200:
-                driver_version = resp.text.strip()
-                return f"https://chromedriver.storage.googleapis.com/{driver_version}/chromedriver_linux64.zip"
-        except Exception as e:
-            logger.warning(f"Failed to check old repository: {e}")
-
-    # For newer versions (>= 115) or if old method failed
-    try:
-        # Check known good versions for newer Chrome
-        json_url = "https://googlechromelabs.github.io/chrome-for-testing/latest-versions-per-milestone-with-downloads.json"
-        resp = httpx.get(json_url)
-        if resp.status_code == 200:
-            data = resp.json()
-            milestones = data.get("milestones", {})
-            if major_version in milestones:
-                downloads = milestones[major_version].get("downloads", {})
-                chromedriver = downloads.get("chromedriver", [])
-                for item in chromedriver:
-                    if item.get("platform") == "linux64":
-                        return item.get("url")
-            else:
-                logger.warning(
-                    f"Major version {major_version} not found in milestones."
-                )
-    except Exception as e:
-        logger.error(f"Failed to find driver in new repository: {e}")
-
-    return None
+    return ensure_chrome_for_testing(
+        version,
+        home=home,
+        cft_platform=platform,
+        expected_sha256=expected_sha256,
+    )
 
 
-def install_chromedriver(url, target_dir):
-    """Download and install Chromedriver."""
-    import httpx
+def resolve_chrome(
+    version: str,
+    *,
+    home: Path | str | None = None,
+    platform: str | None = None,
+) -> ChromeInstallation:
+    """Resolve an installed exact Chrome build without network access."""
 
-    try:
-        click.echo(f"Downloading Chromedriver from {url}...")
-        resp = httpx.get(url, follow_redirects=True)
-        resp.raise_for_status()
-
-        with zipfile.ZipFile(io.BytesIO(resp.content)) as z:
-            # Find the chromedriver binary in the zip
-            # It might be in a subdirectory like 'chromedriver-linux64/chromedriver'
-            driver_info = None
-            for info in z.infolist():
-                if info.is_dir():
-                    continue
-                if Path(info.filename).name == "chromedriver":
-                    driver_info = info
-                    break
-
-            if not driver_info:
-                raise Exception("chromedriver executable not found in archive")
-
-            target_path = Path(target_dir) / "chromedriver"
-            with z.open(driver_info) as source, open(target_path, "wb") as target:
-                shutil.copyfileobj(source, target)
-
-            # Make executable
-            st = os.stat(target_path)
-            os.chmod(target_path, st.st_mode | stat.S_IEXEC)
-            try:
-                subprocess.run(
-                    [str(target_path), "--version"],
-                    capture_output=True,
-                    text=True,
-                    check=True,
-                )
-            except Exception:
-                raise Exception("Downloaded file is not a valid chromedriver binary")
-            click.echo(f"Chromedriver installed to {target_path}")
-
-    except Exception as e:
-        click.echo(f"Failed to install chromedriver: {e}", err=True)
-        raise
+    return resolve_browser_runtime(
+        f"chrome-for-testing@{version}",
+        home=home,
+        cft_platform=platform,
+    )
 
 
-def setup_chrome_driver(interactive=None, update=False):
-    """Main setup function."""
-    usage = "Usage: chatup chrome [--update] [-i|-I]"
-    interactive, can_prompt, force_interactive, _, need_prompt = (
-        resolve_interactive_mode(
-            interactive=interactive,
-            auto_prompt_condition=False,
-        )
+def setup_chrome(
+    *,
+    version: str = "stable",
+    home: Path | str = DEFAULT_CHROME_HOME,
+    platform: str | None = None,
+    expected_sha256: str | None = None,
+    force: bool = False,
+    doctor: bool = True,
+    output: str = "text",
+    interactive: bool | None = None,
+) -> ChromeInstallation:
+    """Install Chrome and emit a stable human or JSON result."""
+
+    usage = "Usage: chatup chrome [OPTIONS]"
+    _, can_prompt, force_interactive, _, _ = resolve_interactive_mode(
+        interactive=interactive,
+        auto_prompt_condition=False,
     )
     abort_if_force_without_tty(force_interactive, can_prompt, usage)
 
-    # Check if chromedriver is already installed
-    existing_path = shutil.which("chromedriver")
-    if existing_path:
-        click.echo(f"Chromedriver is already installed at {existing_path}")
-        target_dir = Path(existing_path).parent
-        if update:
-            click.echo("Updating existing installation...")
-        elif need_prompt:
-            if not ask_confirm("Do you want to update/reinstall?", default=False):
-                return
-            click.echo("Updating existing installation...")
-        else:
-            click.echo("Use --update to refresh the existing installation.")
-            return
+    runtime = install_chrome(
+        version,
+        home=home,
+        platform=platform,
+        expected_sha256=expected_sha256,
+        force=force,
+    )
+    health = doctor_browser_runtime(runtime, execute=doctor)
+
+    if output.lower() == "json":
+        click.echo(json.dumps(health, indent=2, sort_keys=True))
     else:
-        target_dir = Path.home() / ".local" / "bin"
+        click.echo(f"Chrome: {runtime.ref}")
+        click.echo(f"Platform: {runtime.platform}")
+        click.echo(f"Binary: {runtime.binary_path}")
+        click.echo(f"Home: {runtime.root_dir}")
+        click.echo(f"Status: {health['status']}")
+        if health.get("reported_version"):
+            click.echo(f"Reported version: {health['reported_version']}")
 
-    version = get_chrome_version()
-    if not version:
-        click.echo("Could not detect Google Chrome version.", err=True)
-        click.echo("Please install Google Chrome first:")
-        click.echo(
-            "  wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
-        )
-        click.echo("  sudo apt install ./google-chrome-stable_current_amd64.deb")
-        return
+    if health["status"] != "ready":
+        details = ", ".join(health["errors"])
+        raise click.ClickException(f"Chrome installation is unhealthy: {details}")
+    return runtime
 
-    click.echo(f"Detected Chrome version: {version}")
 
-    url = get_chromedriver_url(version)
-    if not url:
-        click.echo(
-            f"Could not find matching Chromedriver for version {version}", err=True
-        )
-        return
-
-    if need_prompt:
-        target_dir = ask_path("Install directory", default=str(target_dir))
-
-    target_dir = Path(target_dir)
-    target_dir.mkdir(parents=True, exist_ok=True)
-
-    install_chromedriver(url, target_dir)
+__all__ = [
+    "ChromeInstallation",
+    "ChromeInstallError",
+    "DEFAULT_CHROME_HOME",
+    "SUPPORTED_CFT_PLATFORMS",
+    "ensure_chrome",
+    "install_chrome",
+    "resolve_chrome",
+    "setup_chrome",
+]

@@ -1,8 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.2.2
 
 ### Added
+- Add a complete bilingual top-level CLI tree and the independent `chatup chrome` contract.
+- Add cross-platform Chrome for Testing installation under `~/.chatarch/chrome`, safe archive extraction, atomic metadata, JSON output, and an importable Python descriptor API.
 - Add `chatup mysql` to install and prepare a ChatData-compatible user-level MySQL runtime, instance layout, `my.cnf`, user-level systemd service, and optional start/smoke flow.
 - Add `chatup nginx` to prepare a user-level NGINX runtime under `~/.chatarch/nginx` and generate common reverse-proxy, HTTPS proxy, WebSocket proxy, static root, and redirect templates.
 - Expand `chatup gitea` from binary install into a ChatTea-compatible Gitea runtime/config/service setup flow under `~/.chatarch/chattea`.
@@ -12,6 +14,8 @@
 - Add `chatup crs` to install the canonical `@chatarch/claude-relay-service` npm package, prepare local Redis, write local configuration and secrets, build the admin SPA, start the service, and run a smoke check.
 
 ### Changed
+- Align `publish.yml` with the active PyPI Trusted Publisher's blank environment while retaining job-level OIDC permission.
+- Replace the legacy system-Chrome/Chromedriver flow with a ChatArch-internal, versioned Chrome for Testing installation while keeping `chatup chrome` as the flat command.
 - Align `chatup gitea` with ChatTea defaults: resolve the latest ChatArch Gitea release by default, install under the ChatTea runtime directory, and optionally generate local `app.ini` plus a user-level systemd service.
 
 ## 0.2.1

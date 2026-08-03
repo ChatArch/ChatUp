@@ -14,7 +14,7 @@ chatup
 |-- nodejs      # 安装 nvm 和默认 LTS Node.js
 |-- docker      # 检查 Docker 环境，并提示 sudo 配置
 |-- zsh         # 配置 zsh / oh-my-zsh / 插件 / alias
-|-- chrome      # 安装 Chrome 和 Chromedriver
+|-- chrome      # 安装 ChatArch 内部 Chrome for Testing
 |-- frp         # 安装 FRP Client/Server
 |-- gitea       # 安装 ChatTea-compatible Gitea runtime/config/service
 |-- mysql       # 安装 ChatData-compatible MySQL runtime/instance/service
@@ -58,11 +58,11 @@ chatup uv                  # 安装/复用 uv，创建 ~/.chatarch/venv
 chatup nodejs              # 安装 nvm 和默认 LTS Node.js
 chatup docker              # 检查 Docker daemon 和当前用户权限
 chatup zsh                 # 配置 zsh / oh-my-zsh / 插件 / alias
-chatup chrome              # 安装 Chrome 和 Chromedriver
+chatup chrome              # 安装 ~/.chatarch/chrome 下的 versioned Chrome for Testing
 chatup frp                 # 安装 FRP Client/Server
 ```
 
-这些命令只承诺把 ChatArch 常用基础依赖准备好；它们不是通用系统包管理器，也不替代发行版的软件源策略。
+这些命令只承诺把 ChatArch 常用基础依赖准备好；它们不是通用系统包管理器，也不替代发行版的软件源策略。`chatup chrome` 额外提供机器可读 descriptor，供 ChatPost 等上层包复用，但 Profile/账号仍由消费方管理。
 
 ## 本地服务安装
 

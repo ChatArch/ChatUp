@@ -6,7 +6,7 @@
 
 - **基础环境**
 
-    先安装 ChatUp，再用 `chatup doctor`、`chatup uv` 检查 CLI 和 Python 运行环境。
+    先安装 ChatUp，再用 `chatup doctor`、`chatup uv` 检查 CLI 和 Python 运行环境；需要浏览器自动化时再运行 `chatup chrome`。
 
 - **工作区**
 
@@ -52,6 +52,20 @@ chatup uv
 ```bash
 chatup uv --venv ~/.chatarch/venv --python-version 3.12
 ```
+
+## 安装 Chrome 环境
+
+```bash
+chatup chrome
+```
+
+该命令把 Chrome for Testing 安装到 `~/.chatarch/chrome`，不会修改系统 Chrome。需要把结果交给其他程序时使用 JSON：
+
+```bash
+chatup chrome --version stable --output json -I
+```
+
+完整 option 和 Python 接口见 [CLI 树](cli-tree.md)。
 
 ## 初始化工作区
 
