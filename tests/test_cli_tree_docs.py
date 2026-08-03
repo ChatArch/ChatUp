@@ -40,6 +40,7 @@ def test_cli_tree_is_in_mkdocs_nav_and_backend_contracts_are_complete():
     required = {
         "chatup chrome-for-testing",
         "chatup chromedriver",
+        "chatup playwright",
         "install",
         "list",
         "show",
@@ -61,6 +62,7 @@ def test_cli_tree_is_in_mkdocs_nav_and_backend_contracts_are_complete():
         "CHATARCH_AUTO_PROMPT",
         "chatup.chrome_for_testing",
         "chatup.chromedriver",
+        "chatup.playwright",
         "-i / -I",
     }
     for name in ("cli-tree.md", "cli-tree.en.md"):

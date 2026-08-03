@@ -6,7 +6,7 @@
 
 - **Base Runtime**
 
-    Install ChatUp, then run `chatup doctor` and `chatup uv` to verify the CLI and Python runtime; install the exact Chrome for Testing backend only when browser automation is needed.
+    Install ChatUp, then run `chatup doctor` and `chatup uv` to verify the CLI and Python runtime; select an exact Chrome for Testing or Playwright backend according to the consumer.
 
 - **Workspace**
 
@@ -64,6 +64,16 @@ This installs Google Chrome for Testing under `~/.chatarch/chrome-for-testing` w
 ```bash
 chatup chrome-for-testing install --version 145.0.7632.6 --output json -I
 ```
+
+When a proven task depends on a Playwright-managed browser, install an exact Playwright version:
+
+```bash
+chatup nodejs -I
+chatup playwright install 1.61.1 --output json -I
+chatup playwright path 1.61.1 -I
+```
+
+The Playwright package and browser cache stay under `~/.chatarch/playwright`; Docker is not required. Profiles, extensions, and accounts remain consumer-owned.
 
 Only Selenium/WebDriver consumers need the independent ChromeDriver backend:
 

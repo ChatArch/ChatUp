@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.4
+
+### Added
+- Add the independent `chatup playwright install/path/doctor` backend and `chatup.playwright` Python API for exact Playwright packages and their managed Chromium revisions.
+- Store Playwright package, browser cache, executable descriptor, and metadata atomically under `~/.chatarch/playwright`.
+
+### Changed
+- Ground Playwright support in the verified Zhihu draft task: ChatUp owns only Playwright/package/browser resolution, while ChatPost continues to own profiles, extensions, bridges, accounts, and publication state.
+- Keep the existing Chrome for Testing and ChromeDriver backends independent; Playwright is additive and does not introduce a shared Browser base class.
+
 ## 0.2.3
 
 ### Added

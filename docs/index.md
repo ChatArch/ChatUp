@@ -70,7 +70,7 @@ ChatUp 是 ChatArch 的独立安装与初始化 CLI，用来把一台机器整�
 
 - **新机器初始化**
 
-    安装 Python、Node.js、Docker 检查、独立 Chrome for Testing/ChromeDriver backend 和 shell 基础环境。
+    安装 Python、Node.js、Docker 检查、独立 Chrome for Testing、ChromeDriver 与 Playwright backend 和 shell 基础环境。
 
 - **工作区初始化**
 
@@ -110,6 +110,7 @@ ChatUp 是 ChatArch 的独立安装与初始化 CLI，用来把一台机器整�
 chatup --help
 chatup chrome-for-testing --help
 chatup chromedriver --help
+chatup playwright --help
 chatup gitea --help
 chatup mysql --help
 chatup nginx --help

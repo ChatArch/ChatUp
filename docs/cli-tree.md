@@ -1,6 +1,6 @@
 # CLI 树
 
-ChatUp 使用一等顶层命令，但不把不同浏览器制品强行统一成一个 `browser` 抽象。Chrome for Testing 浏览器和 ChromeDriver WebDriver server 各自拥有独立命令集、Python API、metadata 和存储目录。
+ChatUp 使用一等顶层命令，但不把不同浏览器制品和工具链强行统一成一个 `browser` 抽象。Chrome for Testing、ChromeDriver 和 Playwright 各自拥有独立命令集、Python API、metadata 和存储目录。
 
 ## 顶层命令
 
@@ -14,6 +14,7 @@ chatup
 ├── zsh                 # 配置 zsh、插件和 alias
 ├── chrome-for-testing  # 管理 Google Chrome for Testing 浏览器
 ├── chromedriver        # 管理 ChromeDriver WebDriver server
+├── playwright          # 管理 Playwright package 与 Chromium browser
 ├── frp                 # 安装 FRP Client/Server
 ├── gitea               # 安装 ChatTea-compatible Gitea
 ├── mysql               # 安装 ChatData-compatible MySQL
@@ -35,8 +36,9 @@ chatup
 | --- | --- | --- |
 | `chrome-for-testing` | Google Chrome for Testing | 可启动的浏览器；支持扩展和 CDP |
 | `chromedriver` | ChromeDriver | WebDriver 协议 server；不是浏览器 |
+| `playwright` | Playwright package + Playwright Chromium | 固定 package、revision、browser version 与 executable path |
 
-`Chrome for Testing` 是 Google 官方发行名称。命令中的 `for-testing` 描述制品身份，不表示 ChatUp 暴露了一个 `test` 操作；两个 backend 都没有 `test` 子命令，健康检查统一叫 `doctor`。
+`Chrome for Testing` 是 Google 官方发行名称。命令中的 `for-testing` 描述制品身份，不表示 ChatUp 暴露了一个 `test` 操作；三个 backend 都没有 `test` 子命令，健康检查统一叫 `doctor`。
 
 当前不注册 `chatup chromium`。只有选定并验证真实 Chromium 下载源、revision contract、平台布局和验收方式后，才会新增独立 Chromium backend。
 
@@ -103,6 +105,30 @@ chatup chromedriver install --match-cft-version 145.0.7632.6 -I
 chatup chromedriver install --match-browser /path/to/browser --output json -I
 ```
 
+## Playwright
+
+```text
+chatup playwright
+├── install [VERSION]
+│   ├── --browser chromium
+│   ├── --home PATH
+│   ├── --force
+│   ├── --doctor / --no-doctor
+│   ├── --output text|json
+│   └── -i / -I
+├── path [VERSION] [--browser chromium] [--output text|json] [-i|-I]
+└── doctor [VERSION] [--execute|--no-execute] [--output text|json] [-i|-I]
+```
+
+Playwright backend 接受精确三段 package 版本。`install` 使用可用的 Node.js/npm 安装该 package，并把它声明的 Chromium revision 下载到同一个 ChatArch-owned installation；`path` 返回 Playwright 自身解析出的 executable。它不创建 Profile、不启动浏览器，也不安装 ChromeDriver。
+
+```bash
+chatup nodejs -I
+chatup playwright install 1.61.1 --output json -I
+chatup playwright path 1.61.1 -I
+chatup playwright doctor 1.61.1 --output json -I
+```
+
 ## 独立存储
 
 ```text
@@ -111,13 +137,18 @@ chatup chromedriver install --match-browser /path/to/browser --output json -I
 │   └── <version>/<platform>/
 │       ├── installation.json
 │       └── <Google archive tree>/
-└── chromedriver/
-    └── <version>/<platform>/
+├── chromedriver/
+│   └── <version>/<platform>/
+│       ├── installation.json
+│       └── <Google archive tree>/
+└── playwright/
+    └── <playwright-version>/<browser>/
         ├── installation.json
-        └── <Google archive tree>/
+        ├── package/
+        └── browsers/
 ```
 
-两个 backend 都使用官方 HTTPS 来源、可选 SHA-256、受限 ZIP 解压和原子目录替换。它们不修改系统 Chrome，不创建 Profile，不保存 Cookie，也不管理账号或扩展。
+Chrome for Testing 与 ChromeDriver 使用官方 Google HTTPS 制品、可选 SHA-256、受限 ZIP 解压和原子目录替换。Playwright 使用 npm package 完整性与 Playwright 自身 browser manifest/download 流程，并同样采用原子安装目录。三个 backend 都不修改系统 Chrome，不创建 Profile，不保存 Cookie，也不管理账号或扩展。
 
 `remove` 必须显式传 `--yes`。`gc` 默认 dry-run，只处理超过最小年龄的 backend 临时/backup 目录；实际清理同时需要 `--apply --yes`。
 
@@ -138,11 +169,14 @@ chatup chromedriver install --match-browser /path/to/browser --output json -I
 ```python
 from chatup.chrome_for_testing import resolve as resolve_cft
 from chatup.chromedriver import resolve as resolve_driver
+from chatup.playwright import resolve as resolve_playwright
 
 browser = resolve_cft("145.0.7632.6")
 driver = resolve_driver("145.0.7632.6")
+playwright_browser = resolve_playwright("1.61.1", browser="chromium")
 print(browser.binary_path)
 print(driver.binary_path)
+print(playwright_browser.binary_path)
 ```
 
-ChatPost 当前只依赖 `chatup.chrome_for_testing`。它继续自己管理 isolated user-data-dir、Runner process、CDP/bridge、扩展、人工登录、账号映射和 publication ledger。
+ChatPost 可以按任务选择 `chatup.chrome_for_testing` 或 `chatup.playwright` descriptor。它继续自己管理 isolated user-data-dir、Runner process、CDP/bridge、扩展、人工登录、账号映射和 publication ledger。

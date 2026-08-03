@@ -13,6 +13,7 @@ def test_browser_artifacts_have_independent_top_level_backends():
 
     assert "chrome-for-testing" in commands
     assert "chromedriver" in commands
+    assert "playwright" in commands
     assert "chrome" not in commands
     assert "browser" not in commands
     assert "chromium" not in commands
@@ -31,11 +32,15 @@ def test_each_implemented_backend_owns_its_command_set():
         for child in sorted(BACKEND_COMMANDS):
             assert child in result.output
 
+    playwright = main.commands["playwright"]
+    assert isinstance(playwright, click.Group)
+    assert set(playwright.commands) == {"install", "path", "doctor"}
+
 
 def test_user_cli_has_no_test_command():
     runner = CliRunner()
 
-    for backend in ("chrome-for-testing", "chromedriver"):
+    for backend in ("chrome-for-testing", "chromedriver", "playwright"):
         result = runner.invoke(main, [backend, "test", "--help"])
         assert result.exit_code != 0
         assert "No such command" in result.output
