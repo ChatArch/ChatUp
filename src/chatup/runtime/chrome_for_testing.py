@@ -1,22 +1,31 @@
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 import platform as platform_module
 import re
-import shutil
 import stat
 import subprocess
 import tempfile
 import urllib.request
-import uuid
-import zipfile
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from pathlib import Path, PurePosixPath
-from typing import Any, Callable
+from pathlib import Path
+from typing import Any
 from urllib.parse import urlparse
+
+from ._managed_artifact import (
+    MAX_ARCHIVE_BYTES,
+    ManagedArtifactError,
+    atomic_write_json,
+    find_stale_directories,
+    normalize_sha256,
+    remove_managed_directory,
+    replace_directory,
+    safe_extract_zip,
+    sha256_file,
+)
 
 CHROME_FOR_TESTING = "chrome-for-testing"
 CFT_CHANNELS_URL = (
@@ -27,22 +36,19 @@ CFT_VERSIONS_URL = (
     "https://googlechromelabs.github.io/chrome-for-testing/"
     "known-good-versions-with-downloads.json"
 )
-DEFAULT_BROWSER_HOME = Path.home() / ".chatarch" / "chrome"
-METADATA_NAME = "runtime.json"
+DEFAULT_CHROME_FOR_TESTING_HOME = Path.home() / ".chatarch" / CHROME_FOR_TESTING
+METADATA_NAME = "installation.json"
 SUPPORTED_CFT_PLATFORMS = ("linux64", "mac-arm64", "mac-x64", "win64")
-MAX_ARCHIVE_FILES = 100_000
-MAX_ARCHIVE_BYTES = 1024 * 1024 * 1024
-MAX_UNCOMPRESSED_BYTES = 2 * 1024 * 1024 * 1024
 CFT_DOWNLOAD_HOST = "storage.googleapis.com"
 CFT_DOWNLOAD_PREFIX = "/chrome-for-testing-public/"
 
 
-class BrowserRuntimeError(RuntimeError):
-    """Raised when a managed browser runtime cannot be resolved safely."""
+class ChromeForTestingError(RuntimeError):
+    """Raised when Chrome for Testing cannot be managed safely."""
 
 
 @dataclass(frozen=True)
-class BrowserRuntime:
+class ChromeForTestingInstallation:
     kind: str
     version: str
     platform: str
@@ -88,42 +94,54 @@ def normalize_cft_platform(
     elif system_name == "windows" and machine_name in {"x86_64", "amd64"}:
         return "win64"
 
-    raise BrowserRuntimeError(
+    raise ChromeForTestingError(
         f"Chrome for Testing does not provide a supported build for "
         f"system={system_name!r}, machine={machine_name!r}"
     )
 
 
 def fetch_json(url: str, *, timeout: float = 30.0) -> dict[str, Any]:
-    request = urllib.request.Request(url, headers={"User-Agent": "ChatUp/browser-runtime"})
+    request = urllib.request.Request(
+        url,
+        headers={"User-Agent": "ChatUp/chrome-for-testing"},
+    )
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
             payload = json.load(response)
     except Exception as exc:
-        raise BrowserRuntimeError(f"Failed to fetch browser manifest: {url}: {exc}") from exc
+        raise ChromeForTestingError(
+            f"Failed to fetch Chrome for Testing manifest: {url}: {exc}"
+        ) from exc
     if not isinstance(payload, dict):
-        raise BrowserRuntimeError(f"Browser manifest is not an object: {url}")
+        raise ChromeForTestingError(
+            f"Chrome for Testing manifest is not an object: {url}"
+        )
     return payload
 
 
 def download_file(url: str, destination: Path, *, timeout: float = 120.0) -> None:
     _validate_download_url(url)
-    request = urllib.request.Request(url, headers={"User-Agent": "ChatUp/browser-runtime"})
+    request = urllib.request.Request(
+        url,
+        headers={"User-Agent": "ChatUp/chrome-for-testing"},
+    )
     destination.parent.mkdir(parents=True, exist_ok=True)
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
             content_length = response.headers.get("Content-Length")
             if content_length and int(content_length) > MAX_ARCHIVE_BYTES:
-                raise BrowserRuntimeError("Browser archive exceeds the 1 GiB download limit")
+                raise ChromeForTestingError("Chrome for Testing archive exceeds the 1 GiB download limit")
             with destination.open("wb") as output:
                 downloaded = 0
                 while chunk := response.read(1024 * 1024):
                     downloaded += len(chunk)
                     if downloaded > MAX_ARCHIVE_BYTES:
-                        raise BrowserRuntimeError("Browser archive exceeds the 1 GiB download limit")
+                        raise ChromeForTestingError("Chrome for Testing archive exceeds the 1 GiB download limit")
                     output.write(chunk)
     except Exception as exc:
-        raise BrowserRuntimeError(f"Failed to download browser archive: {url}: {exc}") from exc
+        raise ChromeForTestingError(
+            f"Failed to download Chrome for Testing archive: {url}: {exc}"
+        ) from exc
 
 
 def resolve_chrome_for_testing_download(
@@ -134,32 +152,51 @@ def resolve_chrome_for_testing_download(
 ) -> tuple[str, str, str]:
     requested = version.strip()
     if not requested:
-        raise BrowserRuntimeError("Browser version must not be empty")
+        raise ChromeForTestingError("Chrome for Testing version must not be empty")
     platform_name = cft_platform or normalize_cft_platform()
     if platform_name not in SUPPORTED_CFT_PLATFORMS:
-        raise BrowserRuntimeError(f"Unsupported Chrome for Testing platform: {platform_name}")
+        raise ChromeForTestingError(f"Unsupported Chrome for Testing platform: {platform_name}")
 
     channel_names = {name.lower(): name for name in ("Stable", "Beta", "Dev", "Canary")}
     if requested.lower() in channel_names:
         data = fetcher(CFT_CHANNELS_URL)
-        entry = data.get("channels", {}).get(channel_names[requested.lower()])
+        channels = data.get("channels")
+        entry = (
+            channels.get(channel_names[requested.lower()])
+            if isinstance(channels, dict)
+            else None
+        )
     else:
         data = fetcher(CFT_VERSIONS_URL)
+        versions = data.get("versions")
         entry = next(
-            (item for item in data.get("versions", []) if item.get("version") == requested),
+            (
+                item
+                for item in versions
+                if isinstance(item, dict) and item.get("version") == requested
+            ),
             None,
-        )
+        ) if isinstance(versions, list) else None
 
     if not isinstance(entry, dict) or not entry.get("version"):
-        raise BrowserRuntimeError(f"Chrome for Testing version not found: {requested}")
+        raise ChromeForTestingError(f"Chrome for Testing version not found: {requested}")
 
-    downloads = entry.get("downloads", {}).get("chrome", [])
-    artifact = next(
-        (item for item in downloads if item.get("platform") == platform_name),
-        None,
+    download_groups = entry.get("downloads")
+    downloads = (
+        download_groups.get("chrome", [])
+        if isinstance(download_groups, dict)
+        else []
     )
+    artifact = next(
+        (
+            item
+            for item in downloads
+            if isinstance(item, dict) and item.get("platform") == platform_name
+        ),
+        None,
+    ) if isinstance(downloads, list) else None
     if not isinstance(artifact, dict) or not artifact.get("url"):
-        raise BrowserRuntimeError(
+        raise ChromeForTestingError(
             f"Chrome for Testing {entry['version']} has no {platform_name} download"
         )
 
@@ -177,27 +214,35 @@ def install_chrome_for_testing(
     force: bool = False,
     resolver: Callable[..., tuple[str, str, str]] = resolve_chrome_for_testing_download,
     downloader: Callable[[str, Path], None] = download_file,
-) -> BrowserRuntime:
+) -> ChromeForTestingInstallation:
     resolved_version, platform_name, source_url = resolver(
         version,
         cft_platform=cft_platform,
     )
     _validate_download_url(source_url)
-    browser_home = Path(home).expanduser() if home is not None else DEFAULT_BROWSER_HOME
-    install_dir = browser_home / CHROME_FOR_TESTING / resolved_version / platform_name
+    home_path = (
+        Path(home).expanduser()
+        if home is not None
+        else DEFAULT_CHROME_FOR_TESTING_HOME
+    )
+    install_dir = home_path / resolved_version / platform_name
     metadata_path = install_dir / METADATA_NAME
     normalized_expected = _normalize_sha256(expected_sha256)
 
+    if install_dir.is_symlink():
+        raise ChromeForTestingError(
+            f"Refusing to use a symlink as a Chrome for Testing installation root: {install_dir}"
+        )
     if metadata_path.is_file() and not force:
-        runtime = load_browser_runtime(metadata_path)
+        runtime = load_chrome_for_testing(metadata_path)
         if normalized_expected and runtime.archive_sha256 != normalized_expected:
-            raise BrowserRuntimeError(
-                "Installed browser SHA-256 does not match the expected archive digest"
+            raise ChromeForTestingError(
+                "Installed Chrome for Testing SHA-256 does not match the expected archive digest"
             )
         return runtime
     if install_dir.exists() and not force:
-        raise BrowserRuntimeError(
-            f"Browser runtime directory exists without valid metadata: {install_dir}; use force to replace it"
+        raise ChromeForTestingError(
+            f"Chrome for Testing directory exists without valid metadata: {install_dir}; use force to replace it"
         )
 
     install_dir.parent.mkdir(parents=True, exist_ok=True)
@@ -207,21 +252,21 @@ def install_chrome_for_testing(
         dir=install_dir.parent,
     ) as temporary:
         temporary_dir = Path(temporary)
-        archive_path = temporary_dir / "browser.zip"
-        staging_dir = temporary_dir / "runtime"
+        archive_path = temporary_dir / "chrome-for-testing.zip"
+        staging_dir = temporary_dir / "installation"
         downloader(source_url, archive_path)
 
         archive_sha256 = _sha256_file(archive_path)
         if normalized_expected and archive_sha256 != normalized_expected:
-            raise BrowserRuntimeError(
-                f"Browser archive SHA-256 mismatch: expected {normalized_expected}, got {archive_sha256}"
+            raise ChromeForTestingError(
+                f"Chrome for Testing archive SHA-256 mismatch: expected {normalized_expected}, got {archive_sha256}"
             )
 
-        safe_extract_zip(archive_path, staging_dir)
+        safe_extract_chrome_for_testing_zip(archive_path, staging_dir)
         binary_relative = _binary_relative_path(platform_name)
         staged_binary = staging_dir / binary_relative
         if not staged_binary.is_file():
-            raise BrowserRuntimeError(
+            raise ChromeForTestingError(
                 f"Chrome executable is missing from the archive: {binary_relative}"
             )
         if os.name != "nt":
@@ -240,7 +285,7 @@ def install_chrome_for_testing(
         _atomic_write_json(staging_dir / METADATA_NAME, metadata)
         _replace_directory(staging_dir, install_dir)
 
-    return load_browser_runtime(metadata_path)
+    return load_chrome_for_testing(metadata_path)
 
 
 def ensure_chrome_for_testing(
@@ -249,15 +294,15 @@ def ensure_chrome_for_testing(
     home: Path | str | None = None,
     cft_platform: str | None = None,
     expected_sha256: str | None = None,
-) -> BrowserRuntime:
+) -> ChromeForTestingInstallation:
     platform_name = cft_platform or normalize_cft_platform()
     try:
-        return resolve_browser_runtime(
-            f"{CHROME_FOR_TESTING}@{version}",
+        return resolve_chrome_for_testing(
+            version,
             home=home,
             cft_platform=platform_name,
         )
-    except BrowserRuntimeError:
+    except ChromeForTestingError:
         return install_chrome_for_testing(
             version,
             home=home,
@@ -266,49 +311,66 @@ def ensure_chrome_for_testing(
         )
 
 
-def list_browser_runtimes(*, home: Path | str | None = None) -> list[BrowserRuntime]:
-    browser_home = Path(home).expanduser() if home is not None else DEFAULT_BROWSER_HOME
-    runtimes: list[BrowserRuntime] = []
-    if not browser_home.is_dir():
-        return runtimes
-    for metadata_path in sorted(browser_home.glob(f"*/*/*/{METADATA_NAME}")):
+def list_chrome_for_testing(
+    *,
+    home: Path | str | None = None,
+) -> list[ChromeForTestingInstallation]:
+    home_path = (
+        Path(home).expanduser()
+        if home is not None
+        else DEFAULT_CHROME_FOR_TESTING_HOME
+    )
+    installations: list[ChromeForTestingInstallation] = []
+    if not home_path.is_dir():
+        return installations
+    for metadata_path in sorted(home_path.glob(f"*/*/{METADATA_NAME}")):
         try:
-            runtimes.append(load_browser_runtime(metadata_path))
-        except BrowserRuntimeError:
+            installations.append(load_chrome_for_testing(metadata_path))
+        except ChromeForTestingError:
             continue
-    return runtimes
+    return installations
 
 
-def resolve_browser_runtime(
-    ref: str,
+def resolve_chrome_for_testing(
+    version: str,
     *,
     home: Path | str | None = None,
     cft_platform: str | None = None,
-) -> BrowserRuntime:
-    kind, separator, version = ref.partition("@")
-    if not separator or not kind or not version:
-        raise BrowserRuntimeError(
-            "Browser reference must use <kind>@<version>, for example chrome-for-testing@145.0.7632.6"
+) -> ChromeForTestingInstallation:
+    if not re.fullmatch(r"\d+\.\d+\.\d+\.\d+", version):
+        raise ChromeForTestingError(
+            f"Chrome for Testing resolution requires an exact version: {version}"
         )
-    if kind in {"chrome", "cft"}:
-        kind = CHROME_FOR_TESTING
-    if kind != CHROME_FOR_TESTING:
-        raise BrowserRuntimeError(f"Unsupported browser runtime kind: {kind}")
-
     platform_name = cft_platform or normalize_cft_platform()
-    browser_home = Path(home).expanduser() if home is not None else DEFAULT_BROWSER_HOME
-    metadata_path = browser_home / kind / version / platform_name / METADATA_NAME
+    home_path = (
+        Path(home).expanduser()
+        if home is not None
+        else DEFAULT_CHROME_FOR_TESTING_HOME
+    )
+    metadata_path = home_path / version / platform_name / METADATA_NAME
     if not metadata_path.is_file():
-        raise BrowserRuntimeError(f"Browser runtime is not installed: {kind}@{version} ({platform_name})")
-    return load_browser_runtime(metadata_path)
+        raise ChromeForTestingError(
+            f"Chrome for Testing is not installed: {version} ({platform_name})"
+        )
+    return load_chrome_for_testing(metadata_path)
 
 
-def load_browser_runtime(metadata_path: Path | str) -> BrowserRuntime:
+def load_chrome_for_testing(metadata_path: Path | str) -> ChromeForTestingInstallation:
     metadata_file = Path(metadata_path)
+    if metadata_file.is_symlink():
+        raise ChromeForTestingError(
+            f"Chrome for Testing metadata must not be a symlink: {metadata_file}"
+        )
     try:
         data = json.loads(metadata_file.read_text(encoding="utf-8"))
     except Exception as exc:
-        raise BrowserRuntimeError(f"Invalid browser runtime metadata: {metadata_file}: {exc}") from exc
+        raise ChromeForTestingError(
+            f"Invalid Chrome for Testing metadata: {metadata_file}: {exc}"
+        ) from exc
+    if not isinstance(data, dict):
+        raise ChromeForTestingError(
+            f"Chrome for Testing metadata must be a JSON object: {metadata_file}"
+        )
 
     required = {
         "kind",
@@ -321,8 +383,8 @@ def load_browser_runtime(metadata_path: Path | str) -> BrowserRuntime:
     }
     missing = sorted(required - data.keys())
     if data.get("schema_version") != 1 or missing:
-        raise BrowserRuntimeError(
-            f"Unsupported browser runtime metadata: {metadata_file}; missing={missing}"
+        raise ChromeForTestingError(
+            f"Unsupported Chrome for Testing metadata: {metadata_file}; missing={missing}"
         )
 
     kind = str(data["kind"])
@@ -332,40 +394,47 @@ def load_browser_runtime(metadata_path: Path | str) -> BrowserRuntime:
     archive_sha256 = str(data["archive_sha256"])
     installed_at = str(data["installed_at"])
     if kind != CHROME_FOR_TESTING:
-        raise BrowserRuntimeError(f"Unsupported browser kind in metadata: {kind}")
+        raise ChromeForTestingError(
+            f"Unexpected kind in Chrome for Testing metadata: {kind}"
+        )
     if not re.fullmatch(r"\d+\.\d+\.\d+\.\d+", version):
-        raise BrowserRuntimeError(f"Invalid Chrome version in metadata: {version}")
+        raise ChromeForTestingError(f"Invalid Chrome version in metadata: {version}")
     if platform_name not in SUPPORTED_CFT_PLATFORMS:
-        raise BrowserRuntimeError(f"Unsupported platform in metadata: {platform_name}")
+        raise ChromeForTestingError(f"Unsupported platform in metadata: {platform_name}")
     _validate_download_url(source_url)
     _normalize_sha256(archive_sha256)
     if not installed_at:
-        raise BrowserRuntimeError("Browser metadata installed_at must not be empty")
+        raise ChromeForTestingError(
+            "Chrome for Testing metadata installed_at must not be empty"
+        )
 
     root_dir = metadata_file.parent.resolve()
-    expected_layout = (kind, version, platform_name)
+    expected_layout = (version, platform_name)
     actual_layout = (
-        root_dir.parent.parent.name,
         root_dir.parent.name,
         root_dir.name,
     )
     if actual_layout != expected_layout:
-        raise BrowserRuntimeError(
-            f"Browser metadata does not match its directory layout: {metadata_file}"
+        raise ChromeForTestingError(
+            f"Chrome for Testing metadata does not match its directory layout: {metadata_file}"
         )
 
     binary_relative = str(data["binary_path"])
     if binary_relative != _binary_relative_path(platform_name).as_posix():
-        raise BrowserRuntimeError(
+        raise ChromeForTestingError(
             f"Unexpected browser executable path in metadata: {binary_relative}"
         )
     binary_path = (root_dir / binary_relative).resolve()
     if not binary_path.is_relative_to(root_dir):
-        raise BrowserRuntimeError(f"Browser binary escapes runtime root: {binary_path}")
+        raise ChromeForTestingError(
+            f"Chrome for Testing binary escapes its installation root: {binary_path}"
+        )
     if not binary_path.is_file():
-        raise BrowserRuntimeError(f"Browser binary is missing: {binary_path}")
+        raise ChromeForTestingError(
+            f"Chrome for Testing binary is missing: {binary_path}"
+        )
 
-    return BrowserRuntime(
+    return ChromeForTestingInstallation(
         kind=kind,
         version=version,
         platform=platform_name,
@@ -377,8 +446,8 @@ def load_browser_runtime(metadata_path: Path | str) -> BrowserRuntime:
     )
 
 
-def doctor_browser_runtime(
-    runtime: BrowserRuntime,
+def doctor_chrome_for_testing(
+    runtime: ChromeForTestingInstallation,
     *,
     execute: bool = True,
 ) -> dict[str, Any]:
@@ -401,7 +470,7 @@ def doctor_browser_runtime(
             reported_version = (result.stdout or result.stderr).strip()
             if runtime.version not in reported_version:
                 errors.append("version_mismatch")
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001 - doctor returns probe failures as data.
             errors.append(f"execution_failed:{exc}")
 
     return {
@@ -412,66 +481,18 @@ def doctor_browser_runtime(
     }
 
 
-def safe_extract_zip(archive_path: Path | str, destination: Path | str) -> None:
-    archive = Path(archive_path)
-    target_root = Path(destination)
-    target_root.mkdir(parents=True, exist_ok=True)
-    root_resolved = target_root.resolve()
-
+def safe_extract_chrome_for_testing_zip(
+    archive_path: Path | str,
+    destination: Path | str,
+) -> None:
     try:
-        with zipfile.ZipFile(archive) as bundle:
-            members = bundle.infolist()
-            if len(members) > MAX_ARCHIVE_FILES:
-                raise BrowserRuntimeError("Browser archive contains too many files")
-            if sum(member.file_size for member in members) > MAX_UNCOMPRESSED_BYTES:
-                raise BrowserRuntimeError("Browser archive is too large after extraction")
-
-            for member in members:
-                normalized_name = member.filename.replace("\\", "/")
-                relative = PurePosixPath(normalized_name)
-                if relative.is_absolute() or ".." in relative.parts:
-                    raise BrowserRuntimeError(
-                        f"Unsafe path in browser archive: {member.filename}"
-                    )
-                mode = (member.external_attr >> 16) & 0xFFFF
-
-                target = (target_root / Path(*relative.parts)).resolve()
-                if not target.is_relative_to(root_resolved):
-                    raise BrowserRuntimeError(
-                        f"Archive member escapes extraction root: {member.filename}"
-                    )
-                if stat.S_ISLNK(mode):
-                    try:
-                        link_value = bundle.read(member).decode("utf-8")
-                    except UnicodeDecodeError as exc:
-                        raise BrowserRuntimeError(
-                            f"Invalid symlink target in browser archive: {member.filename}"
-                        ) from exc
-                    link_path = Path(link_value)
-                    if link_path.is_absolute():
-                        raise BrowserRuntimeError(
-                            f"Absolute symlink is not allowed in browser archive: {member.filename}"
-                        )
-                    resolved_link = (target.parent / link_path).resolve()
-                    if not resolved_link.is_relative_to(root_resolved):
-                        raise BrowserRuntimeError(
-                            f"Symlink escapes browser archive root: {member.filename}"
-                        )
-                    target.parent.mkdir(parents=True, exist_ok=True)
-                    target.symlink_to(link_value)
-                    continue
-                if member.is_dir():
-                    target.mkdir(parents=True, exist_ok=True)
-                    continue
-
-                target.parent.mkdir(parents=True, exist_ok=True)
-                with bundle.open(member) as source, target.open("wb") as output:
-                    shutil.copyfileobj(source, output)
-                permissions = mode & 0o777
-                if permissions and os.name != "nt":
-                    target.chmod(permissions)
-    except zipfile.BadZipFile as exc:
-        raise BrowserRuntimeError(f"Invalid browser archive: {archive}: {exc}") from exc
+        safe_extract_zip(
+            archive_path,
+            destination,
+            label="Chrome for Testing",
+        )
+    except ManagedArtifactError as exc:
+        raise ChromeForTestingError(str(exc)) from exc
 
 
 def _binary_relative_path(cft_platform: str) -> Path:
@@ -488,7 +509,7 @@ def _binary_relative_path(cft_platform: str) -> Path:
     try:
         return candidates[cft_platform]
     except KeyError as exc:
-        raise BrowserRuntimeError(f"Unsupported Chrome for Testing platform: {cft_platform}") from exc
+        raise ChromeForTestingError(f"Unsupported Chrome for Testing platform: {cft_platform}") from exc
 
 
 def _validate_download_url(url: str) -> None:
@@ -498,48 +519,91 @@ def _validate_download_url(url: str) -> None:
         or parsed.hostname != CFT_DOWNLOAD_HOST
         or not parsed.path.startswith(CFT_DOWNLOAD_PREFIX)
     ):
-        raise BrowserRuntimeError(
+        raise ChromeForTestingError(
             "Chrome for Testing download must use the official Google storage prefix: "
             f"{url}"
         )
 
 
+def remove_chrome_for_testing(
+    version: str,
+    *,
+    home: Path | str | None = None,
+    cft_platform: str | None = None,
+) -> ChromeForTestingInstallation:
+    home_path = (
+        Path(home).expanduser()
+        if home is not None
+        else DEFAULT_CHROME_FOR_TESTING_HOME
+    )
+    installation = resolve_chrome_for_testing(
+        version,
+        home=home_path,
+        cft_platform=cft_platform,
+    )
+    try:
+        remove_managed_directory(installation.root_dir, home=home_path)
+    except ManagedArtifactError as exc:
+        raise ChromeForTestingError(str(exc)) from exc
+    version_dir = installation.root_dir.parent
+    if version_dir.is_dir() and not any(version_dir.iterdir()):
+        version_dir.rmdir()
+    return installation
+
+
+def garbage_collect_chrome_for_testing(
+    *,
+    home: Path | str | None = None,
+    dry_run: bool = True,
+    yes: bool = False,
+    minimum_age_seconds: int = 24 * 60 * 60,
+) -> dict[str, Any]:
+    home_path = (
+        Path(home).expanduser()
+        if home is not None
+        else DEFAULT_CHROME_FOR_TESTING_HOME
+    )
+    candidates = find_stale_directories(
+        home_path,
+        minimum_age_seconds=minimum_age_seconds,
+    )
+    if not dry_run and not yes:
+        raise ChromeForTestingError(
+            "Refusing to remove stale Chrome for Testing directories without yes=True"
+        )
+    removed: list[str] = []
+    if not dry_run:
+        for candidate in sorted(candidates, key=lambda path: len(path.parts), reverse=True):
+            if not candidate.exists():
+                continue
+            try:
+                remove_managed_directory(candidate, home=home_path)
+            except ManagedArtifactError as exc:
+                raise ChromeForTestingError(str(exc)) from exc
+            removed.append(str(candidate))
+    return {
+        "kind": CHROME_FOR_TESTING,
+        "home": str(home_path),
+        "dry_run": dry_run,
+        "candidates": [str(path) for path in candidates],
+        "removed": removed,
+    }
+
+
 def _normalize_sha256(value: str | None) -> str | None:
-    if value is None:
-        return None
-    normalized = value.strip().lower()
-    if not re.fullmatch(r"[0-9a-f]{64}", normalized):
-        raise BrowserRuntimeError("Expected SHA-256 must contain exactly 64 hexadecimal characters")
-    return normalized
+    try:
+        return normalize_sha256(value)
+    except ManagedArtifactError as exc:
+        raise ChromeForTestingError(str(exc)) from exc
 
 
 def _sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as source:
-        for chunk in iter(lambda: source.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
+    return sha256_file(path)
 
 
 def _atomic_write_json(path: Path, data: dict[str, Any]) -> None:
-    temporary = path.with_name(f".{path.name}.{uuid.uuid4().hex}.tmp")
-    temporary.write_text(
-        json.dumps(data, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
-    os.replace(temporary, path)
+    atomic_write_json(path, data)
 
 
 def _replace_directory(staging_dir: Path, install_dir: Path) -> None:
-    backup_dir = install_dir.with_name(f".{install_dir.name}.backup-{uuid.uuid4().hex}")
-    had_existing = install_dir.exists()
-    if had_existing:
-        install_dir.rename(backup_dir)
-    try:
-        staging_dir.rename(install_dir)
-    except Exception:
-        if had_existing and backup_dir.exists() and not install_dir.exists():
-            backup_dir.rename(install_dir)
-        raise
-    if backup_dir.exists():
-        shutil.rmtree(backup_dir)
+    replace_directory(staging_dir, install_dir)

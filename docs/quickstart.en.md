@@ -6,7 +6,7 @@
 
 - **Base Runtime**
 
-    Install ChatUp, then run `chatup doctor` and `chatup uv` to verify the CLI and Python runtime; run `chatup chrome` only when browser automation is needed.
+    Install ChatUp, then run `chatup doctor` and `chatup uv` to verify the CLI and Python runtime; install the exact Chrome for Testing backend only when browser automation is needed.
 
 - **Workspace**
 
@@ -53,16 +53,22 @@ To customize the target:
 chatup uv --venv ~/.chatarch/venv --python-version 3.12
 ```
 
-## Install the Chrome Environment
+## Install the Chrome for Testing Browser
 
 ```bash
-chatup chrome
+chatup chrome-for-testing install --channel stable -I
 ```
 
-This installs Chrome for Testing under `~/.chatarch/chrome` without modifying system Chrome. Use JSON when handing the result to another program:
+This installs Google Chrome for Testing under `~/.chatarch/chrome-for-testing` without modifying system Chrome. Use JSON when handing the result to another program:
 
 ```bash
-chatup chrome --version stable --output json -I
+chatup chrome-for-testing install --version 145.0.7632.6 --output json -I
+```
+
+Only Selenium/WebDriver consumers need the independent ChromeDriver backend:
+
+```bash
+chatup chromedriver install --match-cft-version 145.0.7632.6 -I
 ```
 
 See [CLI Tree](cli-tree.md) for all options and the Python API.
@@ -133,4 +139,5 @@ ChatUp uses the shared interaction convention:
 
 - `-i`: force prompts.
 - `-I`: disable prompts, suitable for CI, scripts, and automation.
+- `CHATARCH_AUTO_PROMPT=0/false/no/off`: disable automatic prompts.
 - Commands may prompt for recoverable missing values; unrecoverable missing values should fail fast.

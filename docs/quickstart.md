@@ -6,7 +6,7 @@
 
 - **基础环境**
 
-    先安装 ChatUp，再用 `chatup doctor`、`chatup uv` 检查 CLI 和 Python 运行环境；需要浏览器自动化时再运行 `chatup chrome`。
+    先安装 ChatUp，再用 `chatup doctor`、`chatup uv` 检查 CLI 和 Python 运行环境；需要浏览器自动化时再安装精确的 Chrome for Testing backend。
 
 - **工作区**
 
@@ -53,16 +53,22 @@ chatup uv
 chatup uv --venv ~/.chatarch/venv --python-version 3.12
 ```
 
-## 安装 Chrome 环境
+## 安装 Chrome for Testing 浏览器
 
 ```bash
-chatup chrome
+chatup chrome-for-testing install --channel stable -I
 ```
 
-该命令把 Chrome for Testing 安装到 `~/.chatarch/chrome`，不会修改系统 Chrome。需要把结果交给其他程序时使用 JSON：
+该命令把 Google Chrome for Testing 安装到 `~/.chatarch/chrome-for-testing`，不会修改系统 Chrome。需要把结果交给其他程序时使用 JSON：
 
 ```bash
-chatup chrome --version stable --output json -I
+chatup chrome-for-testing install --version 145.0.7632.6 --output json -I
+```
+
+只有 Selenium/WebDriver 类消费者才需要独立的 ChromeDriver：
+
+```bash
+chatup chromedriver install --match-cft-version 145.0.7632.6 -I
 ```
 
 完整 option 和 Python 接口见 [CLI 树](cli-tree.md)。
@@ -133,4 +139,5 @@ ChatUp 使用统一交互约定：
 
 - `-i`：强制进入交互提示。
 - `-I`：禁用交互提示，适合 CI、脚本和自动化。
+- `CHATARCH_AUTO_PROMPT=0/false/no/off`：关闭默认自动补问。
 - 缺少可恢复参数时，命令可以自动提示；缺少不可恢复参数时应快速失败。

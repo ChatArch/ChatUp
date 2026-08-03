@@ -1,144 +1,148 @@
 # CLI 树
 
-ChatUp 采用扁平的一等安装命令。每个顶层命令负责一种明确的机器环境、工具链或本地服务，不再额外增加 `setup` 或 `browser` 中间层。
+ChatUp 使用一等顶层命令，但不把不同浏览器制品强行统一成一个 `browser` 抽象。Chrome for Testing 浏览器和 ChromeDriver WebDriver server 各自拥有独立命令集、Python API、metadata 和存储目录。
 
 ## 顶层命令
 
 ```text
 chatup
-├── doctor       # 验证 ChatUp CLI 可调用
-├── uv           # 安装 uv 和 ~/.chatarch/venv
-├── workspace    # 初始化 ChatArch workspace
-├── nodejs       # 安装 nvm 与默认 LTS Node.js
-├── docker       # 检查 Docker 环境与权限
-├── zsh          # 配置 zsh、插件和 alias
-├── chrome       # 安装 ChatArch 内部 Chrome for Testing
-├── frp          # 安装 FRP Client/Server
-├── gitea        # 安装 ChatTea-compatible Gitea
-├── mysql        # 安装 ChatData-compatible MySQL
-├── nginx        # 准备 user-level NGINX
-├── crs          # 安装本地 Claude Relay Service + Redis
-├── cc-connect   # 安装 ChatArch CC Connect
-├── claude       # 安装/配置 Claude Code
-├── codex        # 安装/配置 Codex CLI
-├── opencode     # 安装/配置 OpenCode
-├── hermes       # 安装 Hermes Agent 与可选 WebUI
-└── lark-cli     # 配置官方 lark-cli 与 ChatEnv
+├── doctor              # 验证 ChatUp CLI 可调用
+├── uv                  # 安装 uv 和 ~/.chatarch/venv
+├── workspace           # 初始化 ChatArch workspace
+├── nodejs              # 安装 nvm 与默认 LTS Node.js
+├── docker              # 检查 Docker 环境与权限
+├── zsh                 # 配置 zsh、插件和 alias
+├── chrome-for-testing  # 管理 Google Chrome for Testing 浏览器
+├── chromedriver        # 管理 ChromeDriver WebDriver server
+├── frp                 # 安装 FRP Client/Server
+├── gitea               # 安装 ChatTea-compatible Gitea
+├── mysql               # 安装 ChatData-compatible MySQL
+├── nginx               # 准备 user-level NGINX
+├── crs                 # 安装本地 Claude Relay Service + Redis
+├── cc-connect          # 安装 ChatArch CC Connect
+├── claude              # 安装/配置 Claude Code
+├── codex               # 安装/配置 Codex CLI
+├── opencode            # 安装/配置 OpenCode
+├── hermes              # 安装 Hermes Agent 与可选 WebUI
+└── lark-cli            # 配置官方 lark-cli 与 ChatEnv
 ```
 
 完整参数见 [命令参考](commands.md)。
 
-## 为什么 Chrome 是独立命令
+## 制品身份
 
-Chrome 是机器环境依赖，和 `uv`、`nodejs`、`docker` 属于同一层级。ChatUp 负责安装；消费方只解析安装结果。
+| Backend | 实际制品 | 角色 |
+| --- | --- | --- |
+| `chrome-for-testing` | Google Chrome for Testing | 可启动的浏览器；支持扩展和 CDP |
+| `chromedriver` | ChromeDriver | WebDriver 协议 server；不是浏览器 |
 
-因此不设计：
+`Chrome for Testing` 是 Google 官方发行名称。命令中的 `for-testing` 描述制品身份，不表示 ChatUp 暴露了一个 `test` 操作；两个 backend 都没有 `test` 子命令，健康检查统一叫 `doctor`。
+
+当前不注册 `chatup chromium`。只有选定并验证真实 Chromium 下载源、revision contract、平台布局和验收方式后，才会新增独立 Chromium backend。
+
+## Chrome for Testing
 
 ```text
-chatup browser install chrome
-chatpost browser install chrome
+chatup chrome-for-testing
+├── install
+│   ├── --version VERSION
+│   ├── --channel stable|beta|dev|canary
+│   ├── --platform PLATFORM
+│   ├── --home PATH
+│   ├── --sha256 HEX
+│   ├── --force
+│   ├── --doctor / --no-doctor
+│   ├── --output text|json
+│   └── -i / -I
+├── list [--home PATH] [--output text|json]
+├── show [VERSION] [--platform PLATFORM] [--output text|json] [-i|-I]
+├── path [VERSION] [--platform PLATFORM] [--output text|json] [-i|-I]
+├── doctor [VERSION] [--execute|--no-execute] [--output text|json] [-i|-I]
+├── remove [VERSION] --yes [--output text|json] [-i|-I]
+└── gc [--dry-run|--apply] [--yes] [--minimum-age-hours HOURS]
 ```
 
-而是统一使用：
+`install` 的 `--version` 与 `--channel` 互斥；都不提供时默认使用 stable。`resolve` 类操作只接受完整四段版本，不能使用 channel 或旧的 `chrome@...` / `cft@...` 引用。
 
 ```bash
-chatup chrome
+chatup chrome-for-testing install --channel stable -I
+chatup chrome-for-testing install --version 145.0.7632.6 --output json -I
+chatup chrome-for-testing path 145.0.7632.6 -I
+chatup chrome-for-testing doctor 145.0.7632.6 --output json -I
 ```
 
-这让 ChatPost、ChatBlog 自动化或其他包都可以复用同一个环境，不需要把 Chrome 下载逻辑绑定到某个产品的 Browser Runner 模型。
-
-## `chatup chrome` 契约
+## ChromeDriver
 
 ```text
-chatup chrome
-├── --version VERSION          # stable/beta/dev/canary 或精确版本
-├── --home PATH                # 默认 ~/.chatarch/chrome
-├── --platform PLATFORM        # 默认自动识别
-├── --sha256 HEX               # 可选 expected archive digest
-├── --force                    # 原子替换同版本安装
-├── --doctor / --no-doctor     # 是否执行 version probe
-├── --output text|json         # 人类或机器输出
-└── -i / -I                    # ChatStyle 交互策略
+chatup chromedriver
+├── install
+│   ├── --version VERSION
+│   ├── --channel stable|beta|dev|canary
+│   ├── --match-browser PATH
+│   ├── --match-cft-version VERSION
+│   ├── --platform PLATFORM
+│   ├── --home PATH
+│   ├── --sha256 HEX
+│   ├── --force
+│   ├── --doctor / --no-doctor
+│   ├── --output text|json
+│   └── -i / -I
+├── list [--home PATH] [--output text|json]
+├── show [VERSION] [--platform PLATFORM] [--output text|json] [-i|-I]
+├── path [VERSION] [--platform PLATFORM] [--output text|json] [-i|-I]
+├── doctor [VERSION] [--execute|--no-execute] [--output text|json] [-i|-I]
+├── remove [VERSION] --yes [--output text|json] [-i|-I]
+└── gc [--dry-run|--apply] [--yes] [--minimum-age-hours HOURS]
 ```
 
-默认安装布局：
+四个安装选择器互斥。`--match-browser` 读取给定浏览器 binary 的 `--version`，先按 Google 官方 build manifest 匹配，找不到时退回 milestone manifest；浏览器 patch 与最终 Driver patch 不必相同。`--match-cft-version` 直接使用精确 CFT 版本。ChromeDriver 不参与 ChatPost 当前的扩展/CDP 知乎链路。
+
+```bash
+chatup chromedriver install --channel stable -I
+chatup chromedriver install --match-cft-version 145.0.7632.6 -I
+chatup chromedriver install --match-browser /path/to/browser --output json -I
+```
+
+## 独立存储
 
 ```text
-~/.chatarch/chrome/
-└── chrome-for-testing/
-    └── <version>/
-        └── <platform>/
-            ├── runtime.json
-            └── <vendor archive tree>/
+~/.chatarch/
+├── chrome-for-testing/
+│   └── <version>/<platform>/
+│       ├── installation.json
+│       └── <Google archive tree>/
+└── chromedriver/
+    └── <version>/<platform>/
+        ├── installation.json
+        └── <Google archive tree>/
 ```
 
-这个命令：
+两个 backend 都使用官方 HTTPS 来源、可选 SHA-256、受限 ZIP 解压和原子目录替换。它们不修改系统 Chrome，不创建 Profile，不保存 Cookie，也不管理账号或扩展。
 
-- 从 Chrome for Testing 官方 manifest 解析 channel 或精确版本；
-- 支持 `mac-arm64`、`mac-x64`、`linux64` 和 `win64`；
-- 下载到临时目录，检查 HTTPS 来源、可选 SHA-256 和 ZIP 路径安全；
-- 完成后原子切换目录，不破坏已有可用安装；
-- 不修改系统 Chrome；
-- 不安装到 `~/.local/bin`；
-- 不要求 Docker；
-- 不创建浏览器 Profile、不加载扩展、不保存 Cookie。
+`remove` 必须显式传 `--yes`。`gc` 默认 dry-run，只处理超过最小年龄的 backend 临时/backup 目录；实际清理同时需要 `--apply --yes`。
 
-## JSON 输出
+## ChatStyle 交互
 
-`--output json` 是下游程序的稳定边界：
+可恢复缺参通过 ChatStyle `CommandSchema` 处理：
 
-```json
-{
-  "ref": "chrome-for-testing@<resolved-version>",
-  "kind": "chrome-for-testing",
-  "version": "<resolved-version>",
-  "platform": "mac-arm64",
-  "root_dir": "~/.chatarch/chrome/chrome-for-testing/<version>/mac-arm64",
-  "binary_path": "<absolute executable path>",
-  "source_url": "https://...",
-  "archive_sha256": "<sha256>",
-  "installed_at": "<timestamp>",
-  "status": "ready"
-}
-```
+- `-i` 强制当前子命令的缺参补问；
+- `-I` 禁止补问，缺少 required 值时快速失败；
+- `CHATARCH_AUTO_PROMPT=0/false/no/off` 关闭默认自动补问；
+- CLI 参数和 prompt 返回值使用相同校验；
+- 删除/清理不会通过默认确认 prompt 放宽，仍需要 `--yes`。
 
-机器调用不能解析彩色文本或日志来寻找 executable。
+## Python API
 
-## Python 接口
-
-Python 消费方优先使用 importable API，而不是 shell out：
+消费方选择精确 backend module，不经过通用 Browser base：
 
 ```python
-from chatup.chrome import ensure_chrome, resolve_chrome
+from chatup.chrome_for_testing import resolve as resolve_cft
+from chatup.chromedriver import resolve as resolve_driver
 
-runtime = ensure_chrome(version="<tested-version>")
-print(runtime.binary_path)
+browser = resolve_cft("145.0.7632.6")
+driver = resolve_driver("145.0.7632.6")
+print(browser.binary_path)
+print(driver.binary_path)
 ```
 
-`ensure_chrome` 可以安装缺失的精确版本；`resolve_chrome` 只读取已有 `runtime.json`，不做网络写入。
-
-## 与 ChatPost 的边界
-
-ChatUp 返回：
-
-```text
-binary_path
-version
-platform
-runtime root
-provenance/digest
-health status
-```
-
-ChatPost 继续负责：
-
-```text
-isolated user-data-dir
-Runner process / port / lock
-extension and bridge
-manual login checkpoint
-platform account mapping
-publication ledger
-```
-
-Chrome 安装不再是 ChatPost CLI 的一部分。
+ChatPost 当前只依赖 `chatup.chrome_for_testing`。它继续自己管理 isolated user-data-dir、Runner process、CDP/bridge、扩展、人工登录、账号映射和 publication ledger。

@@ -58,11 +58,12 @@ chatup uv                  # 安装/复用 uv，创建 ~/.chatarch/venv
 chatup nodejs              # 安装 nvm 和默认 LTS Node.js
 chatup docker              # 检查 Docker daemon 和当前用户权限
 chatup zsh                 # 配置 zsh / oh-my-zsh / 插件 / alias
-chatup chrome              # 安装 ~/.chatarch/chrome 下的 versioned Chrome for Testing
+chatup chrome-for-testing  # 管理 versioned Google Chrome for Testing 浏览器
+chatup chromedriver        # 管理 ChromeDriver WebDriver server
 chatup frp                 # 安装 FRP Client/Server
 ```
 
-这些命令只承诺把 ChatArch 常用基础依赖准备好；它们不是通用系统包管理器，也不替代发行版的软件源策略。`chatup chrome` 额外提供机器可读 descriptor，供 ChatPost 等上层包复用，但 Profile/账号仍由消费方管理。
+这些命令只承诺把 ChatArch 常用基础依赖准备好；它们不是通用系统包管理器，也不替代发行版的软件源策略。`chatup chrome-for-testing` 提供机器可读浏览器 descriptor，供 ChatPost 等扩展/CDP 消费方复用；`chatup chromedriver` 为 WebDriver 消费方独立提供 driver descriptor。Profile、账号和 Cookie 始终由消费方管理。
 
 ## 本地服务安装
 

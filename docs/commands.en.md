@@ -14,7 +14,8 @@ chatup
 |-- nodejs      # Install nvm and the default LTS Node.js
 |-- docker      # Check Docker and show sudo guidance when needed
 |-- zsh         # Configure zsh / oh-my-zsh / plugins / aliases
-|-- chrome      # Install Chrome for Testing under ~/.chatarch/chrome
+|-- chrome-for-testing # Manage Google Chrome for Testing browsers
+|-- chromedriver       # Manage ChromeDriver WebDriver servers
 |-- frp         # Install FRP Client/Server
 |-- gitea       # Install ChatTea-compatible Gitea runtime/config/service
 |-- mysql       # Install ChatData-compatible MySQL runtime/instance/service
@@ -34,7 +35,7 @@ chatup
 
 - **Base Runtime**
 
-    `doctor`, `uv`, `nodejs`, `docker`, `zsh`, `chrome`, and `frp` prepare and check machine-level runtime basics.
+    `doctor`, `uv`, `nodejs`, `docker`, `zsh`, `chrome-for-testing`, `chromedriver`, and `frp` prepare and check machine-level runtime basics.
 
 - **Local Services**
 
@@ -59,7 +60,8 @@ chatup
 | `chatup nodejs` | Install nvm and the default LTS Node.js. |
 | `chatup docker` | Check the Docker environment and show sudo guidance when needed. |
 | `chatup zsh` | Configure zsh, oh-my-zsh, plugins, theme, and shell aliases. |
-| `chatup chrome` | Install versioned Chrome for Testing under `~/.chatarch/chrome` with JSON/Python resolution contracts. |
+| `chatup chrome-for-testing` | Independently manage Google Chrome for Testing browsers and JSON/Python descriptors. |
+| `chatup chromedriver` | Independently manage ChromeDriver WebDriver servers and match CFT/browser versions. |
 | `chatup frp` | Install FRP Client/Server. |
 
 ## Agents and Toolchains
@@ -88,26 +90,27 @@ chatup
 |---|---|
 | `chatup workspace` | Initialize the ChatArch human-AI collaboration workspace. |
 
-## Chrome Command Contract
+## Browser Artifact Backend Contract
 
-`chatup chrome` is an independent machine-environment installer, not part of an upper-level product's Browser Runner:
+ChatUp exposes neither a generic `browser` group nor the ambiguous `chrome` command:
 
-- default home: `~/.chatarch/chrome`;
-- default channel: `stable`, with beta/dev/canary or an exact version accepted;
-- supports `mac-arm64`, `mac-x64`, `linux64`, and `win64`;
-- downloads to staging and checks optional SHA-256 plus ZIP path traversal before install;
-- writes `runtime.json` and atomically switches the installation directory;
-- `--output json` returns binary, version, platform, root, source, and digest;
-- `--doctor` runs the binary version probe;
-- never changes system Chrome, writes `~/.local/bin`, or creates profiles/cookies.
+- `chatup chrome-for-testing` manages the launchable Google Chrome for Testing browser under `~/.chatarch/chrome-for-testing` by default;
+- `chatup chromedriver` manages the ChromeDriver WebDriver server under `~/.chatarch/chromedriver` by default;
+- each backend owns `install/list/show/path/doctor/remove/gc`;
+- Testing in `Chrome for Testing` is the official artifact name, not a user-facing `test` operation;
+- `chromium` remains unregistered until a provider is verified;
+- installations use official HTTPS manifests, optional SHA-256, bounded ZIP extraction, `installation.json`, and atomic directory replacement;
+- `remove` requires `--yes`; `gc` defaults to dry-run and apply also requires `--yes`;
+- neither backend modifies system Chrome or creates profile/cookie/account/extension state.
 
 ```bash
-chatup chrome
-chatup chrome --version 145.0.7632.6 --output json -I
-chatup chrome --home ~/.chatarch/chrome --force --doctor
+chatup chrome-for-testing install --channel stable -I
+chatup chrome-for-testing path 145.0.7632.6 -I
+chatup chromedriver install --match-cft-version 145.0.7632.6 -I
+chatup chromedriver doctor 145.0.7632.6 --output json -I
 ```
 
-See [CLI Tree](cli-tree.md) for the full option tree and Python contract.
+See [CLI Tree](cli-tree.md) for the full subcommand tree, ChatStyle behavior, and Python contract.
 
 ## Gitea Command Contract
 

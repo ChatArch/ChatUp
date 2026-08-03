@@ -14,7 +14,8 @@ chatup
 |-- nodejs      # 安装 nvm 和默认 LTS Node.js
 |-- docker      # 检查 Docker 环境，并提示 sudo 配置
 |-- zsh         # 配置 zsh / oh-my-zsh / 插件 / alias
-|-- chrome      # 安装 ~/.chatarch/chrome 内的 Chrome for Testing
+|-- chrome-for-testing # 管理 Google Chrome for Testing 浏览器
+|-- chromedriver       # 管理 ChromeDriver WebDriver server
 |-- frp         # 安装 FRP Client/Server
 |-- gitea       # 安装 ChatTea-compatible Gitea runtime/config/service
 |-- mysql       # 安装 ChatData-compatible MySQL runtime/instance/service
@@ -34,7 +35,7 @@ chatup
 
 - **基础环境**
 
-    `doctor`、`uv`、`nodejs`、`docker`、`zsh`、`chrome`、`frp` 负责机器级运行环境准备和检查。
+    `doctor`、`uv`、`nodejs`、`docker`、`zsh`、`chrome-for-testing`、`chromedriver`、`frp` 负责机器级运行环境准备和检查。
 
 - **本地服务**
 
@@ -59,7 +60,8 @@ chatup
 | `chatup nodejs` | 安装 nvm 和默认 LTS Node.js。 |
 | `chatup docker` | 检查 Docker 环境，并在需要时给出 sudo 相关建议。 |
 | `chatup zsh` | 配置 zsh、oh-my-zsh、插件、主题和 shell alias。 |
-| `chatup chrome` | 安装 versioned Chrome for Testing 到 `~/.chatarch/chrome`，并提供 JSON/Python 解析契约。 |
+| `chatup chrome-for-testing` | 独立管理 Google Chrome for Testing 浏览器及其 JSON/Python descriptor。 |
+| `chatup chromedriver` | 独立管理 ChromeDriver WebDriver server，可匹配 CFT 或指定浏览器版本。 |
 | `chatup frp` | 安装 FRP Client/Server。 |
 
 ## Agent 与工具链
@@ -88,26 +90,27 @@ chatup
 |---|---|
 | `chatup workspace` | 初始化 ChatArch 人类-AI 协作 workspace。 |
 
-## Chrome 命令约定
+## 浏览器制品 backend 约定
 
-`chatup chrome` 是独立的机器环境安装命令，不属于某个上层产品的 Browser Runner：
+ChatUp 不提供通用 `browser` group，也不再提供含义模糊的 `chrome` 命令：
 
-- 默认 home：`~/.chatarch/chrome`；
-- 默认 channel：`stable`；也接受 beta/dev/canary 或精确版本；
-- 支持 `mac-arm64`、`mac-x64`、`linux64` 和 `win64`；
-- 安装前在 staging 中完成下载、可选 SHA-256 与 ZIP path traversal 检查；
-- 写入 `runtime.json` 后原子切换安装目录；
-- `--output json` 返回 binary、version、platform、root、source 和 digest；
-- `--doctor` 执行 binary version probe；
-- 不修改系统 Chrome、不写 `~/.local/bin`、不创建 Profile 或 Cookie。
+- `chatup chrome-for-testing` 管理真正可启动的 Google Chrome for Testing 浏览器，默认 home 为 `~/.chatarch/chrome-for-testing`；
+- `chatup chromedriver` 管理 ChromeDriver WebDriver server，默认 home 为 `~/.chatarch/chromedriver`；
+- 两者各自提供 `install/list/show/path/doctor/remove/gc`；
+- `Chrome for Testing` 中的 Testing 是官方制品名，不是用户 CLI 的 `test` 操作；
+- `chromium` 尚无已验证 provider，因此不注册命令；
+- 安装使用官方 HTTPS manifest、可选 SHA-256、受限 ZIP 解压、`installation.json` 和原子目录替换；
+- `remove` 需要 `--yes`，`gc` 默认 dry-run，apply 同时需要 `--yes`；
+- 不修改系统 Chrome、不创建 Profile/Cookie，也不管理账号或扩展。
 
 ```bash
-chatup chrome
-chatup chrome --version 145.0.7632.6 --output json -I
-chatup chrome --home ~/.chatarch/chrome --force --doctor
+chatup chrome-for-testing install --channel stable -I
+chatup chrome-for-testing path 145.0.7632.6 -I
+chatup chromedriver install --match-cft-version 145.0.7632.6 -I
+chatup chromedriver doctor 145.0.7632.6 --output json -I
 ```
 
-完整 option tree 和 Python contract 见 [CLI 树](cli-tree.md)。
+完整子命令、ChatStyle 行为和 Python contract 见 [CLI 树](cli-tree.md)。
 
 ## Gitea 命令约定
 

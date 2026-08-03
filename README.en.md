@@ -11,7 +11,7 @@ Choose documentation by scenario:
 | Scenario | Document |
 | --- | --- |
 | Verify ChatUp, the Python runtime, and a workspace on a new machine | `docs/quickstart.en.md` |
-| Read the complete top-level CLI tree and Chrome install/Python contract | `docs/cli-tree.en.md` |
+| Read the complete top-level CLI tree and independent CFT/ChromeDriver contracts | `docs/cli-tree.en.md` |
 | Read command groups, option boundaries, and service defaults | `docs/commands.en.md` |
 | Check which ChatArch setup flows have first-class commands | `docs/capability-map.en.md` |
 | Understand the directories and project-record conventions created by `chatup workspace` | `docs/workspace.en.md` |
@@ -23,7 +23,7 @@ Choose documentation by scenario:
 chatup --help
 chatup doctor
 chatup uv
-chatup chrome
+chatup chrome-for-testing install --channel stable -I
 chatup workspace default ~/Playground
 ```
 
@@ -41,12 +41,12 @@ chatup crs --install-dir ~/.chatarch/crs/local --port 12392 --redis-port 6379
 
 | Capability group | Commands |
 | --- | --- |
-| Base runtime | `doctor`, `uv`, `nodejs`, `docker`, `zsh`, `chrome`, `frp` |
+| Base runtime | `doctor`, `uv`, `nodejs`, `docker`, `zsh`, `chrome-for-testing`, `chromedriver`, `frp` |
 | Workspace scaffold | `workspace` |
 | Local service installers | `gitea`, `mysql`, `nginx`, `crs` |
 | Agent toolchains | `cc-connect`, `claude`, `codex`, `opencode`, `hermes`, `lark-cli` |
 
-New install targets stay under `~/.chatarch/...`, for example `~/.chatarch/chrome`, `~/.chatarch/chattea`, `~/.chatarch/chatdata`, `~/.chatarch/nginx`, and `~/.chatarch/crs/local`. See `docs/capability-map.en.md` for the full capability boundary.
+New install targets stay under `~/.chatarch/...`, for example `~/.chatarch/chrome-for-testing`, `~/.chatarch/chromedriver`, `~/.chatarch/chattea`, `~/.chatarch/chatdata`, `~/.chatarch/nginx`, and `~/.chatarch/crs/local`. See `docs/capability-map.en.md` for the full capability boundary.
 
 ## Development
 

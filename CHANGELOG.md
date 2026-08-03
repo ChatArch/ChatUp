@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.3
+
+### Added
+- Add independent `chatup chrome-for-testing` and `chatup chromedriver` backend groups with install, list, show, path, doctor, remove, and garbage-collection commands.
+- Add exact `chatup.chrome_for_testing` and `chatup.chromedriver` Python APIs without a shared public Browser base class.
+- Add ChromeDriver installation from official Google manifests, including exact CFT matching, build-compatible browser matching with milestone fallback, and backend-specific metadata.
+
+### Changed
+- Remove the ambiguous `chatup chrome` command and `chatup.chrome` import surface without a compatibility alias.
+- Store CFT and ChromeDriver artifacts under independent `~/.chatarch/chrome-for-testing` and `~/.chatarch/chromedriver` homes.
+- Require `chatstyle>=0.1.1,<0.2.0` so backend commands use the canonical CommandSchema automatic-prompt policy.
+- Keep `chromium` absent until ChatUp has a verified Chromium provider and revision contract.
+
 ## 0.2.2
 
 ### Added
