@@ -8,9 +8,25 @@ from chatstyle import (
     add_interactive_option,
 )
 from chatstyle import resolve_command_inputs as _resolve_command_inputs
-from chatstyle.tui.prompt import ask_confirm, ask_path, ask_select, ask_text
+import chatstyle.tui.prompt as prompt_module
 
 from .policy import resolve_interactive_mode
+
+
+def ask_confirm(*args, **kwargs):
+    return prompt_module.ask_confirm(*args, **kwargs)
+
+
+def ask_path(*args, **kwargs):
+    return prompt_module.ask_path(*args, **kwargs)
+
+
+def ask_select(*args, **kwargs):
+    return prompt_module.ask_select(*args, **kwargs)
+
+
+def ask_text(*args, **kwargs):
+    return prompt_module.ask_text(*args, **kwargs)
 
 
 def resolve_command_inputs(*, schema, provided, interactive, usage):
@@ -27,10 +43,10 @@ def resolve_command_inputs(*, schema, provided, interactive, usage):
 
 
 class _PromptRuntime:
-    ask_confirm = staticmethod(lambda *args, **kwargs: ask_confirm(*args, **kwargs))
-    ask_path = staticmethod(lambda *args, **kwargs: ask_path(*args, **kwargs))
-    ask_select = staticmethod(lambda *args, **kwargs: ask_select(*args, **kwargs))
-    ask_text = staticmethod(lambda *args, **kwargs: ask_text(*args, **kwargs))
+    ask_confirm = staticmethod(ask_confirm)
+    ask_path = staticmethod(ask_path)
+    ask_select = staticmethod(ask_select)
+    ask_text = staticmethod(ask_text)
 
 
 def _resolve_interactive_for_chatstyle(*, interactive, auto_prompt_condition):

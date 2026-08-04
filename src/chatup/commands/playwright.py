@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 import click
-from chatstyle import (
+from chatup.interaction import (
     CommandField,
     CommandSchema,
     add_interactive_option,

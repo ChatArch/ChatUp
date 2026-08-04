@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- Add `chatup cursor-agent` to install/verify Cursor Agent CLI, safely copy Cursor login/config files with restrictive permissions, and optionally write a token-free file-credential wrapper for migrated auth JSON on macOS.
+
 ## 0.2.4
 
 ### Added

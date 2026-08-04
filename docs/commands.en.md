@@ -25,6 +25,7 @@ chatup
 |-- cc-connect  # Install CC Connect CLI and runtime dependencies
 |-- claude      # Configure Claude Code CLI and config files
 |-- codex       # Configure Codex CLI and config files
+|-- cursor-agent # Configure Cursor Agent CLI auth and config files
 |-- opencode    # Configure OpenCode CLI and config files
 |-- hermes      # Install Hermes Agent and optional WebUI
 `-- lark-cli    # Configure official lark-cli with ChatEnv Feishu config
@@ -44,7 +45,7 @@ chatup
 
 - **Agent Toolchains**
 
-    `claude`, `codex`, `opencode`, `hermes`, `cc-connect`, and `lark-cli` configure model, agent, and Feishu/Lark tooling.
+    `claude`, `codex`, `cursor-agent`, `opencode`, `hermes`, `cc-connect`, and `lark-cli` configure model, agent, and Feishu/Lark tooling.
 
 - **Workspace**
 
@@ -72,10 +73,31 @@ chatup
 |---|---|
 | `chatup claude` | Configure Claude Code CLI and config files. |
 | `chatup codex` | Configure Codex CLI and config files. |
+| `chatup cursor-agent` | Install/verify Cursor Agent CLI and safely copy `auth.json`, `cli-config.json`, and `agent-cli-state.json`. |
 | `chatup opencode` | Configure OpenCode CLI and config files. |
 | `chatup hermes` | Install Hermes Agent and optional Hermes WebUI. |
 | `chatup cc-connect` | Install the CC Connect CLI and runtime dependencies. |
 | `chatup lark-cli` | Configure the official lark-cli and reuse ChatEnv Feishu/Lark config. |
+
+## Cursor Agent Command Contract
+
+`chatup cursor-agent` targets the Cursor Agent CLI, not the Cursor IDE GUI:
+
+- `--auth-json PATH` copies Cursor `auth.json` with `accessToken` / `refreshToken`;
+- `--auth-env PATH` reads `CURSOR_ACCESS_TOKEN` and `CURSOR_REFRESH_TOKEN` from an env file and writes Cursor JSON;
+- `--cli-config PATH` copies `~/.cursor/cli-config.json`;
+- `--agent-state PATH` copies `~/.cursor/agent-cli-state.json`;
+- `--api-key-env NAME` uses the named environment variable as `CURSOR_API_KEY` only during verification, avoiding secrets in argv;
+- `--credential-store file-wrapper` writes a token-free `cursor-agent` wrapper that reads `auth.json` at runtime and uses file-backed auth, useful when migrating Linux `auth.json` to macOS;
+- all written Cursor login/config files are tightened to `0600`.
+
+Common forms:
+
+```bash
+chatup cursor-agent --install-only -I
+chatup cursor-agent --auth-json ./auth.json --cli-config ./cli-config.json --agent-state ./agent-cli-state.json --credential-store file-wrapper -I
+chatup cursor-agent --auth-env ./cursor.env --credential-store file-wrapper -I
+```
 
 ## Local Services
 

@@ -25,6 +25,7 @@ chatup
 |-- cc-connect  # 安装 CC Connect CLI 和运行依赖
 |-- claude      # 配置 Claude Code CLI 和配置文件
 |-- codex       # 配置 Codex CLI 和配置文件
+|-- cursor-agent # 配置 Cursor Agent CLI 登录态和配置文件
 |-- opencode    # 配置 OpenCode CLI 和配置文件
 |-- hermes      # 安装 Hermes Agent 和可选 WebUI
 `-- lark-cli    # 配置官方 lark-cli，并复用 ChatEnv 飞书配置
@@ -44,7 +45,7 @@ chatup
 
 - **Agent 工具链**
 
-    `claude`、`codex`、`opencode`、`hermes`、`cc-connect`、`lark-cli` 负责模型、Agent 和飞书工具链配置。
+    `claude`、`codex`、`cursor-agent`、`opencode`、`hermes`、`cc-connect`、`lark-cli` 负责模型、Agent 和飞书工具链配置。
 
 - **工作区**
 
@@ -72,10 +73,31 @@ chatup
 |---|---|
 | `chatup claude` | 配置 Claude Code CLI 和配置文件。 |
 | `chatup codex` | 配置 Codex CLI 和配置文件。 |
+| `chatup cursor-agent` | 安装/验证 Cursor Agent CLI，并安全复制 `auth.json`、`cli-config.json` 和 `agent-cli-state.json`。 |
 | `chatup opencode` | 配置 OpenCode CLI 和配置文件。 |
 | `chatup hermes` | 安装 Hermes Agent 和可选 Hermes WebUI。 |
 | `chatup cc-connect` | 安装 CC Connect CLI 和运行依赖。 |
 | `chatup lark-cli` | 配置官方 lark-cli，并复用 ChatEnv 飞书配置。 |
+
+## Cursor Agent 命令约定
+
+`chatup cursor-agent` 面向 Cursor Agent CLI，而不是 Cursor IDE GUI：
+
+- `--auth-json PATH` 复制包含 `accessToken` / `refreshToken` 的 Cursor `auth.json`；
+- `--auth-env PATH` 从 env 文件读取 `CURSOR_ACCESS_TOKEN` 和 `CURSOR_REFRESH_TOKEN` 后写成 Cursor JSON；
+- `--cli-config PATH` 复制 `~/.cursor/cli-config.json`；
+- `--agent-state PATH` 复制 `~/.cursor/agent-cli-state.json`；
+- `--api-key-env NAME` 仅把指定环境变量作为验证时的 `CURSOR_API_KEY`，不会把 secret 放进 argv；
+- `--credential-store file-wrapper` 会写入不含 token 的 `cursor-agent` wrapper，在运行时从 `auth.json` 读取 token 并使用文件登录态，适合把 Linux `auth.json` 迁移到 macOS；
+- 所有写入的 Cursor 登录态/配置文件权限都会收紧为 `0600`。
+
+常用形式：
+
+```bash
+chatup cursor-agent --install-only -I
+chatup cursor-agent --auth-json ./auth.json --cli-config ./cli-config.json --agent-state ./agent-cli-state.json --credential-store file-wrapper -I
+chatup cursor-agent --auth-env ./cursor.env --credential-store file-wrapper -I
+```
 
 ## 本地服务
 

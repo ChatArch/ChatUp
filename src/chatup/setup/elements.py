@@ -7,6 +7,7 @@ from chatstyle import INTERACTIVE_OPTION_HELP
 
 from chatup.setup.claude import setup_claude
 from chatup.setup.codex import setup_codex
+from chatup.setup.cursor_agent import CREDENTIAL_STORE_CHOICES, setup_cursor_agent
 from chatup.setup.cc_connect import setup_cc_connect
 import chatup.setup.crs as crs_module
 from chatup.setup.crs import (
@@ -103,6 +104,32 @@ def codex_setup(api_key, base_url, model, env, interactive, install_only, log_le
         env_ref=env,
         interactive=interactive,
         install_only=install_only,
+        log_level=log_level,
+    )
+
+
+def cursor_agent_setup(
+    auth_json,
+    auth_env,
+    cli_config,
+    agent_state,
+    api_key_env,
+    credential_store,
+    install_only,
+    verify,
+    interactive,
+    log_level,
+):
+    setup_cursor_agent(
+        auth_json=auth_json,
+        auth_env=auth_env,
+        cli_config=cli_config,
+        agent_state=agent_state,
+        api_key_env=api_key_env,
+        credential_store=credential_store,
+        install_only=install_only,
+        verify=verify,
+        interactive=interactive,
         log_level=log_level,
     )
 
@@ -956,6 +983,84 @@ SETUP_COMMAND_ELEMENTS = (
                 kwargs={
                     "is_flag": True,
                     "help": "Only install or upgrade the CLI and skip provider/model prompts; plugin presets may still update OpenCode config.",
+                },
+            ),
+        ),
+    ),
+    SetupCommandElement(
+        name="cursor-agent",
+        help="Install/configure Cursor Agent CLI auth and config files.",
+        callback=cursor_agent_setup,
+        options=(
+            LOG_LEVEL_OPTION,
+            SetupOptionElement(
+                param_decls=("--interactive/--no-interactive", "-i/-I"),
+                kwargs={
+                    "default": None,
+                    "help": INTERACTIVE_OPTION_HELP,
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--auth-json",),
+                kwargs={
+                    "default": None,
+                    "type": click.Path(path_type=Path),
+                    "help": "Copy Cursor auth.json containing accessToken/refreshToken; values are never printed.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("-e", "--auth-env"),
+                kwargs={
+                    "default": None,
+                    "type": click.Path(path_type=Path),
+                    "help": "Read CURSOR_ACCESS_TOKEN and CURSOR_REFRESH_TOKEN from an env file and write Cursor auth.json.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--cli-config",),
+                kwargs={
+                    "default": None,
+                    "type": click.Path(path_type=Path),
+                    "help": "Copy Cursor ~/.cursor/cli-config.json with restrictive permissions.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--agent-state",),
+                kwargs={
+                    "default": None,
+                    "type": click.Path(path_type=Path),
+                    "help": "Copy Cursor ~/.cursor/agent-cli-state.json with restrictive permissions.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--api-key-env",),
+                kwargs={
+                    "default": None,
+                    "help": "Name of an environment variable containing a Cursor API key for verification only.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--credential-store",),
+                kwargs={
+                    "default": "native",
+                    "show_default": True,
+                    "type": click.Choice(CREDENTIAL_STORE_CHOICES),
+                    "help": "Credential mode. file-wrapper writes a token-free wrapper that reads auth.json at runtime.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--install-only",),
+                kwargs={
+                    "is_flag": True,
+                    "help": "Install/verify the standalone Cursor Agent CLI without writing auth/config files.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--verify/--no-verify",),
+                kwargs={
+                    "default": True,
+                    "show_default": True,
+                    "help": "Run a non-secret cursor-agent version check after setup.",
                 },
             ),
         ),
