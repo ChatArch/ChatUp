@@ -85,21 +85,23 @@ chatup
 
 - `--auth-json PATH` copies Cursor `auth.json` with `accessToken` / `refreshToken`;
 - `--auth-env PATH` reads `CURSOR_ACCESS_TOKEN` and `CURSOR_REFRESH_TOKEN` from an env file and writes Cursor JSON;
+- `-e, --env VALUE` is the fast credential source: a file path is read as an env file, otherwise `VALUE` is treated as a ChatEnv `CursorAgent` profile name;
 - `--env-profile NAME` reads tokens from a ChatEnv `CursorAgent` profile and writes Cursor JSON;
 - `--save-profile NAME` saves imported tokens to a ChatEnv `CursorAgent` profile without printing secret values;
 - `--cli-config PATH` copies `~/.cursor/cli-config.json`;
 - `--agent-state PATH` copies `~/.cursor/agent-cli-state.json`;
 - `--api-key-env NAME` uses the named environment variable as `CURSOR_API_KEY` only during verification, avoiding secrets in argv;
 - `--credential-store file-wrapper` writes a token-free `cursor-agent` wrapper that reads `auth.json` at runtime and uses file-backed auth, useful when migrating Linux `auth.json` to macOS;
-- all written Cursor login/config files are tightened to `0600`.
+- all written Cursor login/config files and saved ChatEnv CursorAgent profiles are tightened to `0600`.
 
 Common forms:
 
 ```bash
 chatup cursor-agent --install-only -I
 chatup cursor-agent --auth-json ./auth.json --cli-config ./cli-config.json --agent-state ./agent-cli-state.json --credential-store file-wrapper -I
+chatup cursor-agent -e ./cursor.env --credential-store file-wrapper -I
 chatup cursor-agent --auth-env ./cursor.env --save-profile work --credential-store file-wrapper -I
-chatup cursor-agent --env-profile work --credential-store file-wrapper -I
+chatup cursor-agent -e work --credential-store file-wrapper -I
 ```
 
 ## Local Services

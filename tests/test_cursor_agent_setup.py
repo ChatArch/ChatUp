@@ -43,6 +43,7 @@ def test_cursor_agent_help_exposes_safe_auth_options():
     for expected in [
         "--auth-json",
         "--auth-env",
+        "-e, --env",
         "--cli-config",
         "--api-key-env",
         "--credential-store",
@@ -94,6 +95,62 @@ def test_cursor_agent_auth_env_writes_auth_json_with_restrictive_mode(tmp_path, 
     assert result["auth_json_written"] is True
     assert "access-secret" not in json.dumps(result)
     assert "refresh-secret" not in json.dumps(result)
+
+
+def test_cursor_agent_env_ref_file_writes_auth_json(tmp_path, monkeypatch):
+    home = tmp_path / "home"
+    env_path = tmp_path / "cursor.env"
+    env_path.write_text(
+        "CURSOR_ACCESS_TOKEN=env-access\nCURSOR_REFRESH_TOKEN=env-refresh\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("HOME", str(home))
+    _install_fake_cursor_agent(tmp_path, monkeypatch)
+
+    result = setup_cursor_agent(
+        env_ref=env_path,
+        install_only=False,
+        verify=False,
+        interactive=False,
+    )
+
+    auth_path = home / ".config" / "cursor" / "auth.json"
+    data = json.loads(auth_path.read_text(encoding="utf-8"))
+    assert data == {"accessToken": "env-access", "refreshToken": "env-refresh"}
+    assert auth_path.stat().st_mode & 0o777 == 0o600
+    assert result["auth_json_written"] is True
+    assert result["env_profile_loaded"] is False
+    assert "env-access" not in json.dumps(result)
+    assert "env-refresh" not in json.dumps(result)
+
+
+def test_cursor_agent_env_ref_profile_loads_auth(tmp_path, monkeypatch):
+    home = tmp_path / "home"
+    chatarch_home = tmp_path / "chatarch"
+    monkeypatch.setenv("HOME", str(home))
+    monkeypatch.setenv("CHATARCH_HOME", str(chatarch_home))
+    _install_fake_cursor_agent(tmp_path, monkeypatch)
+    store = EnvStore(get_paths().envs_dir)
+    store.save_profile(
+        CursorAgentConfig,
+        "cursor-fast",
+        {
+            "CURSOR_ACCESS_TOKEN": "fast-access",
+            "CURSOR_REFRESH_TOKEN": "fast-refresh",
+            "CURSOR_CREDENTIAL_STORE": "native",
+        },
+    )
+
+    result = setup_cursor_agent(env_ref="cursor-fast", verify=False, interactive=False)
+
+    auth_path = home / ".config" / "cursor" / "auth.json"
+    data = json.loads(auth_path.read_text(encoding="utf-8"))
+    assert data == {"accessToken": "fast-access", "refreshToken": "fast-refresh"}
+    assert auth_path.stat().st_mode & 0o777 == 0o600
+    assert result["env_profile_loaded"] is True
+    assert result["auth_json_written"] is True
+    assert "fast-access" not in json.dumps(result)
+    assert "fast-refresh" not in json.dumps(result)
 
 
 def test_cursor_agent_copies_auth_json_and_cli_config_with_restrictive_mode(tmp_path, monkeypatch):
@@ -228,5 +285,6 @@ def test_cursor_agent_saves_imported_auth_to_chatenv_profile(tmp_path, monkeypat
     assert values["CURSOR_REFRESH_TOKEN"] == "save-refresh"
     assert values["CURSOR_CREDENTIAL_STORE"] == "native"
     assert result["profile_saved"]
+    assert Path(result["profile_saved"]).stat().st_mode & 0o777 == 0o600
     assert "save-access" not in json.dumps(result)
     assert "save-refresh" not in json.dumps(result)

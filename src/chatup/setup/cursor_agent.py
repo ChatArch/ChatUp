@@ -152,7 +152,9 @@ def _save_auth_to_profile(
     values[CURSOR_ACCESS_TOKEN_KEY] = str(auth_data["accessToken"])
     values[CURSOR_REFRESH_TOKEN_KEY] = str(auth_data["refreshToken"])
     values[CURSOR_CREDENTIAL_STORE_KEY] = credential_store
-    return store.save_profile(CursorAgentConfig, profile_name, values)
+    profile_path = store.save_profile(CursorAgentConfig, profile_name, values)
+    _chmod_private(profile_path)
+    return profile_path
 
 
 def _copy_json_private(source: Path, target: Path) -> dict[str, Any]:
@@ -314,6 +316,7 @@ def setup_cursor_agent(
     *,
     auth_json: str | Path | None = None,
     auth_env: str | Path | None = None,
+    env_ref: str | Path | None = None,
     env_profile: str | None = None,
     save_profile: str | None = None,
     cli_config: str | Path | None = None,
@@ -359,9 +362,24 @@ def setup_cursor_agent(
         click.echo(f"Cursor Agent binary: {result['binary']}")
         return result
 
-    auth_sources = [name for name, value in (("--auth-json", auth_json), ("--auth-env", auth_env), ("--env-profile", env_profile)) if value]
+    auth_sources = [
+        name
+        for name, value in (
+            ("--auth-json", auth_json),
+            ("--auth-env", auth_env),
+            ("-e/--env", env_ref),
+            ("--env-profile", env_profile),
+        )
+        if value
+    ]
     if len(auth_sources) > 1:
         raise click.ClickException(f"Use only one auth source: {', '.join(auth_sources)}")
+    if env_ref:
+        candidate = Path(env_ref).expanduser()
+        if candidate.is_file():
+            auth_env = candidate
+        else:
+            env_profile = str(env_ref)
 
     auth_data: dict[str, Any] | None = None
     if auth_json:

@@ -85,21 +85,23 @@ chatup
 
 - `--auth-json PATH` 复制包含 `accessToken` / `refreshToken` 的 Cursor `auth.json`；
 - `--auth-env PATH` 从 env 文件读取 `CURSOR_ACCESS_TOKEN` 和 `CURSOR_REFRESH_TOKEN` 后写成 Cursor JSON；
+- `-e, --env VALUE` 快速读取 Cursor 凭据：`VALUE` 是文件路径时按 env 文件读取，否则按 ChatEnv `CursorAgent` profile 名读取；
 - `--env-profile NAME` 从 ChatEnv `CursorAgent` profile 读取 token 并写成 Cursor JSON；
 - `--save-profile NAME` 把导入的 token 保存到 ChatEnv `CursorAgent` profile，不打印 secret 值；
 - `--cli-config PATH` 复制 `~/.cursor/cli-config.json`；
 - `--agent-state PATH` 复制 `~/.cursor/agent-cli-state.json`；
 - `--api-key-env NAME` 仅把指定环境变量作为验证时的 `CURSOR_API_KEY`，不会把 secret 放进 argv；
 - `--credential-store file-wrapper` 会写入不含 token 的 `cursor-agent` wrapper，在运行时从 `auth.json` 读取 token 并使用文件登录态，适合把 Linux `auth.json` 迁移到 macOS；
-- 所有写入的 Cursor 登录态/配置文件权限都会收紧为 `0600`。
+- 所有写入的 Cursor 登录态/配置文件和保存的 ChatEnv CursorAgent profile 权限都会收紧为 `0600`。
 
 常用形式：
 
 ```bash
 chatup cursor-agent --install-only -I
 chatup cursor-agent --auth-json ./auth.json --cli-config ./cli-config.json --agent-state ./agent-cli-state.json --credential-store file-wrapper -I
+chatup cursor-agent -e ./cursor.env --credential-store file-wrapper -I
 chatup cursor-agent --auth-env ./cursor.env --save-profile work --credential-store file-wrapper -I
-chatup cursor-agent --env-profile work --credential-store file-wrapper -I
+chatup cursor-agent -e work --credential-store file-wrapper -I
 ```
 
 ## 本地服务
