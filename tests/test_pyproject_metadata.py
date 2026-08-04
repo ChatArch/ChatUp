@@ -7,7 +7,7 @@ try:
 except ModuleNotFoundError:  # pragma: no cover
     import tomli as tomllib  # type: ignore
 
-from chatup.config import CursorAgentConfig
+from chatup.config import CursorAgentConfig, DiscourseAdminConfig, ZulipAdminConfig
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -25,6 +25,8 @@ def test_chatup_depends_on_chatenv_and_registers_cursor_agent_config_provider():
     assert "chatenv>=0.2.0,<0.3.0" in data["project"]["dependencies"]
     entry_points = data["project"]["entry-points"]["chatenv.configs"]
     assert entry_points["cursor-agent"] == "chatup.config:CursorAgentConfig"
+    assert entry_points["discourse"] == "chatup.config:DiscourseAdminConfig"
+    assert entry_points["zulip"] == "chatup.config:ZulipAdminConfig"
 
 
 def test_chatup_cursor_agent_config_schema_marks_tokens_sensitive():
@@ -39,6 +41,19 @@ def test_chatup_cursor_agent_config_schema_marks_tokens_sensitive():
     assert fields["CURSOR_CREDENTIAL_STORE"].env_key == "CURSOR_CREDENTIAL_STORE"
     assert fields["CURSOR_CREDENTIAL_STORE"].default == "native"
     CursorAgentConfig.test()
+
+
+def test_chatup_service_admin_config_schemas_mark_passwords_sensitive():
+    discourse_fields = DiscourseAdminConfig.get_fields()
+    zulip_fields = ZulipAdminConfig.get_fields()
+
+    assert DiscourseAdminConfig.get_storage_name() == "Discourse"
+    assert discourse_fields["DISCOURSE_ADMIN_PASSWORD"].is_sensitive is True
+    assert ZulipAdminConfig.get_storage_name() == "Zulip"
+    assert zulip_fields["ZULIP_ADMIN_PASSWORD"].is_sensitive is True
+    assert "ZULIP_ADMIN_MAIL" in zulip_fields
+    DiscourseAdminConfig.test()
+    ZulipAdminConfig.test()
 
 
 def test_setup_modules_import_shared_configs_directly():

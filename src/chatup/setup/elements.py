@@ -17,6 +17,13 @@ from chatup.setup.crs import (
     DEFAULT_REDIS_PORT,
 )
 from chatup.setup.docker import setup_docker
+from chatup.setup.discourse import (
+    DEFAULT_HOME as DEFAULT_DISCOURSE_HOME,
+    DEFAULT_HOSTNAME as DEFAULT_DISCOURSE_HOSTNAME,
+    DEFAULT_PORT as DEFAULT_DISCOURSE_PORT,
+    DEFAULT_REPO as DEFAULT_DISCOURSE_REPO,
+    setup_discourse,
+)
 from chatup.setup.frp import setup_frp
 from chatup.setup.gitea import (
     DEFAULT_BASE_URL as DEFAULT_GITEA_BASE_URL,
@@ -46,10 +53,19 @@ from chatup.setup.nginx import (
     setup_nginx,
 )
 from chatup.setup.opencode import setup_opencode
-from chatup.setup.zsh import setup_zsh
 from chatup.setup.nodejs import setup_nodejs
 from chatup.setup.uv import DEFAULT_PYTHON_VERSION, DEFAULT_VENV_PATH, setup_uv
 from chatup.setup.workspace import setup_workspace
+from chatup.setup.zsh import setup_zsh
+from chatup.setup.zulip import (
+    DEFAULT_BIND_ADDRESS as DEFAULT_ZULIP_BIND_ADDRESS,
+    DEFAULT_EXTERNAL_HOST as DEFAULT_ZULIP_EXTERNAL_HOST,
+    DEFAULT_HOME as DEFAULT_ZULIP_HOME,
+    DEFAULT_IMAGE as DEFAULT_ZULIP_IMAGE,
+    DEFAULT_PORT as DEFAULT_ZULIP_PORT,
+    DEFAULT_POSTGRES_IMAGE as DEFAULT_ZULIP_POSTGRES_IMAGE,
+    setup_zulip,
+)
 
 
 @dataclass(frozen=True)
@@ -180,6 +196,74 @@ def gitea_setup(
         database_name=database_name,
         database_user=database_user,
         database_password_env=database_password_env,
+        force=force,
+        interactive=interactive,
+        log_level=log_level,
+    )
+
+
+def discourse_setup(
+    home,
+    hostname,
+    port,
+    env,
+    env_profile,
+    write_admin_env,
+    write_app_yml,
+    clone,
+    repo,
+    with_ai,
+    force,
+    interactive,
+    log_level,
+):
+    setup_discourse(
+        home=home,
+        hostname=hostname,
+        port=port,
+        env_ref=env,
+        env_profile=env_profile,
+        write_admin_env=write_admin_env,
+        write_app_yml=write_app_yml,
+        clone=clone,
+        repo=repo,
+        with_ai=with_ai,
+        force=force,
+        interactive=interactive,
+        log_level=log_level,
+    )
+
+
+def zulip_setup(
+    home,
+    image,
+    postgres_image,
+    external_host,
+    bind_address,
+    port,
+    env,
+    env_profile,
+    write_admin_env,
+    write_compose,
+    pull,
+    start,
+    force,
+    interactive,
+    log_level,
+):
+    setup_zulip(
+        home=home,
+        image=image,
+        postgres_image=postgres_image,
+        external_host=external_host,
+        bind_address=bind_address,
+        port=port,
+        env_ref=env,
+        env_profile=env_profile,
+        write_admin_env=write_admin_env,
+        write_compose=write_compose,
+        pull=pull,
+        start=start,
         force=force,
         interactive=interactive,
         log_level=log_level,
@@ -599,6 +683,126 @@ SETUP_COMMAND_ELEMENTS = (
                     "default": None,
                     "help": INTERACTIVE_OPTION_HELP,
                 },
+            ),
+        ),
+    ),
+    SetupCommandElement(
+        name="discourse",
+        help="Prepare ChatArch-contained Discourse docker config and ChatEnv-managed admin credentials.",
+        callback=discourse_setup,
+        options=(
+            LOG_LEVEL_OPTION,
+            SetupOptionElement(
+                param_decls=("--home",),
+                kwargs={"default": str(DEFAULT_DISCOURSE_HOME), "show_default": True, "type": click.Path(path_type=Path)},
+            ),
+            SetupOptionElement(
+                param_decls=("--hostname",),
+                kwargs={"default": DEFAULT_DISCOURSE_HOSTNAME, "show_default": True},
+            ),
+            SetupOptionElement(
+                param_decls=("--port",),
+                kwargs={"default": DEFAULT_DISCOURSE_PORT, "show_default": True, "type": int},
+            ),
+            SetupOptionElement(
+                param_decls=("-e", "--env"),
+                kwargs={"default": None, "help": "ChatEnv profile name or env file with DISCOURSE_ADMIN_* values."},
+            ),
+            SetupOptionElement(
+                param_decls=("--env-profile",),
+                kwargs={"default": None, "help": "Explicit ChatEnv profile for Discourse admin values."},
+            ),
+            SetupOptionElement(
+                param_decls=("--write-admin-env/--no-write-admin-env",),
+                kwargs={"default": True, "show_default": True, "help": "Write secrets/admin.env from ChatEnv values."},
+            ),
+            SetupOptionElement(
+                param_decls=("--write-app-yml/--no-write-app-yml",),
+                kwargs={"default": True, "show_default": True, "help": "Write containers/app.yml using ChatArch-local paths."},
+            ),
+            SetupOptionElement(
+                param_decls=("--clone/--no-clone",),
+                kwargs={"default": False, "show_default": True, "help": "Clone/update discourse_docker into HOME/docker."},
+            ),
+            SetupOptionElement(
+                param_decls=("--repo",),
+                kwargs={"default": DEFAULT_DISCOURSE_REPO, "show_default": True, "help": "discourse_docker repository URL."},
+            ),
+            SetupOptionElement(
+                param_decls=("--with-ai/--without-ai",),
+                kwargs={"default": True, "show_default": True, "help": "Include discourse-ai plugin hook in generated app.yml."},
+            ),
+            SetupOptionElement(
+                param_decls=("--force", "-f"),
+                kwargs={"is_flag": True, "help": "Overwrite generated app.yml when it already exists."},
+            ),
+            SetupOptionElement(
+                param_decls=("--interactive/--no-interactive", "-i/-I"),
+                kwargs={"default": None, "help": INTERACTIVE_OPTION_HELP},
+            ),
+        ),
+    ),
+    SetupCommandElement(
+        name="zulip",
+        help="Prepare ChatArch-contained Zulip Docker Compose config and ChatEnv-managed admin credentials.",
+        callback=zulip_setup,
+        options=(
+            LOG_LEVEL_OPTION,
+            SetupOptionElement(
+                param_decls=("--home",),
+                kwargs={"default": str(DEFAULT_ZULIP_HOME), "show_default": True, "type": click.Path(path_type=Path)},
+            ),
+            SetupOptionElement(
+                param_decls=("--image",),
+                kwargs={"default": DEFAULT_ZULIP_IMAGE, "show_default": True},
+            ),
+            SetupOptionElement(
+                param_decls=("--postgres-image",),
+                kwargs={"default": DEFAULT_ZULIP_POSTGRES_IMAGE, "show_default": True},
+            ),
+            SetupOptionElement(
+                param_decls=("--external-host",),
+                kwargs={"default": DEFAULT_ZULIP_EXTERNAL_HOST, "show_default": True},
+            ),
+            SetupOptionElement(
+                param_decls=("--bind-address",),
+                kwargs={"default": DEFAULT_ZULIP_BIND_ADDRESS, "show_default": True},
+            ),
+            SetupOptionElement(
+                param_decls=("--port",),
+                kwargs={"default": DEFAULT_ZULIP_PORT, "show_default": True, "type": int},
+            ),
+            SetupOptionElement(
+                param_decls=("-e", "--env"),
+                kwargs={"default": None, "help": "ChatEnv profile name or env file with ZULIP_ADMIN_* values."},
+            ),
+            SetupOptionElement(
+                param_decls=("--env-profile",),
+                kwargs={"default": None, "help": "Explicit ChatEnv profile for Zulip admin values."},
+            ),
+            SetupOptionElement(
+                param_decls=("--write-admin-env/--no-write-admin-env",),
+                kwargs={"default": True, "show_default": True, "help": "Write secrets/admin.env from ChatEnv values."},
+            ),
+            SetupOptionElement(
+                param_decls=("--write-compose/--no-write-compose",),
+                kwargs={"default": True, "show_default": True, "help": "Write ChatArch-contained compose.yaml."},
+            ),
+            SetupOptionElement(
+                param_decls=("--pull/--no-pull",),
+                kwargs={"default": False, "show_default": True, "help": "Run Docker Compose pull after writing config."},
+            ),
+            SetupOptionElement(
+                param_decls=("--start/--no-start",),
+                kwargs={"default": False, "show_default": True, "help": "Run Docker Compose up -d after writing config."},
+            ),
+            SetupOptionElement(
+                param_decls=("--force", "-f"),
+                kwargs={"is_flag": True, "help": "Overwrite generated compose.yaml when it already exists."},
+            ),
+            SetupOptionElement(
+                param_decls=("--interactive/--no-interactive", "-i/-I"),
+                kwargs={"default": None, "help": INTERACTIVE_OPTION_HELP},
             ),
         ),
     ),

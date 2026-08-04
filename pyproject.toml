@@ -40,6 +40,8 @@ chatup = "chatup.cli:main"
 
 [project.entry-points."chatenv.configs"]
 cursor-agent = "chatup.config:CursorAgentConfig"
+discourse = "chatup.config:DiscourseAdminConfig"
+zulip = "chatup.config:ZulipAdminConfig"
 
 [tool.setuptools.dynamic]
 version = {attr = "chatup.__version__"}

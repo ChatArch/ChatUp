@@ -19,6 +19,8 @@ chatup
 |-- playwright         # 管理 Playwright package 与 Chromium browser
 |-- frp         # 安装 FRP Client/Server
 |-- gitea       # 安装 ChatTea-compatible Gitea runtime/config/service
+|-- discourse   # 准备 Discourse docker 配置和 ChatEnv 管理的管理员凭据
+|-- zulip       # 准备 Zulip Docker Compose 配置和 ChatEnv 管理的管理员凭据
 |-- mysql       # 安装 ChatData-compatible MySQL runtime/instance/service
 |-- nginx       # 准备 user-level NGINX runtime，并生成入口模板
 |-- crs         # 安装本地 Claude Relay Service + Redis + smoke check
@@ -40,7 +42,7 @@ chatup
 
 - **本地服务安装**
 
-    `gitea`、`mysql`、`nginx`、`crs` 负责 ChatArch 常用本地服务的 user-level 安装和初始化，默认路径收敛到 `~/.chatarch/...`。
+    `gitea`、`discourse`、`zulip`、`mysql`、`nginx`、`crs` 负责 ChatArch 常用本地服务的 user-level/ChatArch-contained 安装和初始化，默认路径收敛到 `~/.chatarch/...`。Discourse/Zulip 的管理员凭据由 ChatEnv profile 或 env 文件提供。
 
 - **Agent 工具链**
 
@@ -72,6 +74,8 @@ chatup frp                 # 安装 FRP Client/Server
 
 ```text
 chatup gitea               # 对齐 ChatTea 的 Gitea binary/work path/config/service
+chatup discourse           # 准备 Discourse app.yml、shared 数据目录和 ChatEnv 管理的 admin.env
+chatup zulip               # 准备 Zulip Compose、bind-mount 数据目录和 ChatEnv 管理的 admin.env
 chatup mysql               # 对齐 ChatData 的 MySQL runtime/instance/service
 chatup nginx               # 准备 ~/.chatarch/nginx runtime/config/log/run/temp
 chatup crs                 # 准备本地 CRS、Redis、secret、admin SPA 和 smoke check
@@ -82,6 +86,8 @@ chatup crs                 # 准备本地 CRS、Redis、secret、admin SPA 和 s
 | 命令 | 默认目录 | 运行边界 |
 | --- | --- | --- |
 | `chatup gitea` | `~/.chatarch/chattea` | Gitea 默认监听 `127.0.0.1:3000`，公网入口交给 NGINX/public-entry。 |
+| `chatup discourse` | `~/.chatarch/discourse` | 生成 Discourse Docker app.yml 和 admin env；默认不改系统 NGINX，不打印密码。 |
+| `chatup zulip` | `~/.chatarch/zulip` | 生成 Zulip Compose/bind mounts/secrets；默认不启动，`--start` 才执行 Compose。 |
 | `chatup mysql` | `~/.chatarch/chatdata` | MySQL 默认监听 `127.0.0.1:3307`，可创建 user-level service。 |
 | `chatup nginx` | `~/.chatarch/nginx` | 不写 `/etc/nginx`，不重载系统服务；可生成入口模板。 |
 | `chatup crs` | `~/.chatarch/crs/local` | 本地 CRS + Redis + smoke check；secret 文件权限受限。 |

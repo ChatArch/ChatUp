@@ -19,6 +19,8 @@ chatup
 |-- playwright         # Manage Playwright packages and Chromium browsers
 |-- frp         # Install FRP Client/Server
 |-- gitea       # Install ChatTea-compatible Gitea runtime/config/service
+|-- discourse   # Prepare Discourse config and ChatEnv-managed admin credentials
+|-- zulip       # Prepare Zulip Compose and ChatEnv-managed admin credentials
 |-- mysql       # Install ChatData-compatible MySQL runtime/instance/service
 |-- nginx       # Prepare user-level NGINX runtime and entry templates
 |-- crs         # Install local Claude Relay Service + Redis + smoke check
@@ -41,7 +43,7 @@ chatup
 
 - **Local Services**
 
-    `gitea`, `mysql`, `nginx`, and `crs` prepare common ChatArch local services under `~/.chatarch/...` by default.
+    `gitea`, `discourse`, `zulip`, `mysql`, `nginx`, and `crs` prepare common ChatArch local services under `~/.chatarch/...` by default. Discourse/Zulip admin credentials come from ChatEnv profiles or env files.
 
 - **Agent Toolchains**
 
@@ -109,6 +111,8 @@ chatup cursor-agent -e work --credential-store file-wrapper -I
 | Command | Current capability |
 |---|---|
 | `chatup gitea` | Install ChatArch Gitea from `ChatArch/gitea` release assets; defaults to latest and can generate a ChatTea-compatible `app.ini` plus user-level systemd service. |
+| `chatup discourse` | Prepare `~/.chatarch/discourse` Discourse Docker/app.yml layout and write ChatEnv-managed `DISCOURSE_ADMIN_USERNAME`, `DISCOURSE_ADMIN_EMAIL`, and `DISCOURSE_ADMIN_PASSWORD` to a restricted `secrets/admin.env`. |
+| `chatup zulip` | Prepare `~/.chatarch/zulip` Zulip Docker Compose, bind-mounted data directories, secret files, and ChatEnv-managed `ZULIP_ADMIN_USERNAME`, `ZULIP_ADMIN_EMAIL`/`ZULIP_ADMIN_MAIL`, and `ZULIP_ADMIN_PASSWORD`. |
 | `chatup mysql` | Install and prepare a ChatData-compatible user-level MySQL runtime, instance layout, `my.cnf`, and optional user-level systemd service. |
 | `chatup nginx` | Prepare a user-level NGINX runtime/config/log/run/temp layout under `~/.chatarch/nginx`, and also render reverse-proxy, HTTPS proxy, WebSocket proxy, static root, and redirect templates. |
 | `chatup crs` | Install local Claude Relay Service with Redis, config, secrets, admin SPA, and smoke checks. |
