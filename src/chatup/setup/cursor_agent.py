@@ -161,8 +161,23 @@ def _copy_json_private(source: Path, target: Path) -> dict[str, Any]:
     return data
 
 
+def _resolve_command_or_user_bin(name: str) -> Path | None:
+    """Resolve a Cursor Agent command from PATH or its standard user-bin install path."""
+
+    candidates: list[Path] = []
+    found = shutil.which(name)
+    if found:
+        candidates.append(Path(found).expanduser())
+    candidates.append(Path.home() / ".local" / "bin" / name)
+    for candidate in candidates:
+        if candidate.exists() and os.access(candidate, os.X_OK):
+            return candidate
+    return None
+
+
 def _resolve_cursor_agent_binary() -> str | None:
-    return shutil.which("cursor-agent") or shutil.which("agent")
+    found = _resolve_command_or_user_bin("cursor-agent") or _resolve_command_or_user_bin("agent")
+    return str(found) if found else None
 
 
 def _managed_wrapper_official_target(entrypoint: Path) -> Path | None:
@@ -198,10 +213,7 @@ def _resolve_official_cursor_agent_binary(binary: str) -> Path:
 
 
 def _entrypoint_for(name: str) -> Path | None:
-    found = shutil.which(name)
-    if not found:
-        return None
-    return Path(found).expanduser()
+    return _resolve_command_or_user_bin(name)
 
 
 def _write_file_credential_wrapper(entrypoint: Path, official_binary: Path, auth_path: Path) -> bool:

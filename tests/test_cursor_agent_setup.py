@@ -54,6 +54,22 @@ def test_cursor_agent_help_exposes_safe_auth_options():
         assert expected in result.output
 
 
+def test_cursor_agent_resolves_standard_user_bin_when_path_omits_it(tmp_path, monkeypatch):
+    home = tmp_path / "home"
+    bin_dir = home / ".local" / "bin"
+    bin_dir.mkdir(parents=True)
+    binary = bin_dir / "cursor-agent"
+    binary.write_text("#!/usr/bin/env bash\necho test-cursor-agent\n", encoding="utf-8")
+    binary.chmod(0o755)
+    monkeypatch.setenv("HOME", str(home))
+    monkeypatch.setenv("PATH", "/usr/bin:/bin")
+
+    result = setup_cursor_agent(install_only=True, verify=False, interactive=False)
+
+    assert result["installed_binary"] is False
+    assert result["binary"] == str(binary)
+
+
 def test_cursor_agent_auth_env_writes_auth_json_with_restrictive_mode(tmp_path, monkeypatch):
     home = tmp_path / "home"
     env_path = tmp_path / "cursor.env"
@@ -132,7 +148,7 @@ def test_cursor_agent_file_wrapper_reads_auth_json_without_storing_secret(tmp_pa
         encoding="utf-8",
     )
     monkeypatch.setenv("HOME", str(home))
-    monkeypatch.setenv("PATH", str(bin_dir))
+    monkeypatch.setenv("PATH", "/usr/bin:/bin")
 
     result = setup_cursor_agent(
         auth_json=source_auth,
