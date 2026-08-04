@@ -152,9 +152,7 @@ def _save_auth_to_profile(
     values[CURSOR_ACCESS_TOKEN_KEY] = str(auth_data["accessToken"])
     values[CURSOR_REFRESH_TOKEN_KEY] = str(auth_data["refreshToken"])
     values[CURSOR_CREDENTIAL_STORE_KEY] = credential_store
-    profile_path = store.save_profile(CursorAgentConfig, profile_name, values)
-    _chmod_private(profile_path)
-    return profile_path
+    return store.save_profile(CursorAgentConfig, profile_name, values)
 
 
 def _copy_json_private(source: Path, target: Path) -> dict[str, Any]:

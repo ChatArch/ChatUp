@@ -92,7 +92,7 @@ chatup
 - `--agent-state PATH` copies `~/.cursor/agent-cli-state.json`;
 - `--api-key-env NAME` uses the named environment variable as `CURSOR_API_KEY` only during verification, avoiding secrets in argv;
 - `--credential-store file-wrapper` writes a token-free `cursor-agent` wrapper that reads `auth.json` at runtime and uses file-backed auth, useful when migrating Linux `auth.json` to macOS;
-- all written Cursor login/config files and saved ChatEnv CursorAgent profiles are tightened to `0600`.
+- Cursor's own login/config files are written with restrictive permissions; ChatEnv `CursorAgent` profiles are left to ChatEnv's native storage mechanism, and ChatUp does not chmod profile `.env` files.
 
 Common forms:
 
