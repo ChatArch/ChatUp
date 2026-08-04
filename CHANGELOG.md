@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.6
+
+### Fixed
+- Leave ChatEnv `CursorAgent` profile `.env` file permissions to ChatEnv's native storage mechanism; `chatup cursor-agent --save-profile` no longer chmods saved ChatEnv profiles. Cursor-owned auth/config files still use restrictive permissions and wrapper output remains token-free.
+
 ## 0.2.5
 
 ### Added
@@ -7,7 +12,6 @@
 
 ### Changed
 - Detect `~/.local/bin/cursor-agent` / `agent` even when non-interactive PATH omits the standard user bin, so SSH/headless setup can finish without shell rc changes.
-- Tighten saved CursorAgent ChatEnv profiles to `0600` after `--save-profile` to keep access/refresh tokens private.
 
 ## 0.2.4
 

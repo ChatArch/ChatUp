@@ -92,7 +92,7 @@ chatup
 - `--agent-state PATH` 复制 `~/.cursor/agent-cli-state.json`；
 - `--api-key-env NAME` 仅把指定环境变量作为验证时的 `CURSOR_API_KEY`，不会把 secret 放进 argv；
 - `--credential-store file-wrapper` 会写入不含 token 的 `cursor-agent` wrapper，在运行时从 `auth.json` 读取 token 并使用文件登录态，适合把 Linux `auth.json` 迁移到 macOS；
-- 所有写入的 Cursor 登录态/配置文件和保存的 ChatEnv CursorAgent profile 权限都会收紧为 `0600`。
+- 写入 Cursor 自身登录态/配置文件时会使用受限权限；ChatEnv `CursorAgent` profile 由 ChatEnv 自己的存储机制维护，ChatUp 不额外改 profile `.env` 权限。
 
 常用形式：
 

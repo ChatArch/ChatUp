@@ -49,7 +49,7 @@ chatup cursor-agent
 └── -i / -I
 ```
 
-`cursor-agent` manages Cursor Agent CLI installation and login-state copying, and registers the ChatEnv `CursorAgent` config type. It never prints tokens in argv or output; `auth.json`, `cli-config.json`, `agent-cli-state.json`, and saved ChatEnv profiles are written with `0600` permissions. `-e/--env` can quickly read either an env file or a ChatEnv profile. For migrated Linux file auth on macOS, use `--credential-store file-wrapper` to write a token-free wrapper.
+`cursor-agent` manages Cursor Agent CLI installation and login-state copying, and registers the ChatEnv `CursorAgent` config type. It never prints tokens in argv or output; Cursor-owned files such as `auth.json`, `cli-config.json`, and `agent-cli-state.json` are written safely, while ChatEnv profile `.env` files are left to ChatEnv's own storage mechanism. `-e/--env` can quickly read either an env file or a ChatEnv profile. For migrated Linux file auth on macOS, use `--credential-store file-wrapper` to write a token-free wrapper.
 
 Common migration form:
 
