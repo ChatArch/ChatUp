@@ -17,6 +17,8 @@ chatup
 ├── playwright          # Manage Playwright packages and Chromium browsers
 ├── frp                 # Install FRP Client/Server
 ├── gitea               # Install ChatTea-compatible Gitea
+├── discourse           # Prepare Discourse config and ChatEnv-managed admin credentials
+├── zulip               # Prepare Zulip Compose and ChatEnv-managed admin credentials
 ├── mysql               # Install ChatData-compatible MySQL
 ├── nginx               # Prepare user-level NGINX
 ├── crs                 # Install local Claude Relay Service plus Redis

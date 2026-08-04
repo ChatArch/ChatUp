@@ -15,7 +15,7 @@ ChatUp 是 ChatArch 的独立环境与工具安装 CLI。它承接原来 `chatto
 | 查看命令分组、参数边界和服务默认路径 | `docs/commands.md` |
 | 校对哪些 ChatArch setup 流程已经有一等命令 | `docs/capability-map.md` |
 | 理解 `chatup workspace` 创建的目录和项目记录约定 | `docs/workspace.md` |
-| 安装 ChatTea-compatible Gitea、ChatData-compatible MySQL、user-level NGINX 和 CRS | `docs/commands.md` |
+| 安装 ChatTea-compatible Gitea、Discourse/Zulip 社区服务配置、ChatData-compatible MySQL、user-level NGINX 和 CRS | `docs/commands.md` |
 
 ## 快速开始
 
@@ -32,6 +32,8 @@ chatup workspace default ~/Playground
 
 ```bash
 chatup gitea --force
+chatup discourse -e discourse-prod --hostname discourse.public.wzhecnu.cn
+chatup zulip -e zulip-prod --external-host zulip.public.wzhecnu.cn --port 3095
 chatup mysql
 chatup nginx
 chatup nginx proxy-pass ./gitea-local.conf --set SERVER_NAME=gitea.local.example.invalid --set PROXY_PASS=http://127.0.0.1:3000
@@ -44,10 +46,10 @@ chatup crs --install-dir ~/.chatarch/crs/local --port 12392 --redis-port 6379
 | --- | --- |
 | 基础运行环境 | `doctor`、`uv`、`nodejs`、`docker`、`zsh`、`chrome-for-testing`、`chromedriver`、`playwright`、`frp` |
 | 工作区脚手架 | `workspace` |
-| 本地服务安装 | `gitea`、`mysql`、`nginx`、`crs` |
+| 本地服务安装 | `gitea`、`discourse`、`zulip`、`mysql`、`nginx`、`crs` |
 | Agent 工具链 | `cc-connect`、`claude`、`codex`、`cursor-agent`、`opencode`、`hermes`、`lark-cli` |
 
-所有新增安装项默认目录都收敛到 `~/.chatarch/...`，例如 `~/.chatarch/chrome-for-testing`、`~/.chatarch/chromedriver`、`~/.chatarch/playwright`、`~/.chatarch/chattea`、`~/.chatarch/chatdata`、`~/.chatarch/nginx` 和 `~/.chatarch/crs/local`。`cursor-agent` 额外注册 ChatEnv `CursorAgent` profile，并支持 `-e/--env` 从 env 文件或 profile 快速配置迁移来的 Cursor token。更完整的能力边界见 `docs/capability-map.md`。
+所有新增安装项默认目录都收敛到 `~/.chatarch/...`，例如 `~/.chatarch/chrome-for-testing`、`~/.chatarch/chromedriver`、`~/.chatarch/playwright`、`~/.chatarch/chattea`、`~/.chatarch/discourse`、`~/.chatarch/zulip`、`~/.chatarch/chatdata`、`~/.chatarch/nginx` 和 `~/.chatarch/crs/local`。`cursor-agent` 额外注册 ChatEnv `CursorAgent` profile，`discourse`/`zulip` 注册管理员凭据 profile，并支持 `-e/--env` 从 env 文件或 profile 快速配置。更完整的能力边界见 `docs/capability-map.md`。
 
 ## 开发
 
