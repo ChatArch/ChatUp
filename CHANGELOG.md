@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.7
 
 ### Added
 - Add `chatup discourse` and `chatup zulip` service setup commands that keep generated configuration/data under `~/.chatarch/...` and read admin credentials from ChatEnv-managed `DISCOURSE_ADMIN_*` / `ZULIP_ADMIN_*` values without printing secrets.
