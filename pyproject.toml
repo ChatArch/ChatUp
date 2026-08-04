@@ -38,6 +38,9 @@ docs = [
 [project.scripts]
 chatup = "chatup.cli:main"
 
+[project.entry-points."chatenv.configs"]
+cursor-agent = "chatup.config:CursorAgentConfig"
+
 [tool.setuptools.dynamic]
 version = {attr = "chatup.__version__"}
 

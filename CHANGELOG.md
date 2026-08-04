@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.5
+
+### Added
+- Add `chatup cursor-agent` to install/verify Cursor Agent CLI, safely copy Cursor login/config files with restrictive permissions, register a ChatEnv `CursorAgent` profile schema, support `-e/--env` quick configuration from an env file or profile, and optionally write a token-free file-credential wrapper for migrated auth JSON on macOS.
+
+### Changed
+- Detect `~/.local/bin/cursor-agent` / `agent` even when non-interactive PATH omits the standard user bin, so SSH/headless setup can finish without shell rc changes.
+- Tighten saved CursorAgent ChatEnv profiles to `0600` after `--save-profile` to keep access/refresh tokens private.
+
 ## 0.2.4
 
 ### Added
