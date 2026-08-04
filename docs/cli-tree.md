@@ -37,6 +37,8 @@ chatup
 chatup cursor-agent
 ├── --auth-json PATH
 ├── --auth-env PATH
+├── --env-profile NAME
+├── --save-profile NAME
 ├── --cli-config PATH
 ├── --agent-state PATH
 ├── --api-key-env NAME
@@ -46,12 +48,13 @@ chatup cursor-agent
 └── -i / -I
 ```
 
-`cursor-agent` 管理 Cursor Agent CLI 的安装和登录态文件复制。它不在 argv 或输出中打印 token；`auth.json`、`cli-config.json` 和 `agent-cli-state.json` 都会写成 `0600`。在 macOS 上迁移 Linux 文件登录态时，可用 `--credential-store file-wrapper` 写入不含 token 的 wrapper。
+`cursor-agent` 管理 Cursor Agent CLI 的安装和登录态文件复制，并注册 ChatEnv `CursorAgent` 配置类型。它不在 argv 或输出中打印 token；`auth.json`、`cli-config.json` 和 `agent-cli-state.json` 都会写成 `0600`。在 macOS 上迁移 Linux 文件登录态时，可用 `--credential-store file-wrapper` 写入不含 token 的 wrapper。
 
 常用迁移形式：
 
 ```bash
 chatup cursor-agent --auth-json ./auth.json --cli-config ./cli-config.json --agent-state ./agent-cli-state.json --credential-store file-wrapper -I
+chatup cursor-agent --env-profile work --credential-store file-wrapper -I
 ```
 
 ## 制品身份

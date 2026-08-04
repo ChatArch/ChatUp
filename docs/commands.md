@@ -85,6 +85,8 @@ chatup
 
 - `--auth-json PATH` 复制包含 `accessToken` / `refreshToken` 的 Cursor `auth.json`；
 - `--auth-env PATH` 从 env 文件读取 `CURSOR_ACCESS_TOKEN` 和 `CURSOR_REFRESH_TOKEN` 后写成 Cursor JSON；
+- `--env-profile NAME` 从 ChatEnv `CursorAgent` profile 读取 token 并写成 Cursor JSON；
+- `--save-profile NAME` 把导入的 token 保存到 ChatEnv `CursorAgent` profile，不打印 secret 值；
 - `--cli-config PATH` 复制 `~/.cursor/cli-config.json`；
 - `--agent-state PATH` 复制 `~/.cursor/agent-cli-state.json`；
 - `--api-key-env NAME` 仅把指定环境变量作为验证时的 `CURSOR_API_KEY`，不会把 secret 放进 argv；
@@ -96,7 +98,8 @@ chatup
 ```bash
 chatup cursor-agent --install-only -I
 chatup cursor-agent --auth-json ./auth.json --cli-config ./cli-config.json --agent-state ./agent-cli-state.json --credential-store file-wrapper -I
-chatup cursor-agent --auth-env ./cursor.env --credential-store file-wrapper -I
+chatup cursor-agent --auth-env ./cursor.env --save-profile work --credential-store file-wrapper -I
+chatup cursor-agent --env-profile work --credential-store file-wrapper -I
 ```
 
 ## 本地服务

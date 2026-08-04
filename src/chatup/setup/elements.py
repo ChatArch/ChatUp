@@ -111,6 +111,8 @@ def codex_setup(api_key, base_url, model, env, interactive, install_only, log_le
 def cursor_agent_setup(
     auth_json,
     auth_env,
+    env_profile,
+    save_profile,
     cli_config,
     agent_state,
     api_key_env,
@@ -123,6 +125,8 @@ def cursor_agent_setup(
     setup_cursor_agent(
         auth_json=auth_json,
         auth_env=auth_env,
+        env_profile=env_profile,
+        save_profile=save_profile,
         cli_config=cli_config,
         agent_state=agent_state,
         api_key_env=api_key_env,
@@ -1014,6 +1018,20 @@ SETUP_COMMAND_ELEMENTS = (
                     "default": None,
                     "type": click.Path(path_type=Path),
                     "help": "Read CURSOR_ACCESS_TOKEN and CURSOR_REFRESH_TOKEN from an env file and write Cursor auth.json.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--env-profile", "--profile"),
+                kwargs={
+                    "default": None,
+                    "help": "Load Cursor tokens from a ChatEnv Cursor Agent profile.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--save-profile",),
+                kwargs={
+                    "default": None,
+                    "help": "Save imported Cursor tokens to a ChatEnv Cursor Agent profile without printing values.",
                 },
             ),
             SetupOptionElement(

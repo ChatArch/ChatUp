@@ -6,9 +6,26 @@ import os
 import subprocess
 
 from click.testing import CliRunner
+from chatenv.paths import get_paths
+from chatenv.store import EnvStore
 
 from chatup.cli import main
+from chatup.config import CursorAgentConfig
 from chatup.setup.cursor_agent import setup_cursor_agent
+
+
+def _install_fake_cursor_agent(tmp_path, monkeypatch):
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    binary = bin_dir / "cursor-agent"
+    binary.write_text(
+        "#!/usr/bin/env bash\n"
+        "case \"${1:-}\" in --version) echo test-cursor-agent ;; *) echo test-cursor-agent ;; esac\n",
+        encoding="utf-8",
+    )
+    binary.chmod(0o755)
+    monkeypatch.setenv("PATH", os.pathsep.join([str(bin_dir), os.environ.get("PATH", "")]))
+    return binary
 
 
 def test_root_help_lists_cursor_agent_command():
@@ -29,6 +46,8 @@ def test_cursor_agent_help_exposes_safe_auth_options():
         "--cli-config",
         "--api-key-env",
         "--credential-store",
+        "--env-profile",
+        "--save-profile",
         "--install-only",
         "-i, --interactive / -I, --no-interactive",
     ]:
@@ -43,6 +62,7 @@ def test_cursor_agent_auth_env_writes_auth_json_with_restrictive_mode(tmp_path, 
         encoding="utf-8",
     )
     monkeypatch.setenv("HOME", str(home))
+    _install_fake_cursor_agent(tmp_path, monkeypatch)
 
     result = setup_cursor_agent(
         auth_env=env_path,
@@ -73,6 +93,7 @@ def test_cursor_agent_copies_auth_json_and_cli_config_with_restrictive_mode(tmp_
         encoding="utf-8",
     )
     monkeypatch.setenv("HOME", str(home))
+    _install_fake_cursor_agent(tmp_path, monkeypatch)
 
     result = setup_cursor_agent(
         auth_json=source_auth,
@@ -135,3 +156,61 @@ def test_cursor_agent_file_wrapper_reads_auth_json_without_storing_secret(tmp_pa
     )
     assert proc.returncode == 0
     assert proc.stdout.strip() == "file:access-secret:models"
+
+
+def test_cursor_agent_loads_auth_from_chatenv_profile(tmp_path, monkeypatch):
+    home = tmp_path / "home"
+    chatarch_home = tmp_path / "chatarch"
+    monkeypatch.setenv("HOME", str(home))
+    monkeypatch.setenv("CHATARCH_HOME", str(chatarch_home))
+    _install_fake_cursor_agent(tmp_path, monkeypatch)
+    store = EnvStore(get_paths().envs_dir)
+    store.save_profile(
+        CursorAgentConfig,
+        "cursor-work",
+        {
+            "CURSOR_ACCESS_TOKEN": "profile-access",
+            "CURSOR_REFRESH_TOKEN": "profile-refresh",
+            "CURSOR_CREDENTIAL_STORE": "native",
+        },
+    )
+
+    result = setup_cursor_agent(env_profile="cursor-work", verify=False, interactive=False)
+
+    auth_path = home / ".config" / "cursor" / "auth.json"
+    data = json.loads(auth_path.read_text(encoding="utf-8"))
+    assert data == {"accessToken": "profile-access", "refreshToken": "profile-refresh"}
+    assert auth_path.stat().st_mode & 0o777 == 0o600
+    assert result["env_profile_loaded"] is True
+    assert result["auth_json_written"] is True
+    assert "profile-access" not in json.dumps(result)
+    assert "profile-refresh" not in json.dumps(result)
+
+
+def test_cursor_agent_saves_imported_auth_to_chatenv_profile(tmp_path, monkeypatch):
+    home = tmp_path / "home"
+    chatarch_home = tmp_path / "chatarch"
+    env_path = tmp_path / "cursor.env"
+    env_path.write_text(
+        "CURSOR_ACCESS_TOKEN=save-access\nCURSOR_REFRESH_TOKEN=save-refresh\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("HOME", str(home))
+    monkeypatch.setenv("CHATARCH_HOME", str(chatarch_home))
+    _install_fake_cursor_agent(tmp_path, monkeypatch)
+
+    result = setup_cursor_agent(
+        auth_env=env_path,
+        save_profile="cursor-saved",
+        credential_store="native",
+        verify=False,
+        interactive=False,
+    )
+
+    values = EnvStore(get_paths().envs_dir).load_profile(CursorAgentConfig, "cursor-saved")
+    assert values["CURSOR_ACCESS_TOKEN"] == "save-access"
+    assert values["CURSOR_REFRESH_TOKEN"] == "save-refresh"
+    assert values["CURSOR_CREDENTIAL_STORE"] == "native"
+    assert result["profile_saved"]
+    assert "save-access" not in json.dumps(result)
+    assert "save-refresh" not in json.dumps(result)

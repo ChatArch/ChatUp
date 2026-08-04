@@ -7,6 +7,8 @@ try:
 except ModuleNotFoundError:  # pragma: no cover
     import tomli as tomllib  # type: ignore
 
+from chatup.config import CursorAgentConfig
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -15,17 +17,28 @@ def _pyproject() -> dict:
     return tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
 
 
-def test_chatup_depends_on_chatenv_without_registering_config_provider():
+def test_chatup_depends_on_chatenv_and_registers_cursor_agent_config_provider():
     data = _pyproject()
 
     assert data["project"]["requires-python"] == ">=3.10"
     assert "chatstyle>=0.1.1,<0.2.0" in data["project"]["dependencies"]
     assert "chatenv>=0.2.0,<0.3.0" in data["project"]["dependencies"]
-    assert "entry-points" not in data["project"] or "chatenv.configs" not in data["project"]["entry-points"]
+    entry_points = data["project"]["entry-points"]["chatenv.configs"]
+    assert entry_points["cursor-agent"] == "chatup.config:CursorAgentConfig"
 
 
-def test_chatup_does_not_ship_a_config_package():
-    assert not (ROOT / "src" / "chatup" / "config").exists()
+def test_chatup_cursor_agent_config_schema_marks_tokens_sensitive():
+    fields = CursorAgentConfig.get_fields()
+
+    assert CursorAgentConfig.get_storage_name() == "CursorAgent"
+    assert CursorAgentConfig._aliases == ["cursor-agent", "cursor_agent", "cursor"]
+    assert fields["CURSOR_ACCESS_TOKEN"].env_key == "CURSOR_ACCESS_TOKEN"
+    assert fields["CURSOR_ACCESS_TOKEN"].is_sensitive is True
+    assert fields["CURSOR_REFRESH_TOKEN"].env_key == "CURSOR_REFRESH_TOKEN"
+    assert fields["CURSOR_REFRESH_TOKEN"].is_sensitive is True
+    assert fields["CURSOR_CREDENTIAL_STORE"].env_key == "CURSOR_CREDENTIAL_STORE"
+    assert fields["CURSOR_CREDENTIAL_STORE"].default == "native"
+    CursorAgentConfig.test()
 
 
 def test_setup_modules_import_shared_configs_directly():

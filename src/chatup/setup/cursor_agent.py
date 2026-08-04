@@ -10,11 +10,17 @@ import subprocess
 from typing import Any
 
 import click
+from chatenv.paths import get_paths
+from chatenv.store import EnvStore
 
+from chatup.config import CursorAgentConfig
 from chatup.utils.custom_logger import setup_logger
 
 DEFAULT_INSTALL_URL = "https://cursor.com/install"
 CREDENTIAL_STORE_CHOICES = ("native", "file-wrapper")
+CURSOR_ACCESS_TOKEN_KEY = "CURSOR_ACCESS_TOKEN"
+CURSOR_REFRESH_TOKEN_KEY = "CURSOR_REFRESH_TOKEN"
+CURSOR_CREDENTIAL_STORE_KEY = "CURSOR_CREDENTIAL_STORE"
 WRAPPER_MARKER = "Managed by ChatUp cursor-agent setup"
 logger = setup_logger("setup_cursor_agent")
 
@@ -89,6 +95,64 @@ def _write_json_private(path: Path, data: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     _chmod_private(path)
+
+
+def _cursor_env_store() -> EnvStore:
+    return EnvStore(get_paths().envs_dir)
+
+
+def _auth_data_from_tokens(
+    access_token: str | None,
+    refresh_token: str | None,
+    *,
+    source_label: str,
+) -> dict[str, str]:
+    missing = [
+        name
+        for name, value in (
+            (CURSOR_ACCESS_TOKEN_KEY, access_token),
+            (CURSOR_REFRESH_TOKEN_KEY, refresh_token),
+        )
+        if not value
+    ]
+    if missing:
+        raise click.ClickException(
+            f"Cursor auth {source_label} missing required key(s): {', '.join(missing)}"
+        )
+    return {"accessToken": str(access_token), "refreshToken": str(refresh_token)}
+
+
+def _load_auth_from_env_file(path: Path) -> dict[str, str]:
+    values = _parse_env_file(path)
+    return _auth_data_from_tokens(
+        values.get(CURSOR_ACCESS_TOKEN_KEY),
+        values.get(CURSOR_REFRESH_TOKEN_KEY),
+        source_label=f"env file {path}",
+    )
+
+
+def _load_auth_from_profile(profile_name: str) -> tuple[dict[str, str], dict[str, str]]:
+    values = _cursor_env_store().load_profile(CursorAgentConfig, profile_name)
+    auth_data = _auth_data_from_tokens(
+        values.get(CURSOR_ACCESS_TOKEN_KEY),
+        values.get(CURSOR_REFRESH_TOKEN_KEY),
+        source_label=f"ChatEnv profile {profile_name}",
+    )
+    return auth_data, values
+
+
+def _save_auth_to_profile(
+    profile_name: str,
+    auth_data: dict[str, Any],
+    *,
+    credential_store: str,
+) -> Path:
+    store = _cursor_env_store()
+    values = store.load_profile(CursorAgentConfig, profile_name)
+    values[CURSOR_ACCESS_TOKEN_KEY] = str(auth_data["accessToken"])
+    values[CURSOR_REFRESH_TOKEN_KEY] = str(auth_data["refreshToken"])
+    values[CURSOR_CREDENTIAL_STORE_KEY] = credential_store
+    return store.save_profile(CursorAgentConfig, profile_name, values)
 
 
 def _copy_json_private(source: Path, target: Path) -> dict[str, Any]:
@@ -238,6 +302,8 @@ def setup_cursor_agent(
     *,
     auth_json: str | Path | None = None,
     auth_env: str | Path | None = None,
+    env_profile: str | None = None,
+    save_profile: str | None = None,
     cli_config: str | Path | None = None,
     agent_state: str | Path | None = None,
     api_key_env: str | None = None,
@@ -264,6 +330,8 @@ def setup_cursor_agent(
         "auth_json_written": False,
         "cli_config_written": False,
         "agent_state_written": False,
+        "env_profile_loaded": False,
+        "profile_saved": None,
         "credential_store": None,
         "wrapper_written": False,
         "wrappers": [],
@@ -279,36 +347,40 @@ def setup_cursor_agent(
         click.echo(f"Cursor Agent binary: {result['binary']}")
         return result
 
-    if auth_json and auth_env:
-        raise click.ClickException("Use only one of --auth-json or --auth-env")
+    auth_sources = [name for name, value in (("--auth-json", auth_json), ("--auth-env", auth_env), ("--env-profile", env_profile)) if value]
+    if len(auth_sources) > 1:
+        raise click.ClickException(f"Use only one auth source: {', '.join(auth_sources)}")
 
+    auth_data: dict[str, Any] | None = None
     if auth_json:
         source = Path(auth_json).expanduser()
-        _validate_auth_json(source)
-        _copy_json_private(source, _cursor_auth_path())
+        auth_data = _validate_auth_json(source)
+        _write_json_private(_cursor_auth_path(), auth_data)
         result["auth_json_written"] = True
     elif auth_env:
         source = Path(auth_env).expanduser()
-        values = _parse_env_file(source)
-        access_token = values.get("CURSOR_ACCESS_TOKEN")
-        refresh_token = values.get("CURSOR_REFRESH_TOKEN")
-        missing = [
-            name
-            for name, value in (
-                ("CURSOR_ACCESS_TOKEN", access_token),
-                ("CURSOR_REFRESH_TOKEN", refresh_token),
-            )
-            if not value
-        ]
-        if missing:
-            raise click.ClickException(
-                f"Cursor auth env missing required key(s): {', '.join(missing)}"
-            )
-        _write_json_private(
-            _cursor_auth_path(),
-            {"accessToken": access_token, "refreshToken": refresh_token},
-        )
+        auth_data = _load_auth_from_env_file(source)
+        _write_json_private(_cursor_auth_path(), auth_data)
         result["auth_json_written"] = True
+    elif env_profile:
+        auth_data, profile_values = _load_auth_from_profile(env_profile)
+        profile_credential_store = profile_values.get(CURSOR_CREDENTIAL_STORE_KEY)
+        if profile_credential_store and credential_store == "native":
+            credential_store = profile_credential_store
+            if credential_store not in CREDENTIAL_STORE_CHOICES:
+                raise click.ClickException(
+                    f"Unsupported credential store in ChatEnv profile {env_profile}: {credential_store}"
+                )
+            result["credential_store"] = credential_store
+        _write_json_private(_cursor_auth_path(), auth_data)
+        result["auth_json_written"] = True
+        result["env_profile_loaded"] = True
+
+    if save_profile:
+        if auth_data is None:
+            raise click.ClickException("--save-profile requires --auth-json, --auth-env, or --env-profile")
+        profile_path = _save_auth_to_profile(save_profile, auth_data, credential_store=credential_store)
+        result["profile_saved"] = str(profile_path)
 
     if cli_config:
         _copy_json_private(Path(cli_config).expanduser(), _cursor_cli_config_path())
@@ -350,6 +422,8 @@ def setup_cursor_agent(
     click.echo(f"  auth_json_written: {result['auth_json_written']}")
     click.echo(f"  cli_config_written: {result['cli_config_written']}")
     click.echo(f"  agent_state_written: {result['agent_state_written']}")
+    click.echo(f"  env_profile_loaded: {result['env_profile_loaded']}")
+    click.echo(f"  profile_saved: {bool(result['profile_saved'])}")
     click.echo(f"  credential_store: {result['credential_store']}")
     click.echo(f"  wrapper_written: {result['wrapper_written']}")
     return result
