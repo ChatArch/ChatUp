@@ -78,6 +78,9 @@ def test_zulip_setup_writes_compose_with_bind_mounts_and_hidden_admin_password(t
     assert "ZULIP_ADMIN_PASSWORD=secret-password" in admin_env.read_text(encoding="utf-8")
     text = compose.read_text(encoding="utf-8")
     assert "127.0.0.1:3099:80" in text
+    assert 'user: "0:0"' in text
+    assert "chown memcache:memcache" in text
+    assert "exec memcached -S -u memcache" in text
     assert str(home / "data" / "postgresql-14") in text
     assert str(home / "data" / "zulip") in text
     assert "SETTING_ZULIP_ADMINISTRATOR: \"admin@example.com\"" in text

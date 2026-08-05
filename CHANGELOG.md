@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.8
+
+### Fixed
+- Run generated Zulip memcached container startup as root only long enough to read Docker secret files, then launch memcached with `-u memcache`; this keeps host secret files restrictive while avoiding SASL auth bootstrap failures with Docker Compose versions that ignore `secrets.uid/gid/mode`.
+
 ## 0.2.7
 
 ### Added
