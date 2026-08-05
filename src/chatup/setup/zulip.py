@@ -119,6 +119,7 @@ services:
   memcached:
     image: "memcached:alpine"
     restart: unless-stopped
+    user: "0:0"
     command:
       - "sh"
       - "-euc"
@@ -126,7 +127,8 @@ services:
         echo 'mech_list: plain' > "$$SASL_CONF_PATH"
         echo "zulip@$$HOSTNAME:$$(cat $$MEMCACHED_PASSWORD_FILE)" > "$$MEMCACHED_SASL_PWDB"
         echo "zulip@localhost:$$(cat $$MEMCACHED_PASSWORD_FILE)" >> "$$MEMCACHED_SASL_PWDB"
-        exec memcached -S
+        chown memcache:memcache "$$SASL_CONF_PATH" "$$MEMCACHED_SASL_PWDB"
+        exec memcached -S -u memcache
     secrets:
       - zulip__memcached_password
     environment:
