@@ -6,32 +6,35 @@ ChatUp 使用一等顶层命令，但不把不同浏览器制品和工具链强�
 
 ```text
 chatup
+├── --help              # 显示当前命令帮助
+├── --version           # 输出当前包版本
+├── --tree              # 输出真实已注册 CLI 树
 ├── doctor              # 验证 ChatUp CLI 可调用
-├── uv                  # 安装 uv 和 ~/.chatarch/venv
-├── workspace           # 初始化 ChatArch workspace
-├── nodejs              # 安装 nvm 与默认 LTS Node.js
-├── docker              # 检查 Docker 环境与权限
 ├── zsh                 # 配置 zsh、插件和 alias
-├── chrome-for-testing  # 管理 Google Chrome for Testing 浏览器
-├── chromedriver        # 管理 ChromeDriver WebDriver server
-├── playwright          # 管理 Playwright package 与 Chromium browser
-├── frp                 # 安装 FRP Client/Server
+├── cc-connect          # 安装 ChatArch CC Connect
 ├── gitea               # 安装 ChatTea-compatible Gitea
 ├── discourse           # 准备 Discourse 配置和 ChatEnv 管理的管理员凭据
 ├── zulip               # 准备 Zulip Compose 和 ChatEnv 管理的管理员凭据
 ├── mysql               # 安装 ChatData-compatible MySQL
 ├── nginx               # 准备 user-level NGINX
 ├── crs                 # 安装本地 Claude Relay Service + Redis
-├── cc-connect          # 安装 ChatArch CC Connect
 ├── claude              # 安装/配置 Claude Code
+├── docker              # 检查 Docker 环境与权限
+├── frp                 # 安装 FRP Client/Server
+├── nodejs              # 安装 nvm 与默认 LTS Node.js
+├── uv                  # 安装 uv 和 ~/.chatarch/venv
 ├── codex               # 安装/配置 Codex CLI
 ├── cursor-agent        # 安装/配置 Cursor Agent CLI
 ├── opencode            # 安装/配置 OpenCode
+├── lark-cli            # 配置官方 lark-cli 与 ChatEnv
 ├── hermes              # 安装 Hermes Agent 与可选 WebUI
-└── lark-cli            # 配置官方 lark-cli 与 ChatEnv
+├── workspace           # 初始化 ChatArch workspace
+├── chrome-for-testing  # 管理 Google Chrome for Testing 浏览器
+├── chromedriver        # 管理 ChromeDriver WebDriver server
+└── playwright          # 管理 Playwright package 与 Chromium browser
 ```
 
-完整参数见 [命令参考](commands.md)。
+运行 `chatup --tree` 可回读带根注释、参数和命令目的的真实注册树；完整参数见 [命令参考](commands.md)。
 
 ## Cursor Agent
 

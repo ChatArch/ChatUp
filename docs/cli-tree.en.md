@@ -6,32 +6,35 @@ ChatUp uses first-class top-level commands without forcing unlike browser artifa
 
 ```text
 chatup
+├── --help              # Show help for the current command
+├── --version           # Print the package version
+├── --tree              # Print the actual registered CLI tree
 ├── doctor              # Verify that ChatUp is callable
-├── uv                  # Install uv and ~/.chatarch/venv
-├── workspace           # Initialize a ChatArch workspace
-├── nodejs              # Install nvm and default LTS Node.js
-├── docker              # Check Docker and permissions
 ├── zsh                 # Configure zsh, plugins, and aliases
-├── chrome-for-testing  # Manage Google Chrome for Testing browsers
-├── chromedriver        # Manage ChromeDriver WebDriver servers
-├── playwright          # Manage Playwright packages and Chromium browsers
-├── frp                 # Install FRP Client/Server
+├── cc-connect          # Install ChatArch CC Connect
 ├── gitea               # Install ChatTea-compatible Gitea
 ├── discourse           # Prepare Discourse config and ChatEnv-managed admin credentials
 ├── zulip               # Prepare Zulip Compose and ChatEnv-managed admin credentials
 ├── mysql               # Install ChatData-compatible MySQL
 ├── nginx               # Prepare user-level NGINX
 ├── crs                 # Install local Claude Relay Service plus Redis
-├── cc-connect          # Install ChatArch CC Connect
 ├── claude              # Install/configure Claude Code
+├── docker              # Check Docker and permissions
+├── frp                 # Install FRP Client/Server
+├── nodejs              # Install nvm and default LTS Node.js
+├── uv                  # Install uv and ~/.chatarch/venv
 ├── codex               # Install/configure Codex CLI
 ├── cursor-agent        # Install/configure Cursor Agent CLI
 ├── opencode            # Install/configure OpenCode
+├── lark-cli            # Configure official lark-cli with ChatEnv
 ├── hermes              # Install Hermes Agent and optional WebUI
-└── lark-cli            # Configure official lark-cli with ChatEnv
+├── workspace           # Initialize a ChatArch workspace
+├── chrome-for-testing  # Manage Google Chrome for Testing browsers
+├── chromedriver        # Manage ChromeDriver WebDriver servers
+└── playwright          # Manage Playwright packages and Chromium browsers
 ```
 
-See [Command Reference](commands.md) for complete options.
+Run `chatup --tree` to read back the registered tree with the root comment, parameters, and command purposes. See [Command Reference](commands.md) for complete options.
 
 ## Cursor Agent
 
