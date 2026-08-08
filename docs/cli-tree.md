@@ -13,6 +13,8 @@ chatup
 ├── zsh                 # 配置 zsh、插件和 alias
 ├── cc-connect          # 安装 ChatArch CC Connect
 ├── gitea               # 安装 ChatTea-compatible Gitea
+├── discourse           # 准备 Discourse 配置和 ChatEnv 管理的管理员凭据
+├── zulip               # 准备 Zulip Compose 和 ChatEnv 管理的管理员凭据
 ├── mysql               # 安装 ChatData-compatible MySQL
 ├── nginx               # 准备 user-level NGINX
 ├── crs                 # 安装本地 Claude Relay Service + Redis

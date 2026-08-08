@@ -1,12 +1,23 @@
 # Changelog
 
-## Unreleased
+## 0.2.9
 
 ### Added
 - Add a top-level `chatup --tree` readback path that renders the registered CLI tree with command purpose comments.
 
 ### Changed
 - Align the bilingual CLI tree docs with the runtime-registered tree, including `--help`, `--version`, and `--tree`.
+
+## 0.2.8
+
+### Fixed
+- Run generated Zulip memcached container startup as root only long enough to read Docker secret files, then launch memcached with `-u memcache`; this keeps host secret files restrictive while avoiding SASL auth bootstrap failures with Docker Compose versions that ignore `secrets.uid/gid/mode`.
+
+## 0.2.7
+
+### Added
+- Add `chatup discourse` and `chatup zulip` service setup commands that keep generated configuration/data under `~/.chatarch/...` and read admin credentials from ChatEnv-managed `DISCOURSE_ADMIN_*` / `ZULIP_ADMIN_*` values without printing secrets.
+- Register ChatEnv `Discourse` and `Zulip` admin credential schemas, including `ZULIP_ADMIN_MAIL` as a compatibility alias for `ZULIP_ADMIN_EMAIL`.
 
 ## 0.2.6
 
