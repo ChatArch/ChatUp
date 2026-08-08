@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- Add a top-level `chatup --tree` readback path that renders the registered CLI tree with command purpose comments.
+
+### Changed
+- Align the bilingual CLI tree docs with the runtime-registered tree, including `--help`, `--version`, and `--tree`.
+
 ## 0.2.6
 
 ### Fixed
