@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.10
+
+### Fixed
+- Configure MkDocs Material's `pymdownx.emoji` renderer with Material `twemoji` / `to_svg` so Material icon shorthand cannot leak as literal `:material-*:` text in generated or deployed docs.
+
 ## 0.2.9
 
 ### Added

@@ -33,6 +33,15 @@ def test_bilingual_cli_tree_matches_registered_click_commands():
     assert _documented_reference_commands(ROOT / "docs" / "commands.en.md") == actual
 
 
+def test_mkdocs_material_theme_has_material_icon_renderer():
+    mkdocs = (ROOT / "mkdocs.yml").read_text(encoding="utf-8")
+
+    assert "name: material" in mkdocs
+    assert "pymdownx.emoji" in mkdocs
+    assert "material.extensions.emoji.twemoji" in mkdocs
+    assert "material.extensions.emoji.to_svg" in mkdocs
+
+
 def test_cli_tree_is_in_mkdocs_nav_and_backend_contracts_are_complete():
     mkdocs = (ROOT / "mkdocs.yml").read_text(encoding="utf-8")
     assert "CLI 树: cli-tree.md" in mkdocs
