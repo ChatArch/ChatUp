@@ -16,6 +16,7 @@ chatup
 ├── discourse           # Prepare Discourse config and ChatEnv-managed admin credentials
 ├── zulip               # Prepare Zulip Compose and ChatEnv-managed admin credentials
 ├── mysql               # Install ChatData-compatible MySQL
+├── twikoo              # Install multi-instance Twikoo comment services
 ├── nginx               # Prepare user-level NGINX
 ├── crs                 # Install local Claude Relay Service plus Redis
 ├── claude              # Install/configure Claude Code
@@ -35,6 +36,26 @@ chatup
 ```
 
 Run `chatup --tree` to read back the registered tree with the root comment, parameters, and command purposes. See [Command Reference](commands.md) for complete options.
+
+## Twikoo
+
+```text
+chatup twikoo
+├── --version VERSION
+├── --repo OWNER/REPO
+├── --home PATH
+├── --name INSTANCE
+├── --port PORT
+├── --bind-address ADDRESS
+├── --install / --no-install
+├── --init / --no-init
+├── --service / --no-service
+├── --start / --no-start
+├── --smoke / --no-smoke
+└── --force
+```
+
+`chatup twikoo` installs Twikoo from GitHub Release binaries and prepares the multi-instance layout under `~/.chatarch/twikoo/instances/<name>/`. Each instance gets its own `bin/twikoo` and adjacent `bin/.env -> ../env/twikoo.env`, so instances do not accidentally share the runtime-adjacent `.env` that the release binary auto-loads. It binds to `127.0.0.1` by default; local/public domain entry remains the responsibility of NGINX/public-entry.
 
 ## Cursor Agent
 

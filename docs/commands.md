@@ -22,6 +22,7 @@ chatup
 |-- discourse   # 准备 Discourse docker 配置和 ChatEnv 管理的管理员凭据
 |-- zulip       # 准备 Zulip Docker Compose 配置和 ChatEnv 管理的管理员凭据
 |-- mysql       # 安装 ChatData-compatible MySQL runtime/instance/service
+|-- twikoo      # 安装多实例 Twikoo 评论服务 runtime/instance/service
 |-- nginx       # 准备 user-level NGINX runtime，并生成入口模板
 |-- crs         # 安装本地 Claude Relay Service + Redis + smoke check
 |-- cc-connect  # 安装 CC Connect CLI 和运行依赖
@@ -43,7 +44,7 @@ chatup
 
 - **本地服务**
 
-    `gitea`、`discourse`、`zulip`、`mysql`、`nginx`、`crs` 负责 ChatArch 常用本地服务，默认落在 `~/.chatarch/...`，其中 Discourse/Zulip 管理员凭据从 ChatEnv 读取。
+    `gitea`、`discourse`、`zulip`、`mysql`、`twikoo`、`nginx`、`crs` 负责 ChatArch 常用本地服务，默认落在 `~/.chatarch/...`，其中 Discourse/Zulip 管理员凭据从 ChatEnv 读取。
 
 - **Agent 工具链**
 
@@ -114,6 +115,7 @@ chatup cursor-agent -e work --credential-store file-wrapper -I
 | `chatup discourse` | 准备 `~/.chatarch/discourse` 下的 Discourse Docker/app.yml 布局，并从 ChatEnv 读取 `DISCOURSE_ADMIN_USERNAME`、`DISCOURSE_ADMIN_EMAIL`、`DISCOURSE_ADMIN_PASSWORD` 写入受限权限的 `secrets/admin.env`。 |
 | `chatup zulip` | 准备 `~/.chatarch/zulip` 下的 Zulip Docker Compose、bind-mount 数据目录和 secret files，并从 ChatEnv 读取 `ZULIP_ADMIN_USERNAME`、`ZULIP_ADMIN_EMAIL`/`ZULIP_ADMIN_MAIL`、`ZULIP_ADMIN_PASSWORD`。 |
 | `chatup mysql` | 安装并准备 ChatData-compatible user-level MySQL runtime、实例目录、`my.cnf` 和可选 user-level systemd service。 |
+| `chatup twikoo` | 从 `twikoojs/twikoo` Release assets 安装 Twikoo 二进制，并准备多实例目录、实例 env、实例级 `bin/twikoo` 和可选 user-level systemd service。 |
 | `chatup nginx` | 准备 `~/.chatarch/nginx` 下的 user-level NGINX runtime/config/log/run/temp 布局，也可生成 reverse-proxy、HTTPS proxy、WebSocket proxy、static root 和 redirect 模板。 |
 | `chatup crs` | 安装本地 Claude Relay Service，准备 Redis、配置、secret、admin SPA 和 smoke check。 |
 
@@ -215,6 +217,28 @@ chatup mysql
 chatup mysql --start --smoke
 chatup mysql --start --database gitea
 chatup mysql --home ~/.chatarch/chatdata --name default --port 3307
+```
+
+## Twikoo 命令约定
+
+`chatup twikoo` 面向 Twikoo 评论服务的 no-Docker、多实例安装：
+
+- 默认 Twikoo 版本：`1.7.15`。
+- 默认 repo：`twikoojs/twikoo`。
+- 默认 home：`~/.chatarch/twikoo`。
+- 默认实例：`chatblog`。
+- 默认端口：`8892`。
+- 默认绑定：`127.0.0.1`。
+- 默认会下载 release 二进制、初始化实例目录、生成 `env/twikoo.env` 并写入 user-level systemd service，但不会启动服务。
+- 每个实例都通过 `instances/<name>/bin/twikoo` 启动，并让 `bin/.env` 指向该实例自己的 `env/twikoo.env`；不要让多个实例直接共享 runtime 目录旁边的 `.env`。
+- local/public 域名入口仍由 NGINX/public-entry 管理。
+
+常用形式：
+
+```bash
+chatup twikoo --name chatblog --port 8892
+chatup twikoo --name chatblog --port 8892 --start --smoke
+chatup twikoo --home ~/.chatarch/twikoo --name another-blog --port 8893 --no-start
 ```
 
 ## NGINX 命令约定

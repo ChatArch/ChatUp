@@ -54,6 +54,14 @@ from chatup.setup.nginx import (
 )
 from chatup.setup.opencode import setup_opencode
 from chatup.setup.nodejs import setup_nodejs
+from chatup.setup.twikoo import (
+    DEFAULT_TWIKOO_BIND_ADDRESS,
+    DEFAULT_TWIKOO_INSTANCE,
+    DEFAULT_TWIKOO_PORT,
+    DEFAULT_TWIKOO_REPO,
+    DEFAULT_TWIKOO_VERSION,
+    setup_twikoo,
+)
 from chatup.setup.uv import DEFAULT_PYTHON_VERSION, DEFAULT_VENV_PATH, setup_uv
 from chatup.setup.workspace import setup_workspace
 from chatup.setup.zsh import setup_zsh
@@ -302,6 +310,41 @@ def mysql_setup(
         force=force,
         log_level=log_level,
     )
+
+
+def twikoo_setup(
+    version,
+    repo,
+    home,
+    name,
+    port,
+    bind_address,
+    install,
+    init,
+    service,
+    start,
+    smoke,
+    force,
+    log_level,
+):
+    result = setup_twikoo(
+        name=name,
+        version=version,
+        repo=repo,
+        home=home,
+        port=port,
+        bind_address=bind_address,
+        install=install,
+        init=init,
+        service=service,
+        start=start,
+        smoke=smoke,
+        force=force,
+        log_level=log_level,
+    )
+    service_info = result.get("service") if isinstance(result, dict) else None
+    if isinstance(service_info, dict) and service_info.get("unit"):
+        click.echo(service_info["unit"])
 
 
 def nginx_setup(
@@ -867,6 +910,66 @@ SETUP_COMMAND_ELEMENTS = (
             SetupOptionElement(
                 param_decls=("--force", "-f"),
                 kwargs={"is_flag": True, "help": "Replace existing runtime/config/data where supported."},
+            ),
+        ),
+    ),
+    SetupCommandElement(
+        name="twikoo",
+        help="Install and prepare a multi-instance Twikoo comment service runtime.",
+        callback=twikoo_setup,
+        options=(
+            LOG_LEVEL_OPTION,
+            SetupOptionElement(
+                param_decls=("--version",),
+                kwargs={"default": DEFAULT_TWIKOO_VERSION, "show_default": True},
+            ),
+            SetupOptionElement(
+                param_decls=("--repo",),
+                kwargs={"default": DEFAULT_TWIKOO_REPO, "show_default": True},
+            ),
+            SetupOptionElement(
+                param_decls=("--home",),
+                kwargs={
+                    "default": None,
+                    "type": click.Path(path_type=Path),
+                    "help": "Twikoo home. Defaults to ~/.chatarch/twikoo.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--name",),
+                kwargs={"default": DEFAULT_TWIKOO_INSTANCE, "show_default": True},
+            ),
+            SetupOptionElement(
+                param_decls=("--port",),
+                kwargs={"default": DEFAULT_TWIKOO_PORT, "show_default": True, "type": int},
+            ),
+            SetupOptionElement(
+                param_decls=("--bind-address",),
+                kwargs={"default": DEFAULT_TWIKOO_BIND_ADDRESS, "show_default": True},
+            ),
+            SetupOptionElement(
+                param_decls=("--install/--no-install",),
+                kwargs={"default": True, "show_default": True, "help": "Download the Twikoo release binary."},
+            ),
+            SetupOptionElement(
+                param_decls=("--init/--no-init",),
+                kwargs={"default": True, "show_default": True, "help": "Create instance directories, env file, and instance-local binary link."},
+            ),
+            SetupOptionElement(
+                param_decls=("--service/--no-service",),
+                kwargs={"default": True, "show_default": True, "help": "Install a user-level systemd service."},
+            ),
+            SetupOptionElement(
+                param_decls=("--start/--no-start",),
+                kwargs={"default": False, "show_default": True, "help": "Start the user-level Twikoo service."},
+            ),
+            SetupOptionElement(
+                param_decls=("--smoke/--no-smoke",),
+                kwargs={"default": False, "show_default": True, "help": "Run a local HTTP smoke test after starting."},
+            ),
+            SetupOptionElement(
+                param_decls=("--force", "-f"),
+                kwargs={"is_flag": True, "help": "Replace existing runtime/config/service where supported."},
             ),
         ),
     ),
