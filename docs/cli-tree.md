@@ -16,6 +16,7 @@ chatup
 ├── discourse           # 准备 Discourse 配置和 ChatEnv 管理的管理员凭据
 ├── zulip               # 准备 Zulip Compose 和 ChatEnv 管理的管理员凭据
 ├── mysql               # 安装 ChatData-compatible MySQL
+├── twikoo              # 安装多实例 Twikoo 评论服务
 ├── nginx               # 准备 user-level NGINX
 ├── crs                 # 安装本地 Claude Relay Service + Redis
 ├── claude              # 安装/配置 Claude Code
@@ -35,6 +36,26 @@ chatup
 ```
 
 运行 `chatup --tree` 可回读带根注释、参数和命令目的的真实注册树；完整参数见 [命令参考](commands.md)。
+
+## Twikoo
+
+```text
+chatup twikoo
+├── --version VERSION
+├── --repo OWNER/REPO
+├── --home PATH
+├── --name INSTANCE
+├── --port PORT
+├── --bind-address ADDRESS
+├── --install / --no-install
+├── --init / --no-init
+├── --service / --no-service
+├── --start / --no-start
+├── --smoke / --no-smoke
+└── --force
+```
+
+`chatup twikoo` 使用 Twikoo GitHub Release 二进制，并按多实例布局准备 `~/.chatarch/twikoo/instances/<name>/`。每个实例都有自己的 `bin/twikoo` 和相邻 `bin/.env -> ../env/twikoo.env`，避免多个实例共享 runtime 旁边的 `.env` 导致端口或数据目录串扰。默认只绑定 `127.0.0.1`，外部 local/public 域名入口交给 NGINX/public-entry 层。
 
 ## Cursor Agent
 

@@ -12,12 +12,15 @@ def test_twikoo_layout_uses_chatarch_home_and_instance_scoped_paths(tmp_path):
 
     assert layout.home == tmp_path / "twikoo"
     assert layout.runtime == tmp_path / "twikoo" / "runtimes" / "1.7.15"
-    assert layout.binary == tmp_path / "twikoo" / "runtimes" / "1.7.15" / "twikoo"
+    assert layout.runtime_binary == tmp_path / "twikoo" / "runtimes" / "1.7.15" / "twikoo"
     assert layout.instance == tmp_path / "twikoo" / "instances" / "chatblog"
+    assert layout.instance_bin == tmp_path / "twikoo" / "instances" / "chatblog" / "bin" / "twikoo"
+    assert layout.instance_env_link == tmp_path / "twikoo" / "instances" / "chatblog" / "bin" / ".env"
+    assert layout.binary == layout.instance_bin
     assert layout.env == tmp_path / "twikoo" / "instances" / "chatblog" / "env" / "twikoo.env"
     assert layout.data == tmp_path / "twikoo" / "instances" / "chatblog" / "data"
     assert layout.logs == tmp_path / "twikoo" / "instances" / "chatblog" / "logs"
-    assert layout.service.name == "chatup-twikoo-chatblog.service"
+    assert layout.service.name == "chatarch-twikoo-chatblog.service"
 
 
 def test_twikoo_render_env_and_service_are_instance_scoped(tmp_path):
@@ -32,7 +35,7 @@ def test_twikoo_render_env_and_service_are_instance_scoped(tmp_path):
     assert "MONGODB" not in env_text
 
     service_text = render_service(layout, name="chatblog")
-    assert service_name("chatblog") == "chatup-twikoo-chatblog.service"
+    assert service_name("chatblog") == "chatarch-twikoo-chatblog.service"
     assert f"WorkingDirectory={layout.instance}" in service_text
     assert f"EnvironmentFile={layout.env}" in service_text
     assert f"ExecStart={layout.binary}" in service_text
@@ -64,7 +67,7 @@ def test_twikoo_cli_prepares_named_instance_without_starting(monkeypatch, tmp_pa
         "export_layout",
         lambda **kwargs: {
             "instance": str(tmp_path / "twikoo" / "instances" / kwargs["name"]),
-            "service": str(tmp_path / f"chatup-twikoo-{kwargs['name']}.service"),
+            "service": str(tmp_path / f"chatarch-twikoo-{kwargs['name']}.service"),
         },
     )
     monkeypatch.setattr(
@@ -83,7 +86,7 @@ def test_twikoo_cli_prepares_named_instance_without_starting(monkeypatch, tmp_pa
         twikoo_setup,
         "install_service",
         lambda **kwargs: calls.append(("service", kwargs))
-        or {"unit": f"chatup-twikoo-{kwargs['name']}.service"},
+        or {"unit": f"chatarch-twikoo-{kwargs['name']}.service"},
     )
 
     result = CliRunner().invoke(
@@ -107,7 +110,7 @@ def test_twikoo_cli_prepares_named_instance_without_starting(monkeypatch, tmp_pa
     assert calls[1][1]["name"] == "chatblog"
     assert calls[1][1]["port"] == 8892
     assert calls[1][1]["bind_address"] == "127.0.0.1"
-    assert "chatup-twikoo-chatblog.service" in result.output
+    assert "chatarch-twikoo-chatblog.service" in result.output
 
 
 def test_twikoo_smoke_requires_start():
@@ -115,3 +118,19 @@ def test_twikoo_smoke_requires_start():
 
     assert result.exit_code != 0
     assert "--smoke requires --start" in result.output
+
+
+def test_twikoo_no_install_can_adopt_asset_named_runtime(monkeypatch, tmp_path):
+    from chatup.setup.twikoo import ensure_runtime_binary, twikoo_layout
+
+    monkeypatch.setattr("chatup.setup.twikoo.select_twikoo_asset_name", lambda: "twikoo-linux-x64")
+    layout = twikoo_layout(name="chatblog", version="1.7.15", home=tmp_path / "twikoo")
+    layout.runtime.mkdir(parents=True)
+    asset = layout.runtime / "twikoo-linux-x64"
+    asset.write_bytes(b"fake")
+    asset.chmod(0o755)
+
+    adopted = ensure_runtime_binary(layout)
+
+    assert adopted == layout.runtime_binary
+    assert layout.runtime_binary.read_bytes() == b"fake"
