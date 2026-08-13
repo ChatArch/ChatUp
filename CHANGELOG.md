@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.11
+
+### Added
+- Add `chatup twikoo` to install and manage non-Docker Twikoo comment service instances under `~/.chatarch/twikoo`, including versioned release runtimes, per-instance env/data/log/run directories, user-level systemd units, multi-instance isolation, and smoke checks.
+
 ## 0.2.10
 
 ### Fixed
