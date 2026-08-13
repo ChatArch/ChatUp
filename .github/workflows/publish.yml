@@ -44,11 +44,14 @@ jobs:
               print(f"version={version}", file=output)
               print(f"tag=v{version}", file=output)
           PY
-      - name: Check tag matches package version
-        if: github.event_name == 'push'
+      - name: Check release ref matches package version
         env:
           RELEASE_TAG: ${{ steps.meta.outputs.tag }}
         run: |
+          if [ "${GITHUB_REF_TYPE}" != "tag" ]; then
+            echo "Release workflow must run from a tag ref; got ${GITHUB_REF_TYPE} ${GITHUB_REF_NAME}."
+            exit 1
+          fi
           if [ "${GITHUB_REF_NAME}" != "${RELEASE_TAG}" ]; then
             echo "Tag ${GITHUB_REF_NAME} does not match package version ${RELEASE_TAG}."
             exit 1

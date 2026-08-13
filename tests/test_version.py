@@ -5,7 +5,7 @@ from chatup.cli import main
 
 
 def test_version_present():
-    assert __version__ == "0.2.10"
+    assert __version__ == "0.2.11"
 
 
 def test_cli_help():
@@ -42,4 +42,4 @@ def test_cli_doctor():
     result = CliRunner().invoke(main, ["doctor"])
 
     assert result.exit_code == 0
-    assert "chatup 0.2.10 ok" in result.output
+    assert "chatup 0.2.11 ok" in result.output
