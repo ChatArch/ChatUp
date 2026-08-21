@@ -58,6 +58,8 @@ def test_cli_tree_is_in_mkdocs_nav_and_backend_contracts_are_complete():
         "remove",
         "gc",
         "--version",
+        "--tree",
+        "--tree-brief",
         "--channel",
         "--home",
         "--platform",

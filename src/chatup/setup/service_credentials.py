@@ -29,16 +29,19 @@ def load_chatenv_values(
 ) -> tuple[dict[str, str], str]:
     """Load service setup values without printing secrets.
 
-    Precedence is current environment > explicit env file/profile values.
     The env_ref option mirrors Cursor Agent's `-e/--env`: an existing path is
     parsed as a dotenv-style file; otherwise it is treated as a ChatEnv profile.
+    Explicit files/profiles are isolated from process-environment credentials;
+    the process environment is used only when no explicit source is selected.
     """
 
     values: dict[str, str] = {}
     source = "environment"
     store = EnvStore(get_paths().envs_dir)
+    explicit_source = False
 
     if env_ref:
+        explicit_source = True
         candidate = Path(env_ref).expanduser()
         if candidate.exists():
             values.update(parse_env_file(candidate))
@@ -48,14 +51,15 @@ def load_chatenv_values(
             source = f"ChatEnv profile {env_ref}"
 
     if env_profile:
+        explicit_source = True
         values.update(store.load_profile(config_cls, env_profile))
         source = f"ChatEnv profile {env_profile}"
 
-    for key in config_cls.get_fields():
-        env_value = os.getenv(key)
-        if env_value:
-            values[key] = env_value
-            source = "environment"
+    if not explicit_source:
+        for key in config_cls.get_fields():
+            env_value = os.getenv(key)
+            if env_value:
+                values[key] = env_value
     return values, source
 
 

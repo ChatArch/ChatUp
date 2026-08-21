@@ -21,6 +21,9 @@ Choose documentation by scenario:
 
 ```bash
 chatup --help
+chatup --version
+chatup --tree
+chatup --tree-brief
 chatup doctor
 chatup uv
 chatup chrome-for-testing install --channel stable -I
@@ -47,7 +50,7 @@ chatup crs --install-dir ~/.chatarch/crs/local --port 12392 --redis-port 6379
 | Local service installers | `gitea`, `mysql`, `nginx`, `crs` |
 | Agent toolchains | `cc-connect`, `claude`, `codex`, `cursor-agent`, `opencode`, `hermes`, `lark-cli` |
 
-New install targets stay under `~/.chatarch/...`, for example `~/.chatarch/chrome-for-testing`, `~/.chatarch/chromedriver`, `~/.chatarch/playwright`, `~/.chatarch/chattea`, `~/.chatarch/chatdata`, `~/.chatarch/nginx`, and `~/.chatarch/crs/local`. `cursor-agent` also registers a ChatEnv `CursorAgent` profile for migrated Cursor tokens. See `docs/capability-map.en.md` for the full capability boundary.
+New install targets stay under `~/.chatarch/...`, for example `~/.chatarch/chrome-for-testing`, `~/.chatarch/chromedriver`, `~/.chatarch/playwright`, `~/.chatarch/chattea`, `~/.chatarch/discourse`, `~/.chatarch/zulip`, `~/.chatarch/chatdata`, `~/.chatarch/nginx`, and `~/.chatarch/crs/local`. `cursor-agent`, `discourse`, and `zulip` register typed ChatEnv profiles; an explicitly selected profile is isolated from credentials in the process environment. ChatStyle renders the CLI tree from the registered command surface. See `docs/capability-map.en.md` for the full capability boundary.
 
 ## Development
 
@@ -56,6 +59,9 @@ python -m pytest -q
 python -m build
 python -m twine check dist/*
 mkdocs build --strict
+chatup --version
+chatup --tree
+chatup --tree-brief
 ```
 
 See the documentation site's [Quick Start](https://arch.gh.wzhecnu.cn/ChatUp/en/quickstart/), [Command Reference](https://arch.gh.wzhecnu.cn/ChatUp/en/commands/), and [CLI Capability Map](https://arch.gh.wzhecnu.cn/ChatUp/en/capability-map/) for more details.

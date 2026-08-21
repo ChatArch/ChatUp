@@ -8,7 +8,8 @@ ChatUp uses first-class top-level commands without forcing unlike browser artifa
 chatup
 ├── --help              # Show help for the current command
 ├── --version           # Print the package version
-├── --tree              # Print the actual registered CLI tree
+├── --tree              # Print the registered CLI tree with signatures
+├── --tree-brief        # Print the same CLI tree without signatures
 ├── doctor              # Verify that ChatUp is callable
 ├── zsh                 # Configure zsh, plugins, and aliases
 ├── cc-connect          # Install ChatArch CC Connect
@@ -35,7 +36,7 @@ chatup
 └── playwright          # Manage Playwright packages and Chromium browsers
 ```
 
-Run `chatup --tree` to read back the registered tree with the root comment, parameters, and command purposes. See [Command Reference](commands.md) for complete options.
+Run `chatup --tree` to read back the registered tree with parameter signatures and command purposes. `chatup --tree-brief` keeps the same nodes and descriptions while omitting signatures. See [Command Reference](commands.md) for complete options.
 
 ## Twikoo
 
