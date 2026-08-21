@@ -21,8 +21,9 @@ def test_chatup_depends_on_chatenv_and_registers_cursor_agent_config_provider():
     data = _pyproject()
 
     assert data["project"]["requires-python"] == ">=3.10"
-    assert "chatstyle>=0.1.1,<0.2.0" in data["project"]["dependencies"]
-    assert "chatenv>=0.2.0,<0.3.0" in data["project"]["dependencies"]
+    assert "click>=8.0,<9.0" in data["project"]["dependencies"]
+    assert "chatstyle>=0.2.0,<0.3.0" in data["project"]["dependencies"]
+    assert "chatenv>=0.2.10,<0.3.0" in data["project"]["dependencies"]
     entry_points = data["project"]["entry-points"]["chatenv.configs"]
     assert entry_points["cursor-agent"] == "chatup.config:CursorAgentConfig"
     assert entry_points["discourse"] == "chatup.config:DiscourseAdminConfig"
@@ -82,4 +83,5 @@ def test_project_metadata_points_to_chatup_docs_site():
 
     assert data["project"]["urls"]["Documentation"] == "https://arch.gh.wzhecnu.cn/ChatUp/"
     assert data["project"]["urls"]["Source"] == "https://github.com/ChatArch/ChatUp"
-    assert "mkdocs-static-i18n>=1.3,<2.0" in data["project"]["optional-dependencies"]["docs"]
+    assert "mkdocs-material>=9.5,<9.7" in data["project"]["optional-dependencies"]["docs"]
+    assert "mkdocs-static-i18n>=1.2,<2.0" in data["project"]["optional-dependencies"]["docs"]

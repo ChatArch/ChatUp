@@ -11,6 +11,9 @@ def test_publish_workflow_matches_active_any_environment_publisher():
     assert "id-token: write" in workflow
     assert "pypa/gh-action-pypi-publish@release/v1" in workflow
     assert "environment: pypi" not in workflow
+    assert "git merge-base --is-ancestor" in workflow
+    assert "refs/remotes/origin/main" in workflow
+    assert "workflow_dispatch" not in workflow
     assert "Release workflow must run from a tag ref" in workflow
     assert "GITHUB_REF_TYPE" in workflow
     assert "GITHUB_REF_NAME" in workflow

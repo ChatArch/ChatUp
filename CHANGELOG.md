@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.12
+
+### Added
+- Add top-level `chatup --tree-brief` output from the same registered command surface as `--tree`.
+
+### Changed
+- Replace the package-local CLI tree renderer with ChatStyle `add_tree_option()` and explicitly name the root command `chatup`.
+- Require `chatstyle>=0.2.0,<0.3.0` and `chatenv>=0.2.10,<0.3.0`, with bounded Click and documentation dependencies.
+- Keep explicitly selected ChatEnv service profiles isolated from process-environment credentials.
+- Expand CI and release checks to cover installed full/brief trees, wheel and sdist builds, and Twine validation.
+
 ## 0.2.11
 
 ### Added

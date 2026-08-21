@@ -8,7 +8,8 @@ ChatUp 使用一等顶层命令，但不把不同浏览器制品和工具链强�
 chatup
 ├── --help              # 显示当前命令帮助
 ├── --version           # 输出当前包版本
-├── --tree              # 输出真实已注册 CLI 树
+├── --tree              # 输出带参数签名的真实已注册 CLI 树
+├── --tree-brief        # 输出不带参数签名的同一棵 CLI 树
 ├── doctor              # 验证 ChatUp CLI 可调用
 ├── zsh                 # 配置 zsh、插件和 alias
 ├── cc-connect          # 安装 ChatArch CC Connect
@@ -35,7 +36,7 @@ chatup
 └── playwright          # 管理 Playwright package 与 Chromium browser
 ```
 
-运行 `chatup --tree` 可回读带根注释、参数和命令目的的真实注册树；完整参数见 [命令参考](commands.md)。
+运行 `chatup --tree` 可回读带参数签名和命令目的的真实注册树；`chatup --tree-brief` 保留相同节点和说明，但省略参数签名。完整参数见 [命令参考](commands.md)。
 
 ## Twikoo
 

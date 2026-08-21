@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 from click.testing import CliRunner
+from chatenv.paths import get_paths
+from chatenv.store import EnvStore
 
 from chatup.cli import main
 from chatup.config import DiscourseAdminConfig, ZulipAdminConfig
 from chatup.setup.discourse import setup_discourse
+from chatup.setup.service_credentials import load_chatenv_values
 from chatup.setup.zulip import setup_zulip
 
 
@@ -34,6 +37,43 @@ def test_zulip_admin_config_schema_supports_email_and_mail_alias():
     assert fields["ZULIP_ADMIN_MAIL"].env_key == "ZULIP_ADMIN_MAIL"
     assert fields["ZULIP_ADMIN_PASSWORD"].is_sensitive is True
     ZulipAdminConfig.test()
+
+
+def test_explicit_chatenv_profile_isolated_from_process_credentials(tmp_path, monkeypatch):
+    monkeypatch.setenv("CHATARCH_HOME", str(tmp_path / "chatarch"))
+    monkeypatch.setenv("DISCOURSE_ADMIN_USERNAME", "process-admin")
+    monkeypatch.setenv("DISCOURSE_ADMIN_EMAIL", "process@example.com")
+    monkeypatch.setenv("DISCOURSE_ADMIN_PASSWORD", "process-password")
+    EnvStore(get_paths().envs_dir).save_profile(
+        DiscourseAdminConfig,
+        "selected",
+        {
+            "DISCOURSE_ADMIN_USERNAME": "profile-admin",
+            "DISCOURSE_ADMIN_PASSWORD": "profile-password",
+        },
+    )
+
+    values, source = load_chatenv_values(DiscourseAdminConfig, env_profile="selected")
+
+    assert source == "ChatEnv profile selected"
+    assert values["DISCOURSE_ADMIN_USERNAME"] == "profile-admin"
+    assert values["DISCOURSE_ADMIN_PASSWORD"] == "profile-password"
+    assert "DISCOURSE_ADMIN_EMAIL" not in values
+
+
+def test_process_credentials_are_used_without_explicit_source(monkeypatch):
+    monkeypatch.setenv("DISCOURSE_ADMIN_USERNAME", "process-admin")
+    monkeypatch.setenv("DISCOURSE_ADMIN_EMAIL", "process@example.com")
+    monkeypatch.setenv("DISCOURSE_ADMIN_PASSWORD", "process-password")
+
+    values, source = load_chatenv_values(DiscourseAdminConfig)
+
+    assert source == "environment"
+    assert values == {
+        "DISCOURSE_ADMIN_USERNAME": "process-admin",
+        "DISCOURSE_ADMIN_EMAIL": "process@example.com",
+        "DISCOURSE_ADMIN_PASSWORD": "process-password",
+    }
 
 
 def test_discourse_setup_writes_admin_env_and_chatarc_internal_app_yml(tmp_path):
