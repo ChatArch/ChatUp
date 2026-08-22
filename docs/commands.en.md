@@ -82,6 +82,24 @@ chatup
 | `chatup cc-connect` | Install the CC Connect CLI and runtime dependencies. |
 | `chatup lark-cli` | Configure the official lark-cli and reuse ChatEnv Feishu/Lark config. |
 
+## Codex Command Contract
+
+`chatup codex` configures the OpenAI Codex CLI (`~/.codex/config.toml` and `~/.codex/auth.json`):
+
+- `-e, --env VALUE` is the credential source: a file path is read as an env file; otherwise `VALUE` is treated as a ChatEnv `OpenAI` profile name.
+- When `-e PROFILE` selects a ChatEnv profile, ChatUp reads only that explicit profile and does not backfill missing secrets from the active profile, existing Codex config, or process environment.
+- If the selected profile lacks `OPENAI_API_KEY`, non-interactive setup fails instead of writing a different account's key.
+- Codex CLI 0.144+ requires `wire_api = "responses"`; `chatup codex` writes the CRS/OpenAI-compatible provider with the responses wire API.
+- Verify a model channel through Codex itself, for example `chatup codex -e apple -I` followed by `codex exec ...`; direct curl success is not enough for Codex routing.
+
+Common forms:
+
+```bash
+chatup codex -e apple -I
+chatup codex -e ~/.chatarch/envs/OpenAI/.env -I
+chatup codex --api-key "$OPENAI_API_KEY" --base-url https://example.invalid/openai/v1 --model gpt-5.5 -I
+```
+
 ## Cursor Agent Command Contract
 
 `chatup cursor-agent` targets the Cursor Agent CLI, not the Cursor IDE GUI:
