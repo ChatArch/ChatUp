@@ -4,7 +4,7 @@
 
 - Keep the root command explicitly named `chatup`.
 - Use ChatStyle `add_tree_option()` for `--tree` and `--tree-brief`; do not add package-local tree renderers.
-- Keep `chatstyle>=0.2.0,<0.3.0` and `chatenv>=0.2.10,<0.3.0` bounded in package metadata.
+- Keep `chatstyle>=0.2.0,<0.3.0` and `chatenv>=0.2.11,<0.3.0` bounded in package metadata.
 - Missing required args should auto-enter interactive mode when recoverable.
 - `-i` forces interactive mode; `-I` disables prompting and must fail fast.
 - Prompt defaults must match actual execution defaults.

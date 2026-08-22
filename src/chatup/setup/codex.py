@@ -7,6 +7,7 @@ import click
 from chatenv.configs import OpenAIConfig
 from chatenv.fields import BaseEnvConfig
 from chatenv.source_chain import split_config_sources
+from chatenv.store import EnvStore
 from chatup.const import CHATARCH_ENV_DIR, CHATARCH_ENV_FILE
 from chatup.interaction import (
     BACK_VALUE,
@@ -25,7 +26,7 @@ from chatup.setup.nodejs import (
 )
 from chatup.utils.custom_logger import setup_logger
 
-DEFAULT_MODEL = "gpt-5.4"
+DEFAULT_MODEL = "gpt-5.5"
 DEFAULT_BASE_URL = "https://api.openai.com/v1"
 DEFAULT_AUTH_METHOD = "apikey"
 logger = setup_logger("setup_codex")
@@ -264,17 +265,24 @@ def _resolve_openai_env_path(env_ref: str) -> Path:
     )
 
 
+def _openai_values_from_mapping(values: dict[str, str]) -> dict[str, str | None]:
+    return {
+        "openai_api_key": values.get("OPENAI_API_KEY"),
+        "base_url": values.get("OPENAI_API_BASE"),
+        "model": values.get("OPENAI_API_MODEL"),
+    }
+
+
 def _load_openai_values_from_env_ref(env_ref: str) -> dict[str, str | None]:
-    current_values = _snapshot_openai_values()
-    try:
-        env_path = _resolve_openai_env_path(env_ref)
-        BaseEnvConfig.load_all_with_override(
-            CHATARCH_ENV_DIR,
-            override_env_file=env_path,
-        )
-        return _snapshot_openai_values()
-    finally:
-        _restore_openai_values(current_values)
+    """Load only the explicitly selected OpenAI env file/profile.
+
+    `chatup codex -e PROFILE` is an account-selection boundary. Do not merge
+    the selected profile with the active/default ChatEnv profile or process
+    environment, otherwise a profile missing `OPENAI_API_KEY` can silently write
+    a different account's key into `~/.codex/auth.json`.
+    """
+    env_path = _resolve_openai_env_path(env_ref)
+    return _openai_values_from_mapping(EnvStore(CHATARCH_ENV_DIR).load_path(env_path))
 
 
 def setup_codex(
@@ -302,13 +310,19 @@ def setup_codex(
     if isinstance(model, str) and not model.strip():
         model = None
 
-    api_key = resolve_value(
-        api_key,
-        env_config.get("openai_api_key"),
-        existing_api_key,
-        env_values.get("OPENAI_API_KEY"),
-        typed_env_values.get("OPENAI_API_KEY"),
-    )
+    if env_ref:
+        api_key = resolve_value(
+            api_key,
+            env_config.get("openai_api_key"),
+        )
+    else:
+        api_key = resolve_value(
+            api_key,
+            env_config.get("openai_api_key"),
+            existing_api_key,
+            env_values.get("OPENAI_API_KEY"),
+            typed_env_values.get("OPENAI_API_KEY"),
+        )
     missing_required = not api_key
     has_existing_config = any(
         value for key, value in existing.items() if key != "openai_api_key"
@@ -421,22 +435,34 @@ def setup_codex(
                 click.echo(result.stderr.strip(), err=True)
             raise click.Abort()
 
-    base_url = resolve_value(
-        base_url,
-        env_config.get("base_url"),
-        existing.get("base_url"),
-        env_values.get("OPENAI_API_BASE"),
-        typed_env_values.get("OPENAI_API_BASE"),
-        DEFAULT_BASE_URL,
-    )
-    model = resolve_value(
-        model,
-        env_config.get("model"),
-        existing.get("model"),
-        env_values.get("OPENAI_API_MODEL"),
-        typed_env_values.get("OPENAI_API_MODEL"),
-        DEFAULT_MODEL,
-    )
+    if env_ref:
+        base_url = resolve_value(
+            base_url,
+            env_config.get("base_url"),
+            DEFAULT_BASE_URL,
+        )
+        model = resolve_value(
+            model,
+            env_config.get("model"),
+            DEFAULT_MODEL,
+        )
+    else:
+        base_url = resolve_value(
+            base_url,
+            env_config.get("base_url"),
+            existing.get("base_url"),
+            env_values.get("OPENAI_API_BASE"),
+            typed_env_values.get("OPENAI_API_BASE"),
+            DEFAULT_BASE_URL,
+        )
+        model = resolve_value(
+            model,
+            env_config.get("model"),
+            existing.get("model"),
+            env_values.get("OPENAI_API_MODEL"),
+            typed_env_values.get("OPENAI_API_MODEL"),
+            DEFAULT_MODEL,
+        )
 
     codex_dir.mkdir(parents=True, exist_ok=True)
 
