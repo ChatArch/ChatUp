@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.13
+
+### Fixed
+- Keep `chatup codex -e <profile>` isolated to the explicitly selected ChatEnv OpenAI profile; it no longer silently mixes process-environment credentials or an existing Codex key when a profile is selected.
+- Default newly written Codex config to `gpt-5.5`.
+
 ## 0.2.12
 
 ### Added
