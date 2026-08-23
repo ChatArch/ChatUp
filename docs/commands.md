@@ -87,7 +87,8 @@ chatup
 `chatup codex` 配置 OpenAI Codex CLI（`~/.codex/config.toml` 与 `~/.codex/auth.json`）：
 
 - `-e, --env VALUE` 是凭据来源：`VALUE` 是文件路径时按 env 文件读取，否则按 ChatEnv `OpenAI` profile 名读取。
-- 当 `-e PROFILE` 选择 ChatEnv profile 时，ChatUp 只读取这个显式 profile，不会从 active profile、既有 Codex 配置或进程环境变量回填缺失的 secret。
+- 当 `-e PROFILE` 选择 ChatEnv profile 时，ChatUp 只读取这个显式 profile，不会从 active profile、既有 Codex 配置或进程环境变量回填缺失的 secret；profile 文件按无插值方式读取，包含 `${...}` 这类未解析变量会失败而不会回填进程环境。
+- ChatEnv profile 名不能包含路径分隔符、`.` 或 `..`；如果要传文件路径，该路径必须真实存在。
 - 如果显式 profile 缺少 `OPENAI_API_KEY`，非交互 setup 会失败，不会把另一个账号的 key 写进 Codex。
 - Codex CLI 0.144+ 要求 `wire_api = "responses"`；`chatup codex` 写出的 CRS/OpenAI-compatible provider 使用 responses wire API。
 - 模型渠道要通过 Codex 本身验证，例如先 `chatup codex -e apple -I`，再 `codex exec ...`；只 curl API 成功不等于 Codex 路由可用。

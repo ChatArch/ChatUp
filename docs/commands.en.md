@@ -87,7 +87,8 @@ chatup
 `chatup codex` configures the OpenAI Codex CLI (`~/.codex/config.toml` and `~/.codex/auth.json`):
 
 - `-e, --env VALUE` is the credential source: a file path is read as an env file; otherwise `VALUE` is treated as a ChatEnv `OpenAI` profile name.
-- When `-e PROFILE` selects a ChatEnv profile, ChatUp reads only that explicit profile and does not backfill missing secrets from the active profile, existing Codex config, or process environment.
+- When `-e PROFILE` selects a ChatEnv profile, ChatUp reads only that explicit profile. It does not backfill missing secrets from the active profile, an existing Codex config, or process environment variables. Profile files are loaded without interpolation; unresolved `${...}` references fail instead of falling back to the process environment.
+- ChatEnv profile names cannot contain path separators, `.` or `..`; pass an existing file path when file-based config is intended.
 - If the selected profile lacks `OPENAI_API_KEY`, non-interactive setup fails instead of writing a different account's key.
 - Codex CLI 0.144+ requires `wire_api = "responses"`; `chatup codex` writes the CRS/OpenAI-compatible provider with the responses wire API.
 - Verify a model channel through Codex itself, for example `chatup codex -e apple -I` followed by `codex exec ...`; direct curl success is not enough for Codex routing.

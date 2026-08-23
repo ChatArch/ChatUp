@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
+import re
+import tempfile
 import click
+from dotenv import dotenv_values
 
 from chatenv.configs import OpenAIConfig
 from chatenv.fields import BaseEnvConfig
 from chatenv.source_chain import split_config_sources
-from chatenv.store import EnvStore
 from chatup.const import CHATARCH_ENV_DIR, CHATARCH_ENV_FILE
 from chatup.interaction import (
     BACK_VALUE,
@@ -29,6 +32,7 @@ from chatup.utils.custom_logger import setup_logger
 DEFAULT_MODEL = "gpt-5.5"
 DEFAULT_BASE_URL = "https://api.openai.com/v1"
 DEFAULT_AUTH_METHOD = "apikey"
+_ENV_VAR_REF_RE = re.compile(r"\$(?:\{[^}]+\}|[A-Za-z_][A-Za-z0-9_]*)")
 logger = setup_logger("setup_codex")
 
 
@@ -208,6 +212,29 @@ def _write_codex_config(config_path: Path, *, model: str, base_url: str) -> list
     return changed_root + changed_provider
 
 
+def _write_private_text(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp_name = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
+    try:
+        os.chmod(tmp_name, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write(content)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(tmp_name, path)
+        path.chmod(0o600)
+    except Exception:
+        try:
+            os.close(fd)
+        except OSError:
+            pass
+        try:
+            os.unlink(tmp_name)
+        except OSError:
+            pass
+        raise
+
+
 def _write_codex_auth(auth_path: Path, api_key: str) -> list[str]:
     auth_data = {}
     if auth_path.exists():
@@ -219,11 +246,9 @@ def _write_codex_auth(auth_path: Path, api_key: str) -> list[str]:
             auth_data = {}
     old_value = auth_data.get("OPENAI_API_KEY")
     auth_data["OPENAI_API_KEY"] = api_key
-    auth_path.parent.mkdir(parents=True, exist_ok=True)
-    auth_path.write_text(
-        json.dumps(auth_data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    _write_private_text(
+        auth_path, json.dumps(auth_data, ensure_ascii=False, indent=2) + "\n"
     )
-    auth_path.chmod(0o600)
     logger.info(f"Patched auth file: {auth_path}")
     return ["OPENAI_API_KEY"] if old_value != api_key else []
 
@@ -251,10 +276,35 @@ def _restore_openai_values(values: dict[str, str | None]) -> None:
     OpenAIConfig.OPENAI_API_MODEL.value = values.get("model")
 
 
+def _env_ref_has_path_separator(env_ref: str) -> bool:
+    return "/" in env_ref or "\\" in env_ref
+
+
+def _invalid_profile_name(env_ref: str) -> bool:
+    if env_ref == ".env":
+        return False
+    profile_name = env_ref.removesuffix(".env")
+    return (
+        not profile_name
+        or profile_name in {".", ".."}
+        or ".." in profile_name
+        or _env_ref_has_path_separator(profile_name)
+    )
+
+
 def _resolve_openai_env_path(env_ref: str) -> Path:
+    env_ref = str(env_ref).strip()
+    if not env_ref:
+        raise click.ClickException("OpenAI profile name cannot be empty.")
+
     candidate = Path(env_ref).expanduser()
     if candidate.is_file():
         return candidate
+
+    if _invalid_profile_name(env_ref) or _env_ref_has_path_separator(env_ref):
+        raise click.ClickException(
+            "Invalid OpenAI profile name. Profile names cannot contain path separators, '.' or '..'; pass an existing .env file path for file-based config."
+        )
 
     profile_path = OpenAIConfig.get_profile_env_file(CHATARCH_ENV_DIR, env_ref)
     if profile_path.exists():
@@ -273,6 +323,22 @@ def _openai_values_from_mapping(values: dict[str, str]) -> dict[str, str | None]
     }
 
 
+def _load_dotenv_without_interpolation(env_path: Path) -> dict[str, str]:
+    return {
+        key: value
+        for key, value in dotenv_values(env_path, interpolate=False).items()
+        if value is not None
+    }
+
+
+def _reject_unresolved_env_references(values: dict[str, str | None]) -> None:
+    for field, value in values.items():
+        if isinstance(value, str) and _ENV_VAR_REF_RE.search(value):
+            raise click.ClickException(
+                f"OpenAI profile field {field} contains an unresolved variable reference; selected profiles are loaded without process-environment interpolation."
+            )
+
+
 def _load_openai_values_from_env_ref(env_ref: str) -> dict[str, str | None]:
     """Load only the explicitly selected OpenAI env file/profile.
 
@@ -282,7 +348,9 @@ def _load_openai_values_from_env_ref(env_ref: str) -> dict[str, str | None]:
     a different account's key into `~/.codex/auth.json`.
     """
     env_path = _resolve_openai_env_path(env_ref)
-    return _openai_values_from_mapping(EnvStore(CHATARCH_ENV_DIR).load_path(env_path))
+    values = _openai_values_from_mapping(_load_dotenv_without_interpolation(env_path))
+    _reject_unresolved_env_references(values)
+    return values
 
 
 def setup_codex(
@@ -391,27 +459,43 @@ def setup_codex(
         if api_key == BACK_VALUE:
             return
 
-        base_url = prompt_text_value(
-            "base_url (optional)",
-            base_url,
-            env_config.get("base_url"),
-            existing.get("base_url"),
-            env_values.get("OPENAI_API_BASE"),
-            typed_env_values.get("OPENAI_API_BASE"),
-            fallback=DEFAULT_BASE_URL,
-        )
+        if env_ref:
+            base_url = prompt_text_value(
+                "base_url (optional)",
+                base_url,
+                env_config.get("base_url"),
+                fallback=DEFAULT_BASE_URL,
+            )
+        else:
+            base_url = prompt_text_value(
+                "base_url (optional)",
+                base_url,
+                env_config.get("base_url"),
+                existing.get("base_url"),
+                env_values.get("OPENAI_API_BASE"),
+                typed_env_values.get("OPENAI_API_BASE"),
+                fallback=DEFAULT_BASE_URL,
+            )
         if base_url == BACK_VALUE:
             return
 
-        model = prompt_text_value(
-            "default model (optional)",
-            model,
-            env_config.get("model"),
-            existing.get("model"),
-            env_values.get("OPENAI_API_MODEL"),
-            typed_env_values.get("OPENAI_API_MODEL"),
-            fallback=DEFAULT_MODEL,
-        )
+        if env_ref:
+            model = prompt_text_value(
+                "default model (optional)",
+                model,
+                env_config.get("model"),
+                fallback=DEFAULT_MODEL,
+            )
+        else:
+            model = prompt_text_value(
+                "default model (optional)",
+                model,
+                env_config.get("model"),
+                existing.get("model"),
+                env_values.get("OPENAI_API_MODEL"),
+                typed_env_values.get("OPENAI_API_MODEL"),
+                fallback=DEFAULT_MODEL,
+            )
         if model == BACK_VALUE:
             return
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.14
+
+### Fixed
+- Supersede `0.2.13` by fully hardening `chatup codex -e <profile>` profile isolation: selected env/profile files are loaded without process-environment interpolation, unsafe profile names with path traversal are rejected, and interactive prompt defaults stay inside the selected profile.
+- Write Codex `auth.json` through an atomic private-file replacement to avoid a permissive-mode window for `OPENAI_API_KEY`.
+
 ## 0.2.13
 
 ### Fixed
