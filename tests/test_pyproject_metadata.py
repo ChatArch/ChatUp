@@ -24,6 +24,7 @@ def test_chatup_depends_on_chatenv_and_registers_cursor_agent_config_provider():
     assert "click>=8.0,<9.0" in data["project"]["dependencies"]
     assert "chatstyle>=0.2.0,<0.3.0" in data["project"]["dependencies"]
     assert "chatenv>=0.2.11,<0.3.0" in data["project"]["dependencies"]
+    assert "python-dotenv>=1.0,<2.0" in data["project"]["dependencies"]
     entry_points = data["project"]["entry-points"]["chatenv.configs"]
     assert entry_points["cursor-agent"] == "chatup.config:CursorAgentConfig"
     assert entry_points["discourse"] == "chatup.config:DiscourseAdminConfig"
