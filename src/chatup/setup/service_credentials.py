@@ -78,7 +78,9 @@ def write_private_env_file(path: str | Path, values: dict[str, str], keys: Itera
     old_umask = os.umask(0o077)
     try:
         target.write_text("".join(f"{key}={values.get(key, '')}\n" for key in keys), encoding="utf-8")
-        target.chmod(0o600)
+        from chatup.utils.platforming import chmod_private
+
+        chmod_private(target)
     finally:
         os.umask(old_umask)
     return target
@@ -92,7 +94,9 @@ def write_secret_file(path: str | Path, value: str) -> Path:
     old_umask = os.umask(0o077)
     try:
         target.write_text(value, encoding="utf-8")
-        target.chmod(0o600)
+        from chatup.utils.platforming import chmod_private
+
+        chmod_private(target)
     finally:
         os.umask(old_umask)
     return target

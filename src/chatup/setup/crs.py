@@ -12,6 +12,7 @@ import click
 from chatup.interaction import abort_if_force_without_tty, resolve_interactive_mode
 from chatup.setup.nodejs import ensure_nodejs_requirement
 from chatup.utils.custom_logger import setup_logger
+from chatup.utils.platforming import chmod_private, require_non_windows
 
 logger = setup_logger("setup_crs")
 
@@ -146,7 +147,7 @@ def write_secret_file(path: Path) -> dict[str, str]:
     old_umask = os.umask(0o077)
     try:
         path.write_text("".join(f"{key}={value}\n" for key, value in values.items()), encoding="utf-8")
-        path.chmod(0o600)
+        chmod_private(path)
     finally:
         os.umask(old_umask)
     return values
@@ -178,7 +179,7 @@ def write_env_file(crs_root: Path, *, port: int, redis_port: int, secrets_values
         ),
         encoding="utf-8",
     )
-    env_path.chmod(0o600)
+    chmod_private(env_path)
     return env_path
 
 
@@ -225,6 +226,7 @@ def setup_crs(
     log_level="INFO",
 ):
     _configure_logger(log_level)
+    require_non_windows("chatup crs")
     usage = "Usage: chatup crs [--install-dir PATH] [--port PORT] [--redis-port PORT]"
     interactive, can_prompt, force_interactive, _, _ = resolve_interactive_mode(
         interactive=interactive,
@@ -302,7 +304,7 @@ def setup_crs(
             stdout=log_file,
             stderr=subprocess.STDOUT,
         )
-    setup_log.chmod(0o600)
+    chmod_private(setup_log)
 
     run_command(npm_command(node_runtime, "run", "install:web"), cwd=crs_root, env=npm_env)
     run_command(npm_command(node_runtime, "run", "build:web"), cwd=crs_root, env=npm_env)

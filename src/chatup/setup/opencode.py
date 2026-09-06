@@ -27,6 +27,7 @@ from chatup.setup.nodejs import (
     should_install_global_npm_package,
 )
 from chatup.utils.custom_logger import setup_logger
+from chatup.utils.platforming import chmod_private
 
 DEFAULT_PROVIDER_ID = "opencode"
 DEFAULT_BASE_URL = "https://api.openai.com/v1"
@@ -163,7 +164,7 @@ def _write_opencode_config(config_path: Path, config_payload: dict) -> None:
         json.dumps(config_payload, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
-    config_path.chmod(0o600)
+    chmod_private(config_path)
     logger.info(f"Wrote config file: {config_path}")
 
 

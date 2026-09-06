@@ -9,10 +9,12 @@ from pathlib import Path
 import click
 
 from chatup.utils.custom_logger import setup_logger
+from chatup.utils.platforming import is_windows, venv_activate_hint, venv_python_path
 
 DEFAULT_PYTHON_VERSION = "3.12"
 DEFAULT_VENV_PATH = Path("~/.chatarch/venv")
 UV_INSTALLER_URL = "https://astral.sh/uv/install.sh"
+UV_WINDOWS_INSTALLER_URL = "https://astral.sh/uv/install.ps1"
 
 logger = setup_logger("setup_uv")
 
@@ -33,10 +35,9 @@ def _run_command(command: list[str], **kwargs) -> subprocess.CompletedProcess[st
 
 
 def _candidate_uv_paths() -> tuple[Path, ...]:
-    return (
-        Path.home() / ".local" / "bin" / "uv",
-        Path.home() / ".cargo" / "bin" / "uv",
-    )
+    names = ("uv.exe", "uv") if is_windows() else ("uv",)
+    roots = (Path.home() / ".local" / "bin", Path.home() / ".cargo" / "bin")
+    return tuple(root / name for root in roots for name in names)
 
 
 def find_uv() -> str | None:
@@ -50,7 +51,17 @@ def find_uv() -> str | None:
 
 
 def install_uv_with_official_script() -> str:
-    command = ["sh", "-c", f"curl -LsSf {shlex.quote(UV_INSTALLER_URL)} | sh"]
+    if is_windows():
+        command = [
+            "powershell",
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-Command",
+            f"irm {UV_WINDOWS_INSTALLER_URL} | iex",
+        ]
+    else:
+        command = ["sh", "-c", f"curl -LsSf {shlex.quote(UV_INSTALLER_URL)} | sh"]
     result = _run_command(command)
     if result.returncode != 0:
         message = (result.stderr or result.stdout or "uv installer failed").strip()
@@ -78,9 +89,7 @@ def ensure_uv_installed() -> str:
 
 
 def _venv_python_path(venv_path: Path) -> Path:
-    if os.name == "nt":
-        return venv_path / "Scripts" / "python.exe"
-    return venv_path / "bin" / "python"
+    return venv_python_path(venv_path)
 
 
 def _python_minor_version(python_bin: Path) -> str | None:
@@ -184,7 +193,7 @@ def setup_uv(
 
     python_bin = _venv_python_path(target)
     click.echo(f"ChatArch Python environment ready: {target}")
-    click.echo(f"Activate with: source {shlex.quote(str(target / 'bin' / 'activate'))}")
+    click.echo(f"Activate with: {venv_activate_hint(target)}")
     click.echo(f"Verified pip: {python_bin} -m pip --version")
     return {
         "uv": uv_bin,

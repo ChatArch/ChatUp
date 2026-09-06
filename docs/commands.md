@@ -56,6 +56,14 @@ chatup
 
 </div>
 
+## Windows 兼容性
+
+- `chatup uv` 在 Windows 使用官方 PowerShell installer，并输出 `Scripts/Activate.ps1` 激活提示。
+- `chatup nodejs` 在 Windows 复用 PATH 中已有的 `node`/`npm`，不会写入 nvm shell init；如缺失会提示通过官方安装器、winget 或 nvm-windows 安装。
+- `chatup docker` 在 Windows 检查 Docker Desktop 提供的 `docker`/`docker compose`，跳过 Unix group 和 systemd 检查。
+- `chatup mysql` 会选择 MySQL Windows ZIP asset、`.exe` 二进制名和 TCP client config；`gitea`/`mysql`/`twikoo`/`nginx` 的 `--service` 仍依赖 user-level systemd，在 Windows 会给出明确错误。
+- `chatup cursor-agent --credential-store file-wrapper` 在 Windows 写 `.cmd` wrapper；`chatup frp` 支持 Windows ZIP release asset；`zsh` 和 `crs` 仍属于 POSIX/Linux-only setup。
+
 ## 基础命令
 
 | 命令 | 当前能力 |

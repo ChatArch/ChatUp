@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import shlex
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -28,6 +29,7 @@ from chatup.setup.nodejs import (
     should_install_global_npm_package,
 )
 from chatup.utils.custom_logger import setup_logger
+from chatup.utils.platforming import chmod_private
 
 logger = setup_logger("setup_lark_cli")
 
@@ -189,7 +191,7 @@ def _write_lark_cli_file_secret_config(
 
     secret_path = config_dir / "app-secret.txt"
     secret_path.write_text(f"{app_secret}\n", encoding="utf-8")
-    secret_path.chmod(0o600)
+    chmod_private(secret_path)
 
     config_payload = {
         "apps": [
@@ -205,7 +207,7 @@ def _write_lark_cli_file_secret_config(
         json.dumps(config_payload, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
-    config_path.chmod(0o600)
+    chmod_private(config_path)
     return secret_path
 
 
@@ -227,8 +229,9 @@ def _run_lark_cli_command(
             text=True,
         )
 
+    command = shutil.which("lark-cli") or "lark-cli"
     return subprocess.run(
-        ["lark-cli", *args],
+        [command, *args],
         input=input_text,
         capture_output=True,
         text=True,

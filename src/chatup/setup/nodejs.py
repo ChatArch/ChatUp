@@ -15,6 +15,7 @@ from chatup.interaction import (
     resolve_interactive_mode,
 )
 from chatup.utils.custom_logger import setup_logger
+from chatup.utils.platforming import is_windows
 
 BUNDLED_NVM_VERSION = "v0.40.3"
 MIN_NODEJS_MAJOR = 20
@@ -100,6 +101,8 @@ def _detect_nodejs_runtime_from_path():
 
 
 def _detect_nodejs_runtime_from_nvm():
+    if is_windows():
+        return _build_runtime("", "", "", "", "nvm")
     nvm_sh = Path.home() / ".nvm" / "nvm.sh"
     if not nvm_sh.exists():
         return _build_runtime("", "", "", "", "nvm")
@@ -135,9 +138,15 @@ def _detect_nodejs_runtime():
 def _nodejs_requirement_message(runtime, min_major):
     node_version = runtime.get("node_version") or "not found"
     npm_version = runtime.get("npm_version") or "not found"
+    install_hint = (
+        "Install Node.js LTS on Windows first, for example with `winget install OpenJS.NodeJS.LTS`, then rerun this command."
+        if is_windows()
+        else "Please run: chatup nodejs"
+    )
     if not runtime.get("node_bin") or not runtime.get("npm_bin"):
         return (
-            f"Node.js >= {min_major} and npm are required, but node/npm were not found."
+            f"Node.js >= {min_major} and npm are required, but node/npm were not found. "
+            f"{install_hint}"
         )
     node_major = runtime.get("node_major")
     if node_major is None:
@@ -193,7 +202,13 @@ def ensure_nodejs_requirement(
             raise click.Abort()
 
     click.echo(message, err=True)
-    click.echo("Please run: chatup nodejs", err=True)
+    if is_windows():
+        click.echo(
+            "On Windows, install Node.js with the official installer, winget, or nvm-windows; ChatUp will reuse node/npm from PATH.",
+            err=True,
+        )
+    else:
+        click.echo("Please run: chatup nodejs", err=True)
     raise click.Abort()
 
 
@@ -201,6 +216,7 @@ def run_npm_command(args, cwd=None):
     quoted_args = " ".join(shlex.quote(str(arg)) for arg in args)
     click.echo(f"Running: npm {quoted_args}")
     runtime = _detect_nodejs_runtime()
+    npm_command = str(runtime.get("npm_bin") or "npm")
     if runtime.get("source") == "nvm":
         cwd_prefix = (
             f"cd {shlex.quote(str(cwd))} && " if cwd is not None else ""
@@ -209,10 +225,10 @@ def run_npm_command(args, cwd=None):
             'export NVM_DIR="$HOME/.nvm" && '
             '[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && '
             f"{cwd_prefix}"
-            f"npm {quoted_args}"
+            f"{shlex.quote(npm_command)} {quoted_args}"
         )
         return _run_bash(command)
-    return subprocess.run(["npm", *args], capture_output=True, text=True, cwd=cwd)
+    return subprocess.run([npm_command, *args], capture_output=True, text=True, cwd=cwd)
 
 
 def get_global_npm_package_version(package_name):
@@ -352,6 +368,18 @@ def setup_nodejs(interactive=None, log_level="INFO"):
     abort_if_force_without_tty(force_interactive, can_prompt, usage)
 
     runtime = _detect_nodejs_runtime()
+    if is_windows():
+        if has_required_nodejs(runtime=runtime):
+            click.echo(f"Node.js already installed: {runtime['node_version']}")
+            click.echo(f"npm already installed: {runtime['npm_version']}")
+            click.echo("ChatUp reuses node/npm from PATH on Windows.")
+            return
+        click.echo(_nodejs_requirement_message(runtime, MIN_NODEJS_MAJOR), err=True)
+        click.echo(
+            "ChatUp does not install nvm on Windows; install Node.js LTS with the official installer, winget, or nvm-windows.",
+            err=True,
+        )
+        raise click.Abort()
     if has_required_nodejs() and not need_prompt:
         node_version = runtime["node_version"]
         npm_version = runtime["npm_version"]

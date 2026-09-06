@@ -17,6 +17,7 @@ from chatenv import get_paths
 
 from chatup.interaction import abort_if_force_without_tty, resolve_interactive_mode
 from chatup.utils.custom_logger import setup_logger
+from chatup.utils.platforming import chmod_executable, chmod_private, require_systemd
 
 logger = setup_logger("setup_gitea")
 
@@ -116,7 +117,7 @@ def decompress_xz(source: Path, destination: Path) -> None:
     destination.parent.mkdir(parents=True, exist_ok=True)
     with lzma.open(source, "rb") as src, destination.open("wb") as dst:
         shutil.copyfileobj(src, dst)
-    destination.chmod(0o755)
+    chmod_executable(destination)
 
 
 def install_gitea_release_binary(
@@ -316,7 +317,7 @@ def init_gitea_config(
         return config_path
     for child in [config_path.parent, work_dir / "data", work_dir / "log"]:
         child.mkdir(parents=True, exist_ok=True)
-    run_user = os.environ.get("USER") or "git"
+    run_user = os.environ.get("USER") or os.environ.get("USERNAME") or "git"
     config_path.write_text(
         render_app_ini(
             work_dir=work_dir,
@@ -332,7 +333,7 @@ def init_gitea_config(
         ),
         encoding="utf-8",
     )
-    config_path.chmod(0o600)
+    chmod_private(config_path)
     if binary and run_migrate:
         subprocess.run(
             [str(binary), "--config", str(config_path), "--work-path", str(work_dir), "migrate"],
@@ -474,6 +475,7 @@ def setup_gitea(
         result["config"] = str(generated_config)
         result["work_dir"] = str(work_path)
     if service:
+        require_systemd("chatup gitea --service")
         if not init and not resolved_config.exists():
             raise click.ClickException("--service requires --init or an existing --config-path.")
         service_file = write_user_service(

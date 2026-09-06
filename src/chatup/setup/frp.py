@@ -5,6 +5,7 @@ import tarfile
 import tempfile
 import subprocess
 import platform
+import zipfile
 import click
 from pathlib import Path
 from chatup.interaction import (
@@ -18,6 +19,7 @@ from chatup.interaction import (
     resolve_interactive_mode,
 )
 from chatup.utils.custom_logger import setup_logger
+from chatup.utils.platforming import chmod_executable, executable_name, is_windows
 
 FRP_VERSION_DEFAULT = "0.66.0"
 logger = setup_logger("setup_frp")
@@ -57,24 +59,36 @@ def download_file(url, dest_path):
 def extract_frp(archive_path, extract_to, binary_name):
     logger.info(f"Extracting FRP archive: {archive_path}")
     print(f"Extracting {archive_path}...")
-    with tarfile.open(archive_path, "r:gz") as tar:
-        # Find the binary in the archive
-        member = None
-        for m in tar.getmembers():
-            if m.name.endswith(f"/{binary_name}"):
-                member = m
-                break
+    archive = Path(archive_path)
+    member_name = None
+    if archive.suffix.lower() == ".zip":
+        with zipfile.ZipFile(archive) as bundle:
+            for candidate in bundle.namelist():
+                normalized = candidate.replace("\\", "/")
+                if normalized.endswith(f"/{binary_name}") or normalized == binary_name:
+                    member_name = candidate
+                    break
+            if not member_name:
+                raise ValueError(f"Could not find {binary_name} in archive")
+            target = Path(extract_to) / binary_name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            with bundle.open(member_name) as source, target.open("wb") as output:
+                shutil.copyfileobj(source, output)
+    else:
+        with tarfile.open(archive, "r:gz") as tar:
+            member = None
+            for candidate in tar.getmembers():
+                if candidate.name.endswith(f"/{binary_name}") or candidate.name == binary_name:
+                    member = candidate
+                    break
+            if not member:
+                raise ValueError(f"Could not find {binary_name} in archive")
+            member.name = os.path.basename(member.name)
+            tar.extract(member, path=extract_to)
+            target = Path(extract_to) / binary_name
 
-        if not member:
-            raise ValueError(f"Could not find {binary_name} in archive")
-
-        # Extract only the binary
-        member.name = os.path.basename(member.name)  # Extract to current dir structure
-        tar.extract(member, path=extract_to)
-
-    extracted_bin = os.path.join(extract_to, binary_name)
-    os.chmod(extracted_bin, 0o755)
-    return extracted_bin
+    chmod_executable(target)
+    return str(target)
 
 
 def setup_frp(interactive=None, log_level="INFO"):
@@ -111,7 +125,7 @@ def setup_frp(interactive=None, log_level="INFO"):
         return
 
     is_server = mode == "Server"
-    binary_name = "frps" if is_server else "frpc"
+    binary_name = executable_name("frps" if is_server else "frpc")
     config_name = "frps.toml" if is_server else "frpc.toml"
 
     # 2. Ask Install Method
@@ -133,7 +147,8 @@ def setup_frp(interactive=None, log_level="INFO"):
 
         arch = get_system_arch()
         os_name = platform.system().lower()
-        filename = f"frp_{version}_{os_name}_{arch}.tar.gz"
+        suffix = "zip" if os_name == "windows" else "tar.gz"
+        filename = f"frp_{version}_{os_name}_{arch}.{suffix}"
         download_url = (
             f"https://github.com/fatedier/frp/releases/download/v{version}/{filename}"
         )
@@ -150,7 +165,7 @@ def setup_frp(interactive=None, log_level="INFO"):
                 return
 
     else:  # Local File
-        local_path = ask_path("Enter path to local FRP archive (tar.gz):")
+        local_path = ask_path("Enter path to local FRP archive (tar.gz or zip):")
         if local_path == BACK_VALUE:
             return
 
@@ -262,6 +277,12 @@ RestartSec=5s
 [Install]
 WantedBy=multi-user.target
 """
+
+    if is_windows():
+        logger.info("Skipping systemd instructions on Windows")
+        print("\nYou can run FRP manually with:")
+        print(f"{final_bin_path} -c {config_path}")
+        return
 
     install_service = ask_confirm(
         "Do you want to create a Systemd service?", default=True

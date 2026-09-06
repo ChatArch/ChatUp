@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- Add Windows compatibility coverage for uv, Node.js, Docker, MySQL, Gitea service guards, and FRP ZIP extraction.
+- Expand CI to run the full test/build/docs contract on both `ubuntu-latest` and `windows-latest` for Python 3.10/3.11/3.12.
+
+### Changed
+- Add shared platform helpers so private-file chmod, executable chmod, venv paths, and `.exe` command names behave correctly on Windows without regressing POSIX paths.
+- Reuse existing Windows Node.js/npm and Docker Desktop installations instead of attempting nvm, group, or systemd setup.
+- Use the official PowerShell uv installer and Windows venv activation hints when running on Windows.
+
+### Fixed
+- Make setup commands avoid POSIX-only permission calls on Windows and return clear systemd/unsupported-platform errors where a feature remains Linux-only.
+- Add Windows-aware MySQL ZIP asset selection, TCP client config, NGINX/Twikoo `.exe` binary paths, Cursor Agent `.cmd` file-wrapper support, and FRP Windows ZIP extraction.
+
 ## 0.2.14
 
 ### Fixed
