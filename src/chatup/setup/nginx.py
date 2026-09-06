@@ -302,8 +302,8 @@ def install_nginx_binary(
 
 def render_nginx_conf(layout: NginxLayout) -> str:
     return f"""worker_processes  1;
-error_log  {layout.logs}/error.log info;
-pid        {layout.run}/nginx.pid;
+error_log  {layout.logs / 'error.log'} info;
+pid        {layout.run / 'nginx.pid'};
 
 events {{
     worker_connections  1024;
@@ -311,17 +311,17 @@ events {{
 
 http {{
     default_type  application/octet-stream;
-    access_log    {layout.logs}/access.log;
+    access_log    {layout.logs / 'access.log'};
     sendfile      on;
     keepalive_timeout  65;
 
-    client_body_temp_path {layout.temp}/client_body;
-    proxy_temp_path       {layout.temp}/proxy;
-    fastcgi_temp_path     {layout.temp}/fastcgi;
-    uwsgi_temp_path       {layout.temp}/uwsgi;
-    scgi_temp_path        {layout.temp}/scgi;
+    client_body_temp_path {layout.temp / 'client_body'};
+    proxy_temp_path       {layout.temp / 'proxy'};
+    fastcgi_temp_path     {layout.temp / 'fastcgi'};
+    uwsgi_temp_path       {layout.temp / 'uwsgi'};
+    scgi_temp_path        {layout.temp / 'scgi'};
 
-    include {layout.sites_enabled}/*.conf;
+    include {layout.sites_enabled / '*.conf'};
 }}
 """
 

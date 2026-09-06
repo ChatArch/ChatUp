@@ -226,7 +226,6 @@ def setup_crs(
     log_level="INFO",
 ):
     _configure_logger(log_level)
-    require_non_windows("chatup crs")
     usage = "Usage: chatup crs [--install-dir PATH] [--port PORT] [--redis-port PORT]"
     interactive, can_prompt, force_interactive, _, _ = resolve_interactive_mode(
         interactive=interactive,
@@ -236,6 +235,7 @@ def setup_crs(
 
     if smoke and not start:
         raise click.ClickException("--smoke requires --start; pass --no-smoke when using --no-start.")
+    require_non_windows("chatup crs")
 
     node_runtime = ensure_nodejs_requirement(
         interactive=interactive,

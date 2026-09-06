@@ -34,11 +34,12 @@ def test_uv_windows_installer_uses_powershell(monkeypatch):
             "irm https://astral.sh/uv/install.ps1 | iex",
         ]
     ]
-    assert str(platforming.venv_python_path(Path("C:/chatarch/venv"))).endswith(
-        "Scripts/python.exe"
+    assert platforming.venv_python_path(Path("C:/chatarch/venv")).parts[-2:] == (
+        "Scripts",
+        "python.exe",
     )
-    assert str(platforming.venv_activate_hint(Path("C:/chatarch/venv"))).endswith(
-        "Scripts/Activate.ps1"
+    assert platforming.venv_activate_hint(Path("C:/chatarch/venv")).endswith(
+        str(Path("Scripts") / "Activate.ps1")
     )
 
 

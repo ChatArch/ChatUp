@@ -104,6 +104,7 @@ def test_setup_crs_uses_detected_npm_runtime(monkeypatch, tmp_path):
         return subprocess.CompletedProcess(args, 0)
 
     monkeypatch.setattr(crs, "ensure_nodejs_requirement", fake_ensure_nodejs_requirement)
+    monkeypatch.setattr(crs, "require_non_windows", lambda _feature: None)
     monkeypatch.setattr(crs, "start_local_redis", lambda *_args, **_kwargs: {"conf": "redis.conf"})
     monkeypatch.setattr(crs, "run_command", fake_run_command)
     monkeypatch.setattr(crs.subprocess, "run", fake_subprocess_run)

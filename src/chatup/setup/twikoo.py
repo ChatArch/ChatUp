@@ -318,6 +318,7 @@ def install_service(
     home: Path | None = None,
     force: bool = False,
 ) -> dict[str, Any]:
+    require_systemd("chatup twikoo --service")
     layout = twikoo_layout(name=name, version=version, home=home)
     layout.service.path.parent.mkdir(parents=True, exist_ok=True)
     if not layout.service.path.exists() or force:
@@ -398,7 +399,6 @@ def setup_twikoo(
             force=force,
         )
     if service:
-        require_systemd("chatup twikoo --service")
         result["service"] = install_service(name=name, version=version, home=home, force=force)
     if start:
         require_systemd("chatup twikoo --start")
