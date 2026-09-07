@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.15
 
 ### Added
 - Add Windows compatibility coverage for uv, Node.js, Docker, MySQL, Gitea service guards, and FRP ZIP extraction.
