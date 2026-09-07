@@ -12,6 +12,7 @@ import subprocess
 import tarfile
 import time
 import urllib.request
+import zipfile
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
@@ -20,6 +21,7 @@ import click
 from chatenv import get_paths
 
 from chatup.utils.custom_logger import setup_logger
+from chatup.utils.platforming import chmod_executable, chmod_private, executable_name, is_windows, require_systemd
 
 logger = setup_logger("setup_mysql")
 
@@ -110,14 +112,20 @@ def detect_mysql_platform() -> str:
     machine = platform.machine().lower()
     if system == "linux" and machine in {"x86_64", "amd64"}:
         return DEFAULT_MYSQL_PLATFORM
+    if system == "windows" and machine in {"x86_64", "amd64"}:
+        return "winx64"
     raise click.ClickException(f"Unsupported MySQL platform: {platform.system()} {platform.machine()}")
+
+
+def _mysql_archive_suffix(platform_name: str) -> str:
+    return ".zip" if platform_name == "winx64" else ".tar.xz"
 
 
 def mysql_asset_urls(
     version: str = DEFAULT_MYSQL_VERSION, platform_name: str | None = None
 ) -> tuple[str, str]:
     platform_name = platform_name or detect_mysql_platform()
-    filename = f"mysql-{version}-{platform_name}.tar.xz"
+    filename = f"mysql-{version}-{platform_name}{_mysql_archive_suffix(platform_name)}"
     major_minor = version.rsplit(".", 1)[0]
     base = f"https://cdn.mysql.com/archives/mysql-{major_minor}/{filename}"
     return base, f"{base}.md5"
@@ -191,7 +199,12 @@ def safe_extract_tar(archive: Path, destination: Path) -> None:
                 target.parent.mkdir(parents=True, exist_ok=True)
                 if target.exists() or target.is_symlink():
                     target.unlink()
-                os.symlink(member.linkname, target)
+                try:
+                    os.symlink(member.linkname, target)
+                except OSError:
+                    if not is_windows():
+                        raise
+                    continue
                 continue
             if not member.isfile():
                 raise click.ClickException(f"Unsupported tar member type: {member.name}")
@@ -201,7 +214,39 @@ def safe_extract_tar(archive: Path, destination: Path) -> None:
                 raise click.ClickException(f"Could not extract {member.name}")
             with source, target.open("wb") as handle:
                 shutil.copyfileobj(source, handle)
-            target.chmod(member.mode & 0o777)
+            if not is_windows():
+                target.chmod(member.mode & 0o777)
+
+
+def safe_extract_zip(archive: Path, destination: Path) -> None:
+    destination.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(archive) as bundle:
+        members = bundle.infolist()
+        prefixes = {
+            Path(member.filename.replace("\\", "/")).parts[0]
+            for member in members
+            if member.filename and not member.filename.startswith(("/", "\\"))
+        }
+        strip_prefix = next(iter(prefixes)) if len(prefixes) == 1 else ""
+        for member in members:
+            raw_name = member.filename.replace("\\", "/")
+            if not raw_name or raw_name.startswith("/") or ".." in Path(raw_name).parts:
+                raise click.ClickException(f"Unsafe zip member: {member.filename}")
+            relative = raw_name
+            if strip_prefix and relative == strip_prefix:
+                continue
+            if strip_prefix and relative.startswith(strip_prefix + "/"):
+                relative = relative[len(strip_prefix) + 1 :]
+            if not relative:
+                continue
+            target = _safe_member_path(destination, relative)
+            if member.is_dir():
+                target.mkdir(parents=True, exist_ok=True)
+                continue
+            target.parent.mkdir(parents=True, exist_ok=True)
+            with bundle.open(member) as source, target.open("wb") as handle:
+                shutil.copyfileobj(source, handle)
+            chmod_executable(target) if target.suffix.lower() == ".exe" else None
 
 
 def install_mysql(
@@ -211,10 +256,11 @@ def install_mysql(
     platform_name: str | None = None,
 ) -> dict[str, Any]:
     layout = mysql_layout(version=version, home=home)
-    mysqld = layout.runtime / "bin" / "mysqld"
+    mysqld = layout.runtime / "bin" / executable_name("mysqld")
     if mysqld.exists() and not force:
         return {"version": version, "runtime": str(layout.runtime), "binary": str(mysqld), "reused": True}
 
+    platform_name = platform_name or detect_mysql_platform()
     url, md5_url = mysql_asset_urls(version, platform_name=platform_name)
     archive = layout.downloads / Path(url).name
     md5_path = layout.downloads / f"{archive.name}.md5"
@@ -227,7 +273,10 @@ def install_mysql(
     tmp = layout.runtimes / f".{version}.tmp-{int(time.time())}"
     if tmp.exists():
         shutil.rmtree(tmp)
-    safe_extract_tar(archive, tmp)
+    if _mysql_archive_suffix(platform_name) == ".zip":
+        safe_extract_zip(archive, tmp)
+    else:
+        safe_extract_tar(archive, tmp)
     if layout.runtime.exists():
         if not force:
             shutil.rmtree(tmp)
@@ -287,6 +336,25 @@ def render_my_cnf(
     port: int = DEFAULT_MYSQL_PORT,
     bind_address: str = DEFAULT_MYSQL_BIND_ADDRESS,
 ) -> str:
+    if is_windows():
+        return f"""[mysqld]
+basedir={runtime}
+datadir={layout.data}
+pid-file={layout.pid}
+log-error={layout.error_log}
+tmpdir={layout.tmp}
+port={port}
+bind-address={bind_address}
+mysqlx=0
+skip_name_resolve=ON
+character-set-server=utf8mb4
+collation-server=utf8mb4_bin
+
+[client]
+host={bind_address}
+port={port}
+user=root
+"""
     return f"""[mysqld]
 basedir={runtime}
 datadir={layout.data}
@@ -332,7 +400,7 @@ def init_instance(
         render_my_cnf(layout, runtime, port=port, bind_address=bind_address),
         encoding="utf-8",
     )
-    layout.config.chmod(0o600)
+    chmod_private(layout.config)
     initialized = False
     if initialize:
         subprocess.run(
@@ -369,8 +437,8 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory={layout.instance}
-ExecStart={runtime / 'bin' / 'mysqld'} --defaults-file={layout.config}
-ExecStop={runtime / 'bin' / 'mysqladmin'} --socket={layout.socket} shutdown
+ExecStart={runtime / 'bin' / executable_name('mysqld')} --defaults-file={layout.config}
+ExecStop={runtime / 'bin' / executable_name('mysqladmin')} --socket={layout.socket} shutdown
 Restart=on-failure
 RestartSec=5s
 Environment=HOME={Path.home()}
@@ -385,6 +453,7 @@ def install_service(
     version: str = DEFAULT_MYSQL_VERSION,
     home: Path | None = None,
 ) -> dict[str, Any]:
+    require_systemd("chatup mysql --service")
     layout = mysql_layout(name=name, version=version, home=home)
     runtime = layout.runtime
     layout.service.parent.mkdir(parents=True, exist_ok=True)
@@ -414,9 +483,15 @@ def client_command(
     home: Path | None = None,
     binary: str = "mysql",
     database: str | None = None,
+    port: int = DEFAULT_MYSQL_PORT,
+    host: str = DEFAULT_MYSQL_BIND_ADDRESS,
 ) -> list[str]:
     layout = mysql_layout(name=name, version=version, home=home)
-    command = [str(layout.runtime / "bin" / binary), f"--socket={layout.socket}", "-uroot"]
+    command = [str(layout.runtime / "bin" / executable_name(binary)), "-uroot"]
+    if is_windows():
+        command.extend(["-h", host, "-P", str(port)])
+    else:
+        command.append(f"--socket={layout.socket}")
     if database is not None:
         validate_safe_name(database, field="database name")
         command.append(f"--database={database}")
@@ -427,10 +502,18 @@ def ping(
     name: str = DEFAULT_MYSQL_INSTANCE,
     version: str = DEFAULT_MYSQL_VERSION,
     home: Path | None = None,
+    port: int = DEFAULT_MYSQL_PORT,
+    host: str = DEFAULT_MYSQL_BIND_ADDRESS,
 ) -> dict[str, Any]:
     layout = mysql_layout(name=name, version=version, home=home)
+    command = [str(layout.runtime / "bin" / executable_name("mysqladmin")), "-uroot"]
+    if is_windows():
+        command.extend(["-h", host, "-P", str(port)])
+    else:
+        command.append(f"--socket={layout.socket}")
+    command.append("ping")
     result = subprocess.run(
-        [str(layout.runtime / "bin" / "mysqladmin"), f"--socket={layout.socket}", "-uroot", "ping"],
+        command,
         check=False,
         capture_output=True,
         text=True,
@@ -517,6 +600,7 @@ def setup_mysql(
     if service:
         result["service"] = install_service(name=name, version=version, home=home_path)
     if start:
+        require_systemd("chatup mysql --start")
         _raise_for_completed_process(systemctl_user(name, "start"), f"start {name}")
         result["start"] = {"unit": service_name(name), "started": True}
     if smoke:

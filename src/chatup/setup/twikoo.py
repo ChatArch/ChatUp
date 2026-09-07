@@ -15,6 +15,7 @@ import click
 from chatenv import get_paths
 
 from chatup.utils.custom_logger import setup_logger
+from chatup.utils.platforming import chmod_executable, chmod_private, executable_name, require_systemd
 
 logger = setup_logger("setup_twikoo")
 
@@ -92,12 +93,12 @@ def twikoo_layout(
     root = (home or default_twikoo_home()).expanduser()
     runtime = root / "runtimes" / version
     instance = root / "instances" / name
-    instance_bin = instance / "bin" / "twikoo"
+    instance_bin = instance / "bin" / executable_name("twikoo")
     return TwikooLayout(
         home=root,
         downloads=root / "downloads",
         runtime=runtime,
-        runtime_binary=runtime / "twikoo",
+        runtime_binary=runtime / executable_name("twikoo"),
         instance=instance,
         instance_bin=instance_bin,
         instance_env_link=instance / "bin" / ".env",
@@ -177,9 +178,9 @@ def install_twikoo_binary(
     with tempfile.TemporaryDirectory(prefix=".chatup-twikoo-", dir=layout.runtime) as tmp:
         tmp_path = Path(tmp) / selected_asset
         _download_url(url, tmp_path)
-        tmp_path.chmod(0o755)
+        chmod_executable(tmp_path)
         tmp_path.replace(layout.runtime_binary)
-    layout.runtime_binary.chmod(0o755)
+    chmod_executable(layout.runtime_binary)
     return {
         "version": version,
         "binary": str(layout.runtime_binary),
@@ -237,7 +238,7 @@ def _link_or_copy_binary(source: Path, target: Path, *, force: bool = False) -> 
         os.link(source, target)
     except OSError:
         shutil.copy2(source, target)
-    target.chmod(0o755)
+    chmod_executable(target)
 
 
 def ensure_runtime_binary(layout: TwikooLayout) -> Path:
@@ -292,12 +293,15 @@ def init_instance(
     support_files = _copy_support_files(layout.runtime, layout.instance_bin.parent, force=force)
     if not layout.env.exists() or force:
         layout.env.write_text(render_env(layout, port=port, bind_address=bind_address), encoding="utf-8")
-        layout.env.chmod(0o600)
+        chmod_private(layout.env)
     if layout.instance_env_link.exists() or layout.instance_env_link.is_symlink():
         if force:
             layout.instance_env_link.unlink()
     if not layout.instance_env_link.exists() and not layout.instance_env_link.is_symlink():
-        os.symlink(Path("../env/twikoo.env"), layout.instance_env_link)
+        try:
+            os.symlink(Path("../env/twikoo.env"), layout.instance_env_link)
+        except OSError:
+            shutil.copy2(layout.env, layout.instance_env_link)
     return {
         "instance": str(layout.instance),
         "binary": str(layout.instance_bin),
@@ -314,6 +318,7 @@ def install_service(
     home: Path | None = None,
     force: bool = False,
 ) -> dict[str, Any]:
+    require_systemd("chatup twikoo --service")
     layout = twikoo_layout(name=name, version=version, home=home)
     layout.service.path.parent.mkdir(parents=True, exist_ok=True)
     if not layout.service.path.exists() or force:
@@ -396,6 +401,7 @@ def setup_twikoo(
     if service:
         result["service"] = install_service(name=name, version=version, home=home, force=force)
     if start:
+        require_systemd("chatup twikoo --start")
         start_service(name)
         result["started"] = service_name(name)
     if smoke:

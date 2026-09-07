@@ -56,6 +56,14 @@ chatup
 
 </div>
 
+## Windows Compatibility
+
+- `chatup uv` uses the official PowerShell installer on Windows and prints the `Scripts/Activate.ps1` activation hint.
+- `chatup nodejs` reuses `node`/`npm` already on PATH on Windows instead of writing nvm shell init; when missing, it points users to the official installer, winget, or nvm-windows.
+- `chatup docker` checks Docker Desktop's `docker`/`docker compose` on Windows and skips Unix group/systemd checks.
+- `chatup mysql` selects the MySQL Windows ZIP asset, `.exe` binary names, and TCP client config; `gitea`/`mysql`/`twikoo`/`nginx` `--service` flows still require user-level systemd and fail clearly on Windows.
+- `chatup cursor-agent --credential-store file-wrapper` writes `.cmd` wrappers on Windows; `chatup frp` supports Windows ZIP release assets; `zsh` and `crs` remain POSIX/Linux-only setup flows.
+
 ## Base Commands
 
 | Command | Current capability |

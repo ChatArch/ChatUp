@@ -4,7 +4,6 @@ import hashlib
 import os
 import shlex
 import shutil
-import stat
 import subprocess
 import urllib.request
 from pathlib import Path
@@ -17,6 +16,7 @@ from chatenv.source_chain import split_config_sources
 from chatup.const import CHATARCH_ENV_DIR
 from chatup.interaction import abort_if_force_without_tty, resolve_interactive_mode, resolve_value
 from chatup.utils.custom_logger import setup_logger
+from chatup.utils.platforming import chmod_private, is_windows, require_non_windows
 
 logger = setup_logger("setup_hermes")
 
@@ -73,7 +73,7 @@ def _download_installer() -> Path:
     logger.info("Downloading ChatArch Hermes installer")
     with urllib.request.urlopen(CHATARCH_HERMES_INSTALLER_URL, timeout=60) as response:
         tmp.write_bytes(response.read())
-    tmp.chmod(stat.S_IRUSR | stat.S_IWUSR)
+    chmod_private(tmp)
     tmp.replace(target)
     return target
 
@@ -254,7 +254,7 @@ def _upsert_env_values(path: Path, values: dict[str, str]) -> list[str]:
         output.append(f"{key}={_quote_env_value(str(value))}")
 
     path.write_text("\n".join(output).rstrip() + "\n", encoding="utf-8")
-    path.chmod(stat.S_IRUSR | stat.S_IWUSR)
+    chmod_private(path)
     return changed
 
 
@@ -320,7 +320,7 @@ def _upsert_model_config(path: Path, values: dict[str, str]) -> list[str]:
             changed.append(f"model.{key}")
 
     path.write_text("\n".join(output).rstrip() + "\n", encoding="utf-8")
-    path.chmod(stat.S_IRUSR | stat.S_IWUSR)
+    chmod_private(path)
     return changed
 
 
@@ -329,6 +329,7 @@ def _hermes_installed(hermes_home: Path) -> bool:
 
 
 def _run_installer(installer_path: Path, hermes_home: Path) -> None:
+    require_non_windows("Hermes shell installer")
     env = os.environ.copy()
     env["HERMES_HOME"] = str(hermes_home)
     command = ["bash", str(installer_path)]
@@ -361,7 +362,10 @@ def _webui_env_values(
 ) -> dict[str, str]:
     values = {
         "HERMES_WEBUI_AGENT_DIR": _resolve_agent_dir(),
-        "HERMES_WEBUI_PYTHON": shutil.which("python3") or shutil.which("python") or "",
+        "HERMES_WEBUI_PYTHON": (shutil.which("python") if is_windows() else None)
+        or shutil.which("python3")
+        or shutil.which("python")
+        or "",
         "HERMES_WEBUI_HOST": host,
         "HERMES_WEBUI_PORT": str(port),
         "HERMES_WEBUI_STATE_DIR": str(state_dir or hermes_home / "webui-mvp"),
@@ -394,7 +398,9 @@ def _start_webui(webui_dir: Path, env_values: dict[str, str]) -> None:
 
     env = os.environ.copy()
     env.update(env_values)
-    if (webui_dir / "ctl.sh").is_file():
+    if is_windows() and (webui_dir / "bootstrap.py").is_file():
+        command = [env_values.get("HERMES_WEBUI_PYTHON") or "python", "bootstrap.py"]
+    elif (webui_dir / "ctl.sh").is_file():
         command = ["./ctl.sh", "start"]
     elif (webui_dir / "start.sh").is_file():
         command = ["./start.sh"]

@@ -1,3 +1,4 @@
+import json
 import subprocess
 
 import pytest
@@ -151,10 +152,9 @@ def test_metadata_path_tampering_is_rejected(tmp_path):
         installer=_installer,
     )
     metadata = installation.root_dir / "installation.json"
-    payload = metadata.read_text(encoding="utf-8").replace(
-        str(installation.binary_path), str(tmp_path / "outside-browser")
-    )
-    metadata.write_text(payload, encoding="utf-8")
+    payload = json.loads(metadata.read_text(encoding="utf-8"))
+    payload["binary_path"] = str(tmp_path / "outside-browser")
+    metadata.write_text(json.dumps(payload), encoding="utf-8")
 
     with pytest.raises(PlaywrightError, match="escapes"):
         resolve_playwright_browser("1.61.1", home=home)

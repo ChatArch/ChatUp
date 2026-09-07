@@ -1,9 +1,11 @@
 import hashlib
+import os
 
 import pytest
 from click.testing import CliRunner
 
 from chatup.cli import main
+from chatup.utils.platforming import executable_name
 
 
 def test_chatup_root_help_lists_setup_commands_without_setup_group_or_alias():
@@ -133,7 +135,7 @@ def test_gitea_help_exposes_release_install_options():
     assert "--repo" in result.output
     assert "ChatArch/gitea" in result.output
     assert "--install-dir" in result.output
-    assert "chattea/bin" in result.output
+    assert "chattea" in result.output and "bin" in result.output
     assert "--init" in result.output
     assert "--service" in result.output
     assert "--force" in result.output
@@ -166,7 +168,7 @@ def test_gitea_setup_downloads_chatarch_release_asset(monkeypatch, tmp_path):
 
     assert result.exit_code == 0, result.output
     assert installed == [
-        ("ChatArch/gitea", "latest", tmp_path / "bin", "gitea", True)
+        ("ChatArch/gitea", "latest", tmp_path / "bin", executable_name("gitea"), True)
     ]
     assert "gitea version 1.0.0" in result.output
 
@@ -323,6 +325,7 @@ def test_gitea_init_writes_chattea_compatible_config(monkeypatch, tmp_path):
 
     monkeypatch.setattr(gitea_setup, "install_gitea_release_binary", fake_install_release_binary)
     monkeypatch.setattr(gitea_setup, "verify_gitea_binary", lambda path, version: f"gitea version {version}")
+    monkeypatch.setattr(gitea_setup.subprocess, "run", lambda *args, **kwargs: None)
     monkeypatch.setattr(gitea_setup, "generate_secret", lambda size=48: f"secret-{size}")
 
     work_dir = tmp_path / "chattea" / "gitea"
@@ -351,7 +354,8 @@ def test_gitea_init_writes_chattea_compatible_config(monkeypatch, tmp_path):
     assert "HTTP_PORT = 3010" in text
     assert "DB_TYPE = sqlite3" in text
     assert "SECRET_KEY = secret-48" in text
-    assert config.stat().st_mode & 0o777 == 0o600
+    if os.name != "nt":
+        assert config.stat().st_mode & 0o777 == 0o600
 
 
 def test_mysql_help_exposes_chatdata_runtime_defaults():

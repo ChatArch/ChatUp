@@ -3,6 +3,7 @@ from __future__ import annotations
 from click.testing import CliRunner
 
 from chatup.cli import main
+from chatup.utils.platforming import executable_name
 
 
 def test_twikoo_layout_uses_chatarch_home_and_instance_scoped_paths(tmp_path):
@@ -12,9 +13,9 @@ def test_twikoo_layout_uses_chatarch_home_and_instance_scoped_paths(tmp_path):
 
     assert layout.home == tmp_path / "twikoo"
     assert layout.runtime == tmp_path / "twikoo" / "runtimes" / "1.7.15"
-    assert layout.runtime_binary == tmp_path / "twikoo" / "runtimes" / "1.7.15" / "twikoo"
+    assert layout.runtime_binary == tmp_path / "twikoo" / "runtimes" / "1.7.15" / executable_name("twikoo")
     assert layout.instance == tmp_path / "twikoo" / "instances" / "chatblog"
-    assert layout.instance_bin == tmp_path / "twikoo" / "instances" / "chatblog" / "bin" / "twikoo"
+    assert layout.instance_bin == tmp_path / "twikoo" / "instances" / "chatblog" / "bin" / executable_name("twikoo")
     assert layout.instance_env_link == tmp_path / "twikoo" / "instances" / "chatblog" / "bin" / ".env"
     assert layout.binary == layout.instance_bin
     assert layout.env == tmp_path / "twikoo" / "instances" / "chatblog" / "env" / "twikoo.env"

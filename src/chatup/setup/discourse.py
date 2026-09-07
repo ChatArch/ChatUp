@@ -105,7 +105,9 @@ def ensure_directories(home: Path) -> dict[str, Path]:
     }
     for path in paths.values():
         path.mkdir(parents=True, exist_ok=True)
-    paths["secrets"].chmod(0o700)
+    from chatup.utils.platforming import chmod_private_dir
+
+    chmod_private_dir(paths["secrets"])
     return paths
 
 
@@ -162,7 +164,9 @@ def setup_discourse(
                 render_app_yml(hostname=hostname, port=port, shared_dir=paths["shared"], with_ai=with_ai),
                 encoding="utf-8",
             )
-            app_yml.chmod(0o640)
+            from chatup.utils.platforming import chmod_private
+
+            chmod_private(app_yml)
 
     if clone:
         clone_or_update_discourse_docker(paths["docker"], repo)

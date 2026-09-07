@@ -14,6 +14,7 @@ from chatup.interaction import (
     resolve_interactive_mode,
 )
 from chatup.utils.custom_logger import setup_logger
+from chatup.utils.platforming import is_windows
 
 logger = setup_logger("setup_docker")
 DOCKER_COMPOSE_VERSION = "v2.22.0"
@@ -26,7 +27,10 @@ def _configure_logger(log_level="INFO"):
 
 
 def _run(command: list[str]) -> subprocess.CompletedProcess:
-    return subprocess.run(command, capture_output=True, text=True)
+    try:
+        return subprocess.run(command, capture_output=True, text=True)
+    except FileNotFoundError as exc:
+        return subprocess.CompletedProcess(command, 127, "", str(exc))
 
 
 def _ensure_success(result: subprocess.CompletedProcess, step_name: str) -> None:
@@ -102,6 +106,20 @@ def setup_docker(interactive=None, use_sudo=False, log_level="INFO"):
         auto_prompt_condition=True,
     )
     abort_if_force_without_tty(force_interactive, can_prompt, usage)
+
+    if is_windows():
+        docker_version = _docker_version()
+        if docker_version:
+            click.echo(f"Docker already installed: {docker_version}")
+        else:
+            click.echo("Docker CLI not found. Install Docker Desktop for Windows and ensure `docker` is on PATH.")
+        compose_version = _docker_compose_version()
+        if compose_version:
+            click.echo(f"Docker Compose already installed: {compose_version}")
+        else:
+            click.echo("Docker Compose not found. Docker Desktop usually provides `docker compose`.")
+        click.echo("Docker group/systemd checks are skipped on Windows.")
+        return {"docker": docker_version, "compose": compose_version, "platform": "windows"}
 
     logger.info("Start docker setup")
     user_name = _get_user_name()

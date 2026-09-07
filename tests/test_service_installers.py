@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+
 from click.testing import CliRunner
 from chatenv.paths import get_paths
 from chatenv.store import EnvStore
@@ -10,6 +12,10 @@ from chatup.setup.discourse import setup_discourse
 from chatup.setup.service_credentials import load_chatenv_values
 from chatup.setup.zulip import setup_zulip
 
+
+def _assert_private_file(path):
+    if os.name != "nt":
+        assert path.stat().st_mode & 0o777 == 0o600
 
 def test_discourse_and_zulip_help_expose_chatenv_options():
     for command in ["discourse", "zulip"]:
@@ -91,7 +97,7 @@ def test_discourse_setup_writes_admin_env_and_chatarc_internal_app_yml(tmp_path)
     admin_env = home / "secrets" / "admin.env"
     app_yml = home / "docker" / "containers" / "app.yml"
     assert result["admin_env"] == str(admin_env)
-    assert admin_env.stat().st_mode & 0o777 == 0o600
+    _assert_private_file(admin_env)
     assert "DISCOURSE_ADMIN_PASSWORD=secret-password" in admin_env.read_text(encoding="utf-8")
     text = app_yml.read_text(encoding="utf-8")
     assert f"host: {home / 'shared' / 'standalone'}" in text
@@ -114,7 +120,7 @@ def test_zulip_setup_writes_compose_with_bind_mounts_and_hidden_admin_password(t
     admin_env = home / "secrets" / "admin.env"
     compose = home / "compose" / "compose.yaml"
     assert result["admin_env"] == str(admin_env)
-    assert admin_env.stat().st_mode & 0o777 == 0o600
+    _assert_private_file(admin_env)
     assert "ZULIP_ADMIN_PASSWORD=secret-password" in admin_env.read_text(encoding="utf-8")
     text = compose.read_text(encoding="utf-8")
     assert "127.0.0.1:3099:80" in text
@@ -128,7 +134,7 @@ def test_zulip_setup_writes_compose_with_bind_mounts_and_hidden_admin_password(t
     for name in ["postgres_password", "memcached_password", "rabbitmq_password", "redis_password", "secret_key", "email_password"]:
         path = home / "secrets" / name
         assert path.exists()
-        assert path.stat().st_mode & 0o777 == 0o600
+        _assert_private_file(path)
 
 
 def test_zulip_setup_accepts_admin_mail_alias(tmp_path):

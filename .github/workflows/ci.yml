@@ -12,10 +12,14 @@ permissions:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    env:
+      PYTHONUTF8: "1"
+      PYTHONIOENCODING: utf-8
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-latest, windows-latest]
         python-version: ["3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
@@ -33,13 +37,21 @@ jobs:
       - run: python -m build
       - run: python -m twine check dist/*
       - name: Verify built wheel CLI contract
+        shell: bash
         run: |
-          python -m venv "$RUNNER_TEMP/chatup-wheel"
-          "$RUNNER_TEMP/chatup-wheel/bin/python" -m pip install dist/*.whl
-          (
-            cd "$RUNNER_TEMP"
-            "$RUNNER_TEMP/chatup-wheel/bin/chatup" --version
-            "$RUNNER_TEMP/chatup-wheel/bin/chatup" --tree
-            "$RUNNER_TEMP/chatup-wheel/bin/chatup" --tree-brief
-          )
+          python - <<'PY'
+          import glob
+          import os
+          from pathlib import Path
+          import subprocess
+          import sys
+
+          venv = Path(os.environ["RUNNER_TEMP"]) / "chatup-wheel"
+          subprocess.check_call([sys.executable, "-m", "venv", str(venv)])
+          python_bin = venv / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
+          chatup_bin = venv / ("Scripts/chatup.exe" if os.name == "nt" else "bin/chatup")
+          subprocess.check_call([str(python_bin), "-m", "pip", "install", *glob.glob("dist/*.whl")])
+          for args in (["--version"], ["--tree"], ["--tree-brief"]):
+              subprocess.check_call([str(chatup_bin), *args], cwd=os.environ["RUNNER_TEMP"])
+          PY
       - run: mkdocs build --strict

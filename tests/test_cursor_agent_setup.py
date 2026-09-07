@@ -4,6 +4,7 @@ import json
 import os
 import subprocess
 
+import pytest
 from click.testing import CliRunner
 from chatenv.paths import get_paths
 from chatenv.store import EnvStore
@@ -13,15 +14,32 @@ from chatup.config import CursorAgentConfig
 from chatup.setup.cursor_agent import setup_cursor_agent
 
 
+def _set_test_home(monkeypatch, home):
+    monkeypatch.setenv("HOME", str(home))
+    monkeypatch.setenv("USERPROFILE", str(home))
+
+
+def _is_windows() -> bool:
+    return os.name == "nt"
+
+
+def _assert_private_file(path):
+    if not _is_windows():
+        assert path.stat().st_mode & 0o777 == 0o600
+
+
 def _install_fake_cursor_agent(tmp_path, monkeypatch):
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
-    binary = bin_dir / "cursor-agent"
-    binary.write_text(
-        "#!/usr/bin/env bash\n"
-        "case \"${1:-}\" in --version) echo test-cursor-agent ;; *) echo test-cursor-agent ;; esac\n",
-        encoding="utf-8",
-    )
+    binary = bin_dir / ("cursor-agent.cmd" if _is_windows() else "cursor-agent")
+    if _is_windows():
+        binary.write_text("@echo off\necho test-cursor-agent\n", encoding="utf-8")
+    else:
+        binary.write_text(
+            "#!/usr/bin/env bash\n"
+            "case \"${1:-}\" in --version) echo test-cursor-agent ;; *) echo test-cursor-agent ;; esac\n",
+            encoding="utf-8",
+        )
     binary.chmod(0o755)
     monkeypatch.setenv("PATH", os.pathsep.join([str(bin_dir), os.environ.get("PATH", "")]))
     return binary
@@ -58,10 +76,13 @@ def test_cursor_agent_resolves_standard_user_bin_when_path_omits_it(tmp_path, mo
     home = tmp_path / "home"
     bin_dir = home / ".local" / "bin"
     bin_dir.mkdir(parents=True)
-    binary = bin_dir / "cursor-agent"
-    binary.write_text("#!/usr/bin/env bash\necho test-cursor-agent\n", encoding="utf-8")
+    binary = bin_dir / ("cursor-agent.cmd" if _is_windows() else "cursor-agent")
+    if _is_windows():
+        binary.write_text("@echo off\necho test-cursor-agent\n", encoding="utf-8")
+    else:
+        binary.write_text("#!/usr/bin/env bash\necho test-cursor-agent\n", encoding="utf-8")
     binary.chmod(0o755)
-    monkeypatch.setenv("HOME", str(home))
+    _set_test_home(monkeypatch, home)
     monkeypatch.setenv("PATH", "/usr/bin:/bin")
 
     result = setup_cursor_agent(install_only=True, verify=False, interactive=False)
@@ -77,7 +98,7 @@ def test_cursor_agent_auth_env_writes_auth_json_with_restrictive_mode(tmp_path, 
         "CURSOR_ACCESS_TOKEN=access-secret\nCURSOR_REFRESH_TOKEN=refresh-secret\n",
         encoding="utf-8",
     )
-    monkeypatch.setenv("HOME", str(home))
+    _set_test_home(monkeypatch, home)
     _install_fake_cursor_agent(tmp_path, monkeypatch)
 
     result = setup_cursor_agent(
@@ -90,7 +111,7 @@ def test_cursor_agent_auth_env_writes_auth_json_with_restrictive_mode(tmp_path, 
     auth_path = home / ".config" / "cursor" / "auth.json"
     data = json.loads(auth_path.read_text(encoding="utf-8"))
     assert data == {"accessToken": "access-secret", "refreshToken": "refresh-secret"}
-    assert auth_path.stat().st_mode & 0o777 == 0o600
+    _assert_private_file(auth_path)
     assert result["auth_json_written"] is True
     assert "access-secret" not in json.dumps(result)
     assert "refresh-secret" not in json.dumps(result)
@@ -103,7 +124,7 @@ def test_cursor_agent_env_ref_file_writes_auth_json(tmp_path, monkeypatch):
         "CURSOR_ACCESS_TOKEN=env-access\nCURSOR_REFRESH_TOKEN=env-refresh\n",
         encoding="utf-8",
     )
-    monkeypatch.setenv("HOME", str(home))
+    _set_test_home(monkeypatch, home)
     _install_fake_cursor_agent(tmp_path, monkeypatch)
 
     result = setup_cursor_agent(
@@ -116,7 +137,7 @@ def test_cursor_agent_env_ref_file_writes_auth_json(tmp_path, monkeypatch):
     auth_path = home / ".config" / "cursor" / "auth.json"
     data = json.loads(auth_path.read_text(encoding="utf-8"))
     assert data == {"accessToken": "env-access", "refreshToken": "env-refresh"}
-    assert auth_path.stat().st_mode & 0o777 == 0o600
+    _assert_private_file(auth_path)
     assert result["auth_json_written"] is True
     assert result["env_profile_loaded"] is False
     assert "env-access" not in json.dumps(result)
@@ -126,7 +147,7 @@ def test_cursor_agent_env_ref_file_writes_auth_json(tmp_path, monkeypatch):
 def test_cursor_agent_env_ref_profile_loads_auth(tmp_path, monkeypatch):
     home = tmp_path / "home"
     chatarch_home = tmp_path / "chatarch"
-    monkeypatch.setenv("HOME", str(home))
+    _set_test_home(monkeypatch, home)
     monkeypatch.setenv("CHATARCH_HOME", str(chatarch_home))
     _install_fake_cursor_agent(tmp_path, monkeypatch)
     store = EnvStore(get_paths().envs_dir)
@@ -145,7 +166,7 @@ def test_cursor_agent_env_ref_profile_loads_auth(tmp_path, monkeypatch):
     auth_path = home / ".config" / "cursor" / "auth.json"
     data = json.loads(auth_path.read_text(encoding="utf-8"))
     assert data == {"accessToken": "fast-access", "refreshToken": "fast-refresh"}
-    assert auth_path.stat().st_mode & 0o777 == 0o600
+    _assert_private_file(auth_path)
     assert result["env_profile_loaded"] is True
     assert result["auth_json_written"] is True
     assert "fast-access" not in json.dumps(result)
@@ -164,7 +185,7 @@ def test_cursor_agent_copies_auth_json_and_cli_config_with_restrictive_mode(tmp_
         json.dumps({"authInfo": {"email": "user@example.com"}, "selectedModel": {"modelId": "gpt-5"}}),
         encoding="utf-8",
     )
-    monkeypatch.setenv("HOME", str(home))
+    _set_test_home(monkeypatch, home)
     _install_fake_cursor_agent(tmp_path, monkeypatch)
 
     result = setup_cursor_agent(
@@ -177,13 +198,15 @@ def test_cursor_agent_copies_auth_json_and_cli_config_with_restrictive_mode(tmp_
 
     auth_path = home / ".config" / "cursor" / "auth.json"
     config_path = home / ".cursor" / "cli-config.json"
-    assert auth_path.stat().st_mode & 0o777 == 0o600
-    assert config_path.stat().st_mode & 0o777 == 0o600
+    _assert_private_file(auth_path)
+    _assert_private_file(config_path)
     assert result["auth_json_written"] is True
     assert result["cli_config_written"] is True
 
 
 def test_cursor_agent_file_wrapper_reads_auth_json_without_storing_secret(tmp_path, monkeypatch):
+    if _is_windows():
+        pytest.skip("POSIX wrapper execution uses bash; Windows .cmd wrapper is covered separately.")
     home = tmp_path / "home"
     bin_dir = home / ".local" / "bin"
     version_dir = home / ".local" / "share" / "cursor-agent" / "versions" / "test-version"
@@ -203,7 +226,7 @@ def test_cursor_agent_file_wrapper_reads_auth_json_without_storing_secret(tmp_pa
         json.dumps({"accessToken": "access-secret", "refreshToken": "refresh-secret"}),
         encoding="utf-8",
     )
-    monkeypatch.setenv("HOME", str(home))
+    _set_test_home(monkeypatch, home)
     monkeypatch.setenv("PATH", "/usr/bin:/bin")
 
     result = setup_cursor_agent(
@@ -233,7 +256,7 @@ def test_cursor_agent_file_wrapper_reads_auth_json_without_storing_secret(tmp_pa
 def test_cursor_agent_loads_auth_from_chatenv_profile(tmp_path, monkeypatch):
     home = tmp_path / "home"
     chatarch_home = tmp_path / "chatarch"
-    monkeypatch.setenv("HOME", str(home))
+    _set_test_home(monkeypatch, home)
     monkeypatch.setenv("CHATARCH_HOME", str(chatarch_home))
     _install_fake_cursor_agent(tmp_path, monkeypatch)
     store = EnvStore(get_paths().envs_dir)
@@ -252,7 +275,7 @@ def test_cursor_agent_loads_auth_from_chatenv_profile(tmp_path, monkeypatch):
     auth_path = home / ".config" / "cursor" / "auth.json"
     data = json.loads(auth_path.read_text(encoding="utf-8"))
     assert data == {"accessToken": "profile-access", "refreshToken": "profile-refresh"}
-    assert auth_path.stat().st_mode & 0o777 == 0o600
+    _assert_private_file(auth_path)
     assert result["env_profile_loaded"] is True
     assert result["auth_json_written"] is True
     assert "profile-access" not in json.dumps(result)
@@ -267,7 +290,7 @@ def test_cursor_agent_saves_imported_auth_to_chatenv_profile(tmp_path, monkeypat
         "CURSOR_ACCESS_TOKEN=save-access\nCURSOR_REFRESH_TOKEN=save-refresh\n",
         encoding="utf-8",
     )
-    monkeypatch.setenv("HOME", str(home))
+    _set_test_home(monkeypatch, home)
     monkeypatch.setenv("CHATARCH_HOME", str(chatarch_home))
     _install_fake_cursor_agent(tmp_path, monkeypatch)
 

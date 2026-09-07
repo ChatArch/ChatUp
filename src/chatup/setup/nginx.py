@@ -11,6 +11,7 @@ import click
 from chatenv import get_paths
 
 from chatup.interaction import abort_if_force_without_tty, resolve_interactive_mode
+from chatup.utils.platforming import chmod_executable, executable_name, require_systemd
 
 DEFAULT_NGINX_HOME = get_paths().home_dir / "nginx"
 DEFAULT_NGINX_BIND_ADDRESS = "127.0.0.1"
@@ -256,7 +257,7 @@ def nginx_layout(home: str | Path | None = None) -> NginxLayout:
     return NginxLayout(
         home=root,
         bin_dir=root / "bin",
-        binary=root / "bin" / "nginx",
+        binary=root / "bin" / executable_name("nginx"),
         conf=root / "conf",
         nginx_conf=root / "conf" / "nginx.conf",
         sites_available=root / "conf" / "sites-available",
@@ -295,14 +296,14 @@ def install_nginx_binary(
     layout.bin_dir.mkdir(parents=True, exist_ok=True)
     if source.resolve() != layout.binary.resolve():
         shutil.copy2(source, layout.binary)
-    layout.binary.chmod(layout.binary.stat().st_mode | 0o755)
+    chmod_executable(layout.binary)
     return {"binary": str(layout.binary), "source": str(source), "reused": False}
 
 
 def render_nginx_conf(layout: NginxLayout) -> str:
     return f"""worker_processes  1;
-error_log  {layout.logs}/error.log info;
-pid        {layout.run}/nginx.pid;
+error_log  {layout.logs / 'error.log'} info;
+pid        {layout.run / 'nginx.pid'};
 
 events {{
     worker_connections  1024;
@@ -310,17 +311,17 @@ events {{
 
 http {{
     default_type  application/octet-stream;
-    access_log    {layout.logs}/access.log;
+    access_log    {layout.logs / 'access.log'};
     sendfile      on;
     keepalive_timeout  65;
 
-    client_body_temp_path {layout.temp}/client_body;
-    proxy_temp_path       {layout.temp}/proxy;
-    fastcgi_temp_path     {layout.temp}/fastcgi;
-    uwsgi_temp_path       {layout.temp}/uwsgi;
-    scgi_temp_path        {layout.temp}/scgi;
+    client_body_temp_path {layout.temp / 'client_body'};
+    proxy_temp_path       {layout.temp / 'proxy'};
+    fastcgi_temp_path     {layout.temp / 'fastcgi'};
+    uwsgi_temp_path       {layout.temp / 'uwsgi'};
+    scgi_temp_path        {layout.temp / 'scgi'};
 
-    include {layout.sites_enabled}/*.conf;
+    include {layout.sites_enabled / '*.conf'};
 }}
 """
 
@@ -590,12 +591,13 @@ def setup_nginx(
         layout.bin_dir.mkdir(parents=True, exist_ok=True)
         if not layout.binary.exists():
             shutil.copy2(source, layout.binary)
-            layout.binary.chmod(layout.binary.stat().st_mode | 0o755)
+            chmod_executable(layout.binary)
     if init:
         result["init"] = init_nginx_runtime(
             layout, bind_address=bind_address, port=port, force=force
         )
     if service:
+        require_systemd("chatup nginx --service")
         if not layout.nginx_conf.exists():
             raise click.ClickException("--service requires --init or an existing nginx.conf.")
         result["service"] = install_user_service(layout)

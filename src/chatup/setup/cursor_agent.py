@@ -5,7 +5,6 @@ import os
 from pathlib import Path
 import shutil
 import shlex
-import stat
 import subprocess
 from typing import Any
 
@@ -15,6 +14,7 @@ from chatenv.store import EnvStore
 
 from chatup.config import CursorAgentConfig
 from chatup.utils.custom_logger import setup_logger
+from chatup.utils.platforming import chmod_executable, chmod_private, is_windows, user_bin_candidates
 
 DEFAULT_INSTALL_URL = "https://cursor.com/install"
 CREDENTIAL_STORE_CHOICES = ("native", "file-wrapper")
@@ -44,10 +44,7 @@ def _cursor_agent_state_path() -> Path:
 
 
 def _chmod_private(path: Path) -> None:
-    try:
-        path.chmod(0o600)
-    except PermissionError:
-        logger.warning(f"Could not chmod private file: {path}")
+    chmod_private(path)
 
 
 def _read_json_file(path: Path) -> dict[str, Any]:
@@ -168,9 +165,16 @@ def _resolve_command_or_user_bin(name: str) -> Path | None:
     found = shutil.which(name)
     if found:
         candidates.append(Path(found).expanduser())
-    candidates.append(Path.home() / ".local" / "bin" / name)
+    candidates.extend(user_bin_candidates(name))
+    if is_windows():
+        candidates.extend(
+            [
+                Path.home() / ".local" / "bin" / f"{name}.cmd",
+                Path.home() / ".local" / "bin" / f"{name}.bat",
+            ]
+        )
     for candidate in candidates:
-        if candidate.exists() and os.access(candidate, os.X_OK):
+        if candidate.exists() and (is_windows() or os.access(candidate, os.X_OK)):
             return candidate
     return None
 
@@ -190,14 +194,19 @@ def _managed_wrapper_official_target(entrypoint: Path) -> Path | None:
     if WRAPPER_MARKER not in text:
         return None
     for line in text.splitlines():
-        if line.startswith("CHATUP_CURSOR_AGENT_OFFICIAL="):
-            value = line.split("=", 1)[1]
+        stripped = line.strip()
+        if stripped.startswith("CHATUP_CURSOR_AGENT_OFFICIAL="):
+            value = stripped.split("=", 1)[1]
             try:
                 parts = shlex.split(value)
             except ValueError:
                 return None
             if parts:
                 return Path(parts[0])
+        if stripped.lower().startswith('set "chatup_cursor_agent_official=') and stripped.endswith('"'):
+            value = stripped.split("=", 1)[1][:-1]
+            if value:
+                return Path(value)
     return None
 
 
@@ -231,7 +240,24 @@ def _write_file_credential_wrapper(entrypoint: Path, official_binary: Path, auth
     if existing_target and existing_target == entrypoint:
         raise click.ClickException(f"Refusing to wrap Cursor Agent entrypoint that resolves to itself: {entrypoint}")
     official = official_binary.expanduser()
-    script = f'''#!/usr/bin/env bash
+    if is_windows():
+        script = f'''@echo off
+rem {WRAPPER_MARKER}.
+rem This wrapper does not store token values; it reads Cursor auth.json at runtime.
+set "CHATUP_CURSOR_AGENT_OFFICIAL={official}"
+if "%CURSOR_AGENT_AUTH_JSON%"=="" (
+  set "CHATUP_CURSOR_AGENT_AUTH_JSON={auth_path}"
+) else (
+  set "CHATUP_CURSOR_AGENT_AUTH_JSON=%CURSOR_AGENT_AUTH_JSON%"
+)
+if "%AGENT_CLI_CREDENTIAL_STORE%"=="" set "AGENT_CLI_CREDENTIAL_STORE=file"
+if "%CURSOR_AUTH_TOKEN%"=="" if exist "%CHATUP_CURSOR_AGENT_AUTH_JSON%" (
+  for /f "usebackq delims=" %%T in (`python -c "import json,sys; print(json.load(open(sys.argv[1], encoding='utf-8')).get('accessToken',''), end='')" "%CHATUP_CURSOR_AGENT_AUTH_JSON%"`) do set "CURSOR_AUTH_TOKEN=%%T"
+)
+"%CHATUP_CURSOR_AGENT_OFFICIAL%" %*
+'''
+    else:
+        script = f'''#!/usr/bin/env bash
 set -euo pipefail
 # {WRAPPER_MARKER}.
 # This wrapper does not store token values; it reads Cursor auth.json at runtime.
@@ -256,13 +282,19 @@ fi
 exec -a "$0" "$CHATUP_CURSOR_AGENT_OFFICIAL" "$@"
 '''
     entrypoint.write_text(script, encoding="utf-8")
-    entrypoint.chmod(0o755)
+    chmod_executable(entrypoint)
     return True
 
 
 def _write_file_credential_wrappers(binary: str) -> list[str]:
     official = _resolve_official_cursor_agent_binary(binary)
     written: list[str] = []
+    if is_windows():
+        for name in ("cursor-agent", "agent"):
+            entrypoint = official.parent / f"{name}.cmd"
+            if _write_file_credential_wrapper(entrypoint, official, _cursor_auth_path()):
+                written.append(str(entrypoint))
+        return written
     for name in ("cursor-agent", "agent"):
         entrypoint = _entrypoint_for(name)
         if not entrypoint:
@@ -278,6 +310,10 @@ def _write_file_credential_wrappers(binary: str) -> list[str]:
 def _install_cursor_agent_if_needed(*, install_url: str = DEFAULT_INSTALL_URL) -> bool:
     if _resolve_cursor_agent_binary():
         return False
+    if is_windows():
+        raise click.ClickException(
+            "Cursor Agent was not found on PATH. Install Cursor Agent for Windows first, then rerun ChatUp."
+        )
     script = subprocess.run(
         ["bash", "-lc", f"curl -fsSL {install_url!r} | bash"],
         text=True,

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 
 import click
 import pytest
@@ -12,6 +13,11 @@ def _write_env(path, values):
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def _set_test_home(monkeypatch, home):
+    monkeypatch.setenv("HOME", str(home))
+    monkeypatch.setenv("USERPROFILE", str(home))
+
+
 def test_codex_env_profile_does_not_backfill_missing_key_from_active_or_process_env(
     tmp_path, monkeypatch
 ):
@@ -20,7 +26,7 @@ def test_codex_env_profile_does_not_backfill_missing_key_from_active_or_process_
     home = tmp_path / "home"
     envs_dir = tmp_path / "chatarch" / "envs"
     openai_dir = envs_dir / "OpenAI"
-    monkeypatch.setenv("HOME", str(home))
+    _set_test_home(monkeypatch, home)
     monkeypatch.setenv("OPENAI_API_KEY", "process-key-should-not-be-used")
     monkeypatch.setenv("OPENAI_API_BASE", "https://process.example/v1")
     monkeypatch.setenv("OPENAI_API_MODEL", "process-model")
@@ -67,7 +73,7 @@ def test_codex_env_profile_writes_exact_named_profile_values(tmp_path, monkeypat
     home = tmp_path / "home"
     envs_dir = tmp_path / "chatarch" / "envs"
     openai_dir = envs_dir / "OpenAI"
-    monkeypatch.setenv("HOME", str(home))
+    _set_test_home(monkeypatch, home)
     monkeypatch.setenv("OPENAI_API_KEY", "process-key-should-not-be-used")
     monkeypatch.setattr(codex_setup, "CHATARCH_ENV_DIR", envs_dir)
     monkeypatch.setattr(codex_setup, "CHATARCH_ENV_FILE", envs_dir / ".env")
@@ -100,7 +106,8 @@ def test_codex_env_profile_writes_exact_named_profile_values(tmp_path, monkeypat
     auth_path = home / ".codex" / "auth.json"
     auth_data = json.loads(auth_path.read_text(encoding="utf-8"))
     assert auth_data == {"OPENAI_API_KEY": "apple-key"}
-    assert auth_path.stat().st_mode & 0o777 == 0o600
+    if os.name != "nt":
+        assert auth_path.stat().st_mode & 0o777 == 0o600
 
     config_text = (home / ".codex" / "config.toml").read_text(encoding="utf-8")
     assert 'model = "gpt-5.5"' in config_text
@@ -115,7 +122,7 @@ def test_codex_env_dotenv_ref_loads_active_openai_profile(tmp_path, monkeypatch)
     home = tmp_path / "home"
     envs_dir = tmp_path / "chatarch" / "envs"
     openai_dir = envs_dir / "OpenAI"
-    monkeypatch.setenv("HOME", str(home))
+    _set_test_home(monkeypatch, home)
     monkeypatch.setenv("OPENAI_API_KEY", "process-key-should-not-be-used")
     monkeypatch.setattr(codex_setup, "CHATARCH_ENV_DIR", envs_dir)
     monkeypatch.setattr(codex_setup, "CHATARCH_ENV_FILE", envs_dir / ".env")
@@ -150,7 +157,7 @@ def test_codex_env_profile_rejects_dotenv_interpolation_backfill(tmp_path, monke
     home = tmp_path / "home"
     envs_dir = tmp_path / "chatarch" / "envs"
     openai_dir = envs_dir / "OpenAI"
-    monkeypatch.setenv("HOME", str(home))
+    _set_test_home(monkeypatch, home)
     monkeypatch.setenv("OPENAI_API_KEY", "process-key-should-not-be-used")
     monkeypatch.setattr(codex_setup, "CHATARCH_ENV_DIR", envs_dir)
     monkeypatch.setattr(codex_setup, "CHATARCH_ENV_FILE", envs_dir / ".env")
@@ -181,7 +188,7 @@ def test_codex_env_profile_rejects_path_traversal_name(tmp_path, monkeypatch):
     home = tmp_path / "home"
     envs_dir = tmp_path / "chatarch" / "envs"
     other_dir = envs_dir / "Other"
-    monkeypatch.setenv("HOME", str(home))
+    _set_test_home(monkeypatch, home)
     monkeypatch.setattr(codex_setup, "CHATARCH_ENV_DIR", envs_dir)
     monkeypatch.setattr(codex_setup, "CHATARCH_ENV_FILE", envs_dir / ".env")
     monkeypatch.setattr(codex_setup, "ensure_nodejs_requirement", lambda **kwargs: None)
@@ -222,7 +229,7 @@ def test_codex_env_profile_prompt_defaults_stay_inside_selected_profile(
         'base_url = "https://existing.example/v1"\n',
         encoding="utf-8",
     )
-    monkeypatch.setenv("HOME", str(home))
+    _set_test_home(monkeypatch, home)
     monkeypatch.setenv("OPENAI_API_BASE", "https://process.example/v1")
     monkeypatch.setenv("OPENAI_API_MODEL", "process-model")
     monkeypatch.setattr(codex_setup, "CHATARCH_ENV_DIR", envs_dir)

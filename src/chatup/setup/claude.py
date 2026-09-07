@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 
+from chatup.utils.platforming import chmod_private
+
 DEFAULT_BASE_URL = "https://api.anthropic.com/v1"
 DEFAULT_SMALL_FAST_MODEL = "claude-opus-4-6"
 
@@ -223,7 +225,7 @@ def setup_claude(
     settings_path.write_text(
         json.dumps(settings_json, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
-    settings_path.chmod(0o600)
+    chmod_private(settings_path)
     logger.info(f"Wrote settings file: {settings_path}")
 
     config_json = {"primaryApiKey": primary_api_key}
@@ -231,7 +233,7 @@ def setup_claude(
     config_path.write_text(
         json.dumps(config_json, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
-    config_path.chmod(0o600)
+    chmod_private(config_path)
     logger.info(f"Wrote config file: {config_path}")
 
     click.echo("Claude Code setup completed.")

@@ -62,7 +62,7 @@ from chatup.setup.twikoo import (
     DEFAULT_TWIKOO_VERSION,
     setup_twikoo,
 )
-from chatup.setup.uv import DEFAULT_PYTHON_VERSION, DEFAULT_VENV_PATH, setup_uv
+from chatup.setup.uv import DEFAULT_PYTHON_VERSION, setup_uv
 from chatup.setup.workspace import setup_workspace
 from chatup.setup.zsh import setup_zsh
 from chatup.setup.zulip import (
@@ -1231,7 +1231,7 @@ SETUP_COMMAND_ELEMENTS = (
             SetupOptionElement(
                 param_decls=("--venv", "--venv-path"),
                 kwargs={
-                    "default": str(DEFAULT_VENV_PATH),
+                    "default": "~/.chatarch/venv",
                     "show_default": True,
                     "help": "Target ChatArch Python virtual environment path.",
                 },

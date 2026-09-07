@@ -28,6 +28,7 @@ from chatup.setup.nodejs import (
     should_install_global_npm_package,
 )
 from chatup.utils.custom_logger import setup_logger
+from chatup.utils.platforming import chmod_private
 
 DEFAULT_MODEL = "gpt-5.5"
 DEFAULT_BASE_URL = "https://api.openai.com/v1"
@@ -207,7 +208,7 @@ def _write_codex_config(config_path: Path, *, model: str, base_url: str) -> list
     )
     config_path.parent.mkdir(parents=True, exist_ok=True)
     config_path.write_text(content, encoding="utf-8")
-    config_path.chmod(0o600)
+    chmod_private(config_path)
     logger.info(f"Patched config file: {config_path}")
     return changed_root + changed_provider
 
@@ -216,13 +217,13 @@ def _write_private_text(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp_name = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
     try:
-        os.chmod(tmp_name, 0o600)
+        chmod_private(Path(tmp_name))
         with os.fdopen(fd, "w", encoding="utf-8") as handle:
             handle.write(content)
             handle.flush()
             os.fsync(handle.fileno())
         os.replace(tmp_name, path)
-        path.chmod(0o600)
+        chmod_private(path)
     except Exception:
         try:
             os.close(fd)
