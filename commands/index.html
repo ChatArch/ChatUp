@@ -1,0 +1,1174 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="ChatArch setup CLI documentation">
+      
+      
+      
+        <link rel="canonical" href="https://arch.gh.wzhecnu.cn/ChatUp/commands/">
+      
+      
+        <link rel="prev" href="../cli-tree/">
+      
+      
+        <link rel="next" href="../capability-map/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.23">
+    
+    
+      
+        <title>命令参考 - ChatUp 文档</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.84d31ad4.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#_1" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href=".." title="ChatUp 文档" class="md-header__button md-logo" aria-label="ChatUp 文档" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            ChatUp 文档
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              命令参考
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="选择当前语言">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="zh" class="md-select__link">
+              中文
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../en/commands/" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ChatArch/ChatUp" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ChatArch/ChatUp
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="ChatUp 文档" class="md-nav__button md-logo" aria-label="ChatUp 文档" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    ChatUp 文档
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ChatArch/ChatUp" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ChatArch/ChatUp
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    首页
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    快速开始
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli-tree/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CLI 树
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    命令参考
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    命令参考
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      CLI 树
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      命令分组速览
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#windows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Windows 兼容性
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      基础命令
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      Agent 与工具链
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#codex" class="md-nav__link">
+    <span class="md-ellipsis">
+      Codex 命令约定
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cursor-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cursor Agent 命令约定
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      本地服务
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      工作区
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      浏览器制品 backend 约定
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gitea" class="md-nav__link">
+    <span class="md-ellipsis">
+      Gitea 命令约定
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#discourse-zulip" class="md-nav__link">
+    <span class="md-ellipsis">
+      Discourse / Zulip 命令约定
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mysql" class="md-nav__link">
+    <span class="md-ellipsis">
+      MySQL 命令约定
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#twikoo" class="md-nav__link">
+    <span class="md-ellipsis">
+      Twikoo 命令约定
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nginx" class="md-nav__link">
+    <span class="md-ellipsis">
+      NGINX 命令约定
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#crs" class="md-nav__link">
+    <span class="md-ellipsis">
+      CRS 命令约定
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../capability-map/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    能力地图
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workspace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    工作区脚手架
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      CLI 树
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      命令分组速览
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#windows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Windows 兼容性
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      基础命令
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      Agent 与工具链
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#codex" class="md-nav__link">
+    <span class="md-ellipsis">
+      Codex 命令约定
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cursor-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cursor Agent 命令约定
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      本地服务
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      工作区
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backend" class="md-nav__link">
+    <span class="md-ellipsis">
+      浏览器制品 backend 约定
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gitea" class="md-nav__link">
+    <span class="md-ellipsis">
+      Gitea 命令约定
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#discourse-zulip" class="md-nav__link">
+    <span class="md-ellipsis">
+      Discourse / Zulip 命令约定
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mysql" class="md-nav__link">
+    <span class="md-ellipsis">
+      MySQL 命令约定
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#twikoo" class="md-nav__link">
+    <span class="md-ellipsis">
+      Twikoo 命令约定
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nginx" class="md-nav__link">
+    <span class="md-ellipsis">
+      NGINX 命令约定
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#crs" class="md-nav__link">
+    <span class="md-ellipsis">
+      CRS 命令约定
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="_1">命令参考<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
+<p>本页只列当前已经实现的 <code>chatup</code> 一级命令。运行时以 <code>chatup &lt;command&gt; --help</code> 为准。</p>
+<h2 id="cli">CLI 树<a class="headerlink" href="#cli" title="Permanent link">&para;</a></h2>
+<p>ChatUp 当前采用一级命令结构，没有 <code>chatup setup ...</code> 子树。所有安装、初始化和配置能力都直接挂在 <code>chatup</code> 下：</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>chatup
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>|-- doctor      # 检查 ChatUp 是否可调用
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>|-- uv          # 安装 uv，并创建默认 ChatArch Python 运行环境
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>|-- workspace   # 初始化 ChatArch workspace scaffold
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>|-- nodejs      # 安装 nvm 和默认 LTS Node.js
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>|-- docker      # 检查 Docker 环境，并提示 sudo 配置
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>|-- zsh         # 配置 zsh / oh-my-zsh / 插件 / alias
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>|-- chrome-for-testing # 管理 Google Chrome for Testing 浏览器
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>|-- chromedriver       # 管理 ChromeDriver WebDriver server
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>|-- playwright         # 管理 Playwright package 与 Chromium browser
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>|-- frp         # 安装 FRP Client/Server
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>|-- gitea       # 安装 ChatTea-compatible Gitea runtime/config/service
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>|-- discourse   # 准备 Discourse docker 配置和 ChatEnv 管理的管理员凭据
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>|-- zulip       # 准备 Zulip Docker Compose 配置和 ChatEnv 管理的管理员凭据
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>|-- mysql       # 安装 ChatData-compatible MySQL runtime/instance/service
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>|-- twikoo      # 安装多实例 Twikoo 评论服务 runtime/instance/service
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>|-- nginx       # 准备 user-level NGINX runtime，并生成入口模板
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>|-- crs         # 安装本地 Claude Relay Service + Redis + smoke check
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>|-- cc-connect  # 安装 CC Connect CLI 和运行依赖
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>|-- claude      # 配置 Claude Code CLI 和配置文件
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>|-- codex       # 配置 Codex CLI 和配置文件
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>|-- cursor-agent # 配置 Cursor Agent CLI 登录态和配置文件
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>|-- opencode    # 配置 OpenCode CLI 和配置文件
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>|-- hermes      # 安装 Hermes Agent 和可选 WebUI
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>`-- lark-cli    # 配置官方 lark-cli，并复用 ChatEnv 飞书配置
+</code></pre></div>
+<h2 id="_2">命令分组速览<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<div class="grid cards">
+<ul>
+<li>
+<p><strong>基础环境</strong></p>
+<p><code>doctor</code>、<code>uv</code>、<code>nodejs</code>、<code>docker</code>、<code>zsh</code>、<code>chrome-for-testing</code>、<code>chromedriver</code>、<code>playwright</code>、<code>frp</code> 负责机器级运行环境准备和检查。</p>
+</li>
+<li>
+<p><strong>本地服务</strong></p>
+<p><code>gitea</code>、<code>discourse</code>、<code>zulip</code>、<code>mysql</code>、<code>twikoo</code>、<code>nginx</code>、<code>crs</code> 负责 ChatArch 常用本地服务，默认落在 <code>~/.chatarch/...</code>，其中 Discourse/Zulip 管理员凭据从 ChatEnv 读取。</p>
+</li>
+<li>
+<p><strong>Agent 工具链</strong></p>
+<p><code>claude</code>、<code>codex</code>、<code>cursor-agent</code>、<code>opencode</code>、<code>hermes</code>、<code>cc-connect</code>、<code>lark-cli</code> 负责模型、Agent 和飞书工具链配置。</p>
+</li>
+<li>
+<p><strong>工作区</strong></p>
+<p><code>workspace</code> 创建 ChatArch 人类-AI 协作目录结构和项目记录入口。</p>
+</li>
+</ul>
+</div>
+<h2 id="windows">Windows 兼容性<a class="headerlink" href="#windows" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>chatup uv</code> 在 Windows 使用官方 PowerShell installer，并输出 <code>Scripts/Activate.ps1</code> 激活提示。</li>
+<li><code>chatup nodejs</code> 在 Windows 复用 PATH 中已有的 <code>node</code>/<code>npm</code>，不会写入 nvm shell init；如缺失会提示通过官方安装器、winget 或 nvm-windows 安装。</li>
+<li><code>chatup docker</code> 在 Windows 检查 Docker Desktop 提供的 <code>docker</code>/<code>docker compose</code>，跳过 Unix group 和 systemd 检查。</li>
+<li><code>chatup mysql</code> 会选择 MySQL Windows ZIP asset、<code>.exe</code> 二进制名和 TCP client config；<code>gitea</code>/<code>mysql</code>/<code>twikoo</code>/<code>nginx</code> 的 <code>--service</code> 仍依赖 user-level systemd，在 Windows 会给出明确错误。</li>
+<li><code>chatup cursor-agent --credential-store file-wrapper</code> 在 Windows 写 <code>.cmd</code> wrapper；<code>chatup frp</code> 支持 Windows ZIP release asset；<code>zsh</code> 和 <code>crs</code> 仍属于 POSIX/Linux-only setup。</li>
+</ul>
+<h2 id="_3">基础命令<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>当前能力</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>chatup doctor</code></td>
+<td>检查 ChatUp 是否可调用。</td>
+</tr>
+<tr>
+<td><code>chatup uv</code></td>
+<td>安装 <code>uv</code> 并创建 ChatArch Python 运行环境。</td>
+</tr>
+<tr>
+<td><code>chatup nodejs</code></td>
+<td>安装 nvm 和默认 LTS Node.js。</td>
+</tr>
+<tr>
+<td><code>chatup docker</code></td>
+<td>检查 Docker 环境，并在需要时给出 sudo 相关建议。</td>
+</tr>
+<tr>
+<td><code>chatup zsh</code></td>
+<td>配置 zsh、oh-my-zsh、插件、主题和 shell alias。</td>
+</tr>
+<tr>
+<td><code>chatup chrome-for-testing</code></td>
+<td>独立管理 Google Chrome for Testing 浏览器及其 JSON/Python descriptor。</td>
+</tr>
+<tr>
+<td><code>chatup chromedriver</code></td>
+<td>独立管理 ChromeDriver WebDriver server，可匹配 CFT 或指定浏览器版本。</td>
+</tr>
+<tr>
+<td><code>chatup playwright</code></td>
+<td>安装精确 Playwright package 与其管理的 Chromium，并输出可复用 descriptor。</td>
+</tr>
+<tr>
+<td><code>chatup frp</code></td>
+<td>安装 FRP Client/Server。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="agent">Agent 与工具链<a class="headerlink" href="#agent" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>当前能力</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>chatup claude</code></td>
+<td>配置 Claude Code CLI 和配置文件。</td>
+</tr>
+<tr>
+<td><code>chatup codex</code></td>
+<td>配置 Codex CLI 和配置文件。</td>
+</tr>
+<tr>
+<td><code>chatup cursor-agent</code></td>
+<td>安装/验证 Cursor Agent CLI，并安全复制 <code>auth.json</code>、<code>cli-config.json</code> 和 <code>agent-cli-state.json</code>。</td>
+</tr>
+<tr>
+<td><code>chatup opencode</code></td>
+<td>配置 OpenCode CLI 和配置文件。</td>
+</tr>
+<tr>
+<td><code>chatup hermes</code></td>
+<td>安装 Hermes Agent 和可选 Hermes WebUI。</td>
+</tr>
+<tr>
+<td><code>chatup cc-connect</code></td>
+<td>安装 CC Connect CLI 和运行依赖。</td>
+</tr>
+<tr>
+<td><code>chatup lark-cli</code></td>
+<td>配置官方 lark-cli，并复用 ChatEnv 飞书配置。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="codex">Codex 命令约定<a class="headerlink" href="#codex" title="Permanent link">&para;</a></h2>
+<p><code>chatup codex</code> 配置 OpenAI Codex CLI（<code>~/.codex/config.toml</code> 与 <code>~/.codex/auth.json</code>）：</p>
+<ul>
+<li><code>-e, --env VALUE</code> 是凭据来源：<code>VALUE</code> 是文件路径时按 env 文件读取，否则按 ChatEnv <code>OpenAI</code> profile 名读取。</li>
+<li>当 <code>-e PROFILE</code> 选择 ChatEnv profile 时，ChatUp 只读取这个显式 profile，不会从 active profile、既有 Codex 配置或进程环境变量回填缺失的 secret；profile 文件按无插值方式读取，包含 <code>${...}</code> 这类未解析变量会失败而不会回填进程环境。</li>
+<li>ChatEnv profile 名不能包含路径分隔符、<code>.</code> 或 <code>..</code>；如果要传文件路径，该路径必须真实存在。</li>
+<li>如果显式 profile 缺少 <code>OPENAI_API_KEY</code>，非交互 setup 会失败，不会把另一个账号的 key 写进 Codex。</li>
+<li>Codex CLI 0.144+ 要求 <code>wire_api = "responses"</code>；<code>chatup codex</code> 写出的 CRS/OpenAI-compatible provider 使用 responses wire API。</li>
+<li>模型渠道要通过 Codex 本身验证，例如先 <code>chatup codex -e apple -I</code>，再 <code>codex exec ...</code>；只 curl API 成功不等于 Codex 路由可用。</li>
+</ul>
+<p>常用形式：</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>chatup<span class="w"> </span>codex<span class="w"> </span>-e<span class="w"> </span>apple<span class="w"> </span>-I
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>chatup<span class="w"> </span>codex<span class="w"> </span>-e<span class="w"> </span>~/.chatarch/envs/OpenAI/.env<span class="w"> </span>-I
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>chatup<span class="w"> </span>codex<span class="w"> </span>--api-key<span class="w"> </span><span class="s2">"</span><span class="nv">$OPENAI_API_KEY</span><span class="s2">"</span><span class="w"> </span>--base-url<span class="w"> </span>https://example.invalid/openai/v1<span class="w"> </span>--model<span class="w"> </span>gpt-5.5<span class="w"> </span>-I
+</code></pre></div>
+<h2 id="cursor-agent">Cursor Agent 命令约定<a class="headerlink" href="#cursor-agent" title="Permanent link">&para;</a></h2>
+<p><code>chatup cursor-agent</code> 面向 Cursor Agent CLI，而不是 Cursor IDE GUI：</p>
+<ul>
+<li><code>--auth-json PATH</code> 复制包含 <code>accessToken</code> / <code>refreshToken</code> 的 Cursor <code>auth.json</code>；</li>
+<li><code>--auth-env PATH</code> 从 env 文件读取 <code>CURSOR_ACCESS_TOKEN</code> 和 <code>CURSOR_REFRESH_TOKEN</code> 后写成 Cursor JSON；</li>
+<li><code>-e, --env VALUE</code> 快速读取 Cursor 凭据：<code>VALUE</code> 是文件路径时按 env 文件读取，否则按 ChatEnv <code>CursorAgent</code> profile 名读取；</li>
+<li><code>--env-profile NAME</code> 从 ChatEnv <code>CursorAgent</code> profile 读取 token 并写成 Cursor JSON；</li>
+<li><code>--save-profile NAME</code> 把导入的 token 保存到 ChatEnv <code>CursorAgent</code> profile，不打印 secret 值；</li>
+<li><code>--cli-config PATH</code> 复制 <code>~/.cursor/cli-config.json</code>；</li>
+<li><code>--agent-state PATH</code> 复制 <code>~/.cursor/agent-cli-state.json</code>；</li>
+<li><code>--api-key-env NAME</code> 仅把指定环境变量作为验证时的 <code>CURSOR_API_KEY</code>，不会把 secret 放进 argv；</li>
+<li><code>--credential-store file-wrapper</code> 会写入不含 token 的 <code>cursor-agent</code> wrapper，在运行时从 <code>auth.json</code> 读取 token 并使用文件登录态，适合把 Linux <code>auth.json</code> 迁移到 macOS；</li>
+<li>写入 Cursor 自身登录态/配置文件时会使用受限权限；ChatEnv <code>CursorAgent</code> profile 由 ChatEnv 自己的存储机制维护，ChatUp 不额外改 profile <code>.env</code> 权限。</li>
+</ul>
+<p>常用形式：</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>chatup<span class="w"> </span>cursor-agent<span class="w"> </span>--install-only<span class="w"> </span>-I
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>chatup<span class="w"> </span>cursor-agent<span class="w"> </span>--auth-json<span class="w"> </span>./auth.json<span class="w"> </span>--cli-config<span class="w"> </span>./cli-config.json<span class="w"> </span>--agent-state<span class="w"> </span>./agent-cli-state.json<span class="w"> </span>--credential-store<span class="w"> </span>file-wrapper<span class="w"> </span>-I
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>chatup<span class="w"> </span>cursor-agent<span class="w"> </span>-e<span class="w"> </span>./cursor.env<span class="w"> </span>--credential-store<span class="w"> </span>file-wrapper<span class="w"> </span>-I
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>chatup<span class="w"> </span>cursor-agent<span class="w"> </span>--auth-env<span class="w"> </span>./cursor.env<span class="w"> </span>--save-profile<span class="w"> </span>work<span class="w"> </span>--credential-store<span class="w"> </span>file-wrapper<span class="w"> </span>-I
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>chatup<span class="w"> </span>cursor-agent<span class="w"> </span>-e<span class="w"> </span>work<span class="w"> </span>--credential-store<span class="w"> </span>file-wrapper<span class="w"> </span>-I
+</code></pre></div>
+<h2 id="_4">本地服务<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>当前能力</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>chatup gitea</code></td>
+<td>从 <code>ChatArch/gitea</code> Release assets 安装 ChatArch Gitea；默认跟随 latest，可选生成 ChatTea-compatible <code>app.ini</code> 和 user-level systemd service。</td>
+</tr>
+<tr>
+<td><code>chatup discourse</code></td>
+<td>准备 <code>~/.chatarch/discourse</code> 下的 Discourse Docker/app.yml 布局，并从 ChatEnv 读取 <code>DISCOURSE_ADMIN_USERNAME</code>、<code>DISCOURSE_ADMIN_EMAIL</code>、<code>DISCOURSE_ADMIN_PASSWORD</code> 写入受限权限的 <code>secrets/admin.env</code>。</td>
+</tr>
+<tr>
+<td><code>chatup zulip</code></td>
+<td>准备 <code>~/.chatarch/zulip</code> 下的 Zulip Docker Compose、bind-mount 数据目录和 secret files，并从 ChatEnv 读取 <code>ZULIP_ADMIN_USERNAME</code>、<code>ZULIP_ADMIN_EMAIL</code>/<code>ZULIP_ADMIN_MAIL</code>、<code>ZULIP_ADMIN_PASSWORD</code>。</td>
+</tr>
+<tr>
+<td><code>chatup mysql</code></td>
+<td>安装并准备 ChatData-compatible user-level MySQL runtime、实例目录、<code>my.cnf</code> 和可选 user-level systemd service。</td>
+</tr>
+<tr>
+<td><code>chatup twikoo</code></td>
+<td>从 <code>twikoojs/twikoo</code> Release assets 安装 Twikoo 二进制，并准备多实例目录、实例 env、实例级 <code>bin/twikoo</code> 和可选 user-level systemd service。</td>
+</tr>
+<tr>
+<td><code>chatup nginx</code></td>
+<td>准备 <code>~/.chatarch/nginx</code> 下的 user-level NGINX runtime/config/log/run/temp 布局，也可生成 reverse-proxy、HTTPS proxy、WebSocket proxy、static root 和 redirect 模板。</td>
+</tr>
+<tr>
+<td><code>chatup crs</code></td>
+<td>安装本地 Claude Relay Service，准备 Redis、配置、secret、admin SPA 和 smoke check。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_5">工作区<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>当前能力</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>chatup workspace</code></td>
+<td>初始化 ChatArch 人类-AI 协作 workspace。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="backend">浏览器制品 backend 约定<a class="headerlink" href="#backend" title="Permanent link">&para;</a></h2>
+<p>ChatUp 不提供通用 <code>browser</code> group，也不再提供含义模糊的 <code>chrome</code> 命令：</p>
+<ul>
+<li><code>chatup chrome-for-testing</code> 管理真正可启动的 Google Chrome for Testing 浏览器，默认 home 为 <code>~/.chatarch/chrome-for-testing</code>；</li>
+<li><code>chatup chromedriver</code> 管理 ChromeDriver WebDriver server，默认 home 为 <code>~/.chatarch/chromedriver</code>；</li>
+<li><code>chatup playwright</code> 管理精确 Playwright package 与 Playwright Chromium，默认 home 为 <code>~/.chatarch/playwright</code>；</li>
+<li>Chrome for Testing 与 ChromeDriver 各自提供完整制品生命周期；Playwright 仅提供本任务实际使用的 <code>install/path/doctor</code>；</li>
+<li><code>Chrome for Testing</code> 中的 Testing 是官方制品名，不是用户 CLI 的 <code>test</code> 操作；</li>
+<li><code>chromium</code> 尚无已验证 provider，因此不注册命令；</li>
+<li>安装使用官方 HTTPS manifest、可选 SHA-256、受限 ZIP 解压、<code>installation.json</code> 和原子目录替换；</li>
+<li><code>remove</code> 需要 <code>--yes</code>，<code>gc</code> 默认 dry-run，apply 同时需要 <code>--yes</code>；</li>
+<li>不修改系统 Chrome、不创建 Profile/Cookie，也不管理账号或扩展。</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>chatup<span class="w"> </span>chrome-for-testing<span class="w"> </span>install<span class="w"> </span>--channel<span class="w"> </span>stable<span class="w"> </span>-I
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>chatup<span class="w"> </span>chrome-for-testing<span class="w"> </span>path<span class="w"> </span><span class="m">145</span>.0.7632.6<span class="w"> </span>-I
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>chatup<span class="w"> </span>chromedriver<span class="w"> </span>install<span class="w"> </span>--match-cft-version<span class="w"> </span><span class="m">145</span>.0.7632.6<span class="w"> </span>-I
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>chatup<span class="w"> </span>chromedriver<span class="w"> </span>doctor<span class="w"> </span><span class="m">145</span>.0.7632.6<span class="w"> </span>--output<span class="w"> </span>json<span class="w"> </span>-I
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>chatup<span class="w"> </span>playwright<span class="w"> </span>install<span class="w"> </span><span class="m">1</span>.61.1<span class="w"> </span>--output<span class="w"> </span>json<span class="w"> </span>-I
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>chatup<span class="w"> </span>playwright<span class="w"> </span>path<span class="w"> </span><span class="m">1</span>.61.1<span class="w"> </span>-I
+</code></pre></div>
+<p>完整子命令、ChatStyle 行为和 Python contract 见 <a href="../cli-tree/">CLI 树</a>。</p>
+<h2 id="gitea">Gitea 命令约定<a class="headerlink" href="#gitea" title="Permanent link">&para;</a></h2>
+<p><code>chatup gitea</code> 对齐 ChatTea 的本地 Gitea 布局：</p>
+<ul>
+<li>默认 release：<code>latest</code>，从 <code>ChatArch/gitea</code> 最新 GitHub Release 解析。</li>
+<li>默认 binary：<code>~/.chatarch/chattea/bin/gitea</code>。</li>
+<li>默认 work path：<code>~/.chatarch/chattea/gitea</code>。</li>
+<li>可选 <code>--init</code> 会生成 <code>custom/conf/app.ini</code>，权限为 <code>0600</code>。</li>
+<li>可选 <code>--service</code> 会写入 user-level systemd service。</li>
+<li>Gitea 默认监听 <code>127.0.0.1:3000</code>，公网或本地域名入口交给 NGINX/public-entry 层。</li>
+</ul>
+<p>常用形式：</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>chatup<span class="w"> </span>gitea<span class="w"> </span>--force
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>chatup<span class="w"> </span>gitea<span class="w"> </span>--init<span class="w"> </span>--service<span class="w"> </span>--base-url<span class="w"> </span>http://127.0.0.1:3000
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>chatup<span class="w"> </span>gitea<span class="w"> </span>--init<span class="w"> </span>--database-backend<span class="w"> </span>mysql<span class="w"> </span>--database-host<span class="w"> </span>~/.chatarch/chatdata/instances/mysql/default/run/mysql.sock
+</code></pre></div>
+<h2 id="discourse-zulip">Discourse / Zulip 命令约定<a class="headerlink" href="#discourse-zulip" title="Permanent link">&para;</a></h2>
+<p><code>chatup discourse</code> 和 <code>chatup zulip</code> 面向 ChatArch 社区服务安装，不在命令输出中打印管理员密码。管理员凭据统一来自 ChatEnv：</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>DISCOURSE_ADMIN_USERNAME
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>DISCOURSE_ADMIN_EMAIL
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>DISCOURSE_ADMIN_PASSWORD
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>ZULIP_ADMIN_USERNAME
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>ZULIP_ADMIN_EMAIL      # 或兼容 ZULIP_ADMIN_MAIL
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>ZULIP_ADMIN_PASSWORD
+</code></pre></div>
+<p>常用形式：</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>chatup<span class="w"> </span>discourse<span class="w"> </span>-e<span class="w"> </span>discourse-prod<span class="w"> </span>--hostname<span class="w"> </span>discourse.public.wzhecnu.cn
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>chatup<span class="w"> </span>discourse<span class="w"> </span>-e<span class="w"> </span>./discourse-admin.env<span class="w"> </span>--clone<span class="w"> </span>--force
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>chatup<span class="w"> </span>zulip<span class="w"> </span>-e<span class="w"> </span>zulip-prod<span class="w"> </span>--external-host<span class="w"> </span>zulip.public.wzhecnu.cn<span class="w"> </span>--port<span class="w"> </span><span class="m">3095</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>chatup<span class="w"> </span>zulip<span class="w"> </span>-e<span class="w"> </span>./zulip-admin.env<span class="w"> </span>--pull<span class="w"> </span>--start
+</code></pre></div>
+<p>默认行为：</p>
+<ul>
+<li><code>chatup discourse</code> 准备 <code>~/.chatarch/discourse</code>、<code>docker/containers/app.yml</code>、<code>shared/standalone</code> 和 <code>secrets/admin.env</code>；<code>--clone</code> 才 clone/update <code>discourse_docker</code>。</li>
+<li><code>chatup zulip</code> 准备 <code>~/.chatarch/zulip/compose/compose.yaml</code>、<code>data/</code> bind mounts、<code>secrets/</code> secret files 和 <code>secrets/admin.env</code>；<code>--start</code> 才执行 Docker Compose。</li>
+<li>Zulip Compose 默认只绑定 <code>127.0.0.1:3095:80</code>，不抢主机 <code>25/80/443</code>；public/local 入口仍交给外层 NGINX/public-entry。</li>
+<li><code>ZULIP_ADMIN_MAIL</code> 只作为 <code>ZULIP_ADMIN_EMAIL</code> 的兼容别名；优先使用 <code>ZULIP_ADMIN_EMAIL</code>。</li>
+</ul>
+<h2 id="mysql">MySQL 命令约定<a class="headerlink" href="#mysql" title="Permanent link">&para;</a></h2>
+<p><code>chatup mysql</code> 复用 ChatData 第一版 no-sudo runtime 模型：</p>
+<ul>
+<li>默认 MySQL 版本：<code>8.4.6</code>。</li>
+<li>默认 home：<code>~/.chatarch/chatdata</code>。</li>
+<li>默认实例：<code>default</code>。</li>
+<li>默认端口：<code>3307</code>。</li>
+<li>默认绑定：<code>127.0.0.1</code>。</li>
+<li>默认会下载 runtime、初始化实例目录、生成 <code>my.cnf</code> 并写入 user-level systemd service，但不会启动服务。</li>
+<li><code>--smoke</code> 和 <code>--database</code> 需要 <code>--start</code>，避免在未启动服务时延迟失败。</li>
+</ul>
+<p>常用形式：</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>chatup<span class="w"> </span>mysql
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>chatup<span class="w"> </span>mysql<span class="w"> </span>--start<span class="w"> </span>--smoke
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>chatup<span class="w"> </span>mysql<span class="w"> </span>--start<span class="w"> </span>--database<span class="w"> </span>gitea
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>chatup<span class="w"> </span>mysql<span class="w"> </span>--home<span class="w"> </span>~/.chatarch/chatdata<span class="w"> </span>--name<span class="w"> </span>default<span class="w"> </span>--port<span class="w"> </span><span class="m">3307</span>
+</code></pre></div>
+<h2 id="twikoo">Twikoo 命令约定<a class="headerlink" href="#twikoo" title="Permanent link">&para;</a></h2>
+<p><code>chatup twikoo</code> 面向 Twikoo 评论服务的 no-Docker、多实例安装：</p>
+<ul>
+<li>默认 Twikoo 版本：<code>1.7.15</code>。</li>
+<li>默认 repo：<code>twikoojs/twikoo</code>。</li>
+<li>默认 home：<code>~/.chatarch/twikoo</code>。</li>
+<li>默认实例：<code>chatblog</code>。</li>
+<li>默认端口：<code>8892</code>。</li>
+<li>默认绑定：<code>127.0.0.1</code>。</li>
+<li>默认会下载 release 二进制、初始化实例目录、生成 <code>env/twikoo.env</code> 并写入 user-level systemd service，但不会启动服务。</li>
+<li>每个实例都通过 <code>instances/&lt;name&gt;/bin/twikoo</code> 启动，并让 <code>bin/.env</code> 指向该实例自己的 <code>env/twikoo.env</code>；不要让多个实例直接共享 runtime 目录旁边的 <code>.env</code>。</li>
+<li>local/public 域名入口仍由 NGINX/public-entry 管理。</li>
+</ul>
+<p>常用形式：</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>chatup<span class="w"> </span>twikoo<span class="w"> </span>--name<span class="w"> </span>chatblog<span class="w"> </span>--port<span class="w"> </span><span class="m">8892</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>chatup<span class="w"> </span>twikoo<span class="w"> </span>--name<span class="w"> </span>chatblog<span class="w"> </span>--port<span class="w"> </span><span class="m">8892</span><span class="w"> </span>--start<span class="w"> </span>--smoke
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>chatup<span class="w"> </span>twikoo<span class="w"> </span>--home<span class="w"> </span>~/.chatarch/twikoo<span class="w"> </span>--name<span class="w"> </span>another-blog<span class="w"> </span>--port<span class="w"> </span><span class="m">8893</span><span class="w"> </span>--no-start
+</code></pre></div>
+<h2 id="nginx">NGINX 命令约定<a class="headerlink" href="#nginx" title="Permanent link">&para;</a></h2>
+<p><code>chatup nginx</code> 默认准备 user-level NGINX，而不是修改系统 NGINX：</p>
+<ul>
+<li>默认 home：<code>~/.chatarch/nginx</code>。</li>
+<li>默认 binary：复制已有 <code>nginx</code> 到 <code>~/.chatarch/nginx/bin/nginx</code>；如系统 PATH 中没有 <code>nginx</code>，可用 <code>--binary PATH</code> 指定已有二进制。</li>
+<li>默认 config：<code>~/.chatarch/nginx/conf/nginx.conf</code>。</li>
+<li>默认 logs/run/temp：<code>~/.chatarch/nginx/logs</code>、<code>~/.chatarch/nginx/run</code>、<code>~/.chatarch/nginx/temp</code>。</li>
+<li>默认站点目录：<code>~/.chatarch/nginx/conf/sites-available</code> 和 <code>~/.chatarch/nginx/conf/sites-enabled</code>。</li>
+<li>默认监听：<code>127.0.0.1:8080</code>。</li>
+<li>默认写入 user-level systemd service；不会写 <code>/etc/nginx</code>，不会重载系统服务。</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>chatup<span class="w"> </span>nginx
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>chatup<span class="w"> </span>nginx<span class="w"> </span>--home<span class="w"> </span>~/.chatarch/nginx<span class="w"> </span>--binary<span class="w"> </span>/usr/sbin/nginx<span class="w"> </span>--port<span class="w"> </span><span class="m">8080</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>chatup<span class="w"> </span>nginx<span class="w"> </span>--start<span class="w"> </span>--smoke
+</code></pre></div>
+<p><code>chatup nginx</code> 也保留模板生成模式：</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>chatup<span class="w"> </span>nginx<span class="w"> </span>--list
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>chatup<span class="w"> </span>nginx<span class="w"> </span>proxy-pass<span class="w"> </span>./gitea-local.conf<span class="w"> </span>--set<span class="w"> </span><span class="nv">SERVER_NAME</span><span class="o">=</span>gitea.local.example.invalid<span class="w"> </span>--set<span class="w"> </span><span class="nv">PROXY_PASS</span><span class="o">=</span>http://127.0.0.1:3000
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>chatup<span class="w"> </span>nginx<span class="w"> </span>websocket-proxy<span class="w"> </span>./ws.conf<span class="w"> </span>--set<span class="w"> </span><span class="nv">SERVER_NAME</span><span class="o">=</span>ws.local.example.invalid<span class="w"> </span>--set<span class="w"> </span><span class="nv">PROXY_PASS</span><span class="o">=</span>http://127.0.0.1:3000
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>chatup<span class="w"> </span>nginx<span class="w"> </span>static-root<span class="w"> </span>./site.conf<span class="w"> </span>--set<span class="w"> </span><span class="nv">SERVER_NAME</span><span class="o">=</span>site.local.example.invalid<span class="w"> </span>--set<span class="w"> </span><span class="nv">ROOT_DIR</span><span class="o">=</span>/srv/site
+</code></pre></div>
+<h2 id="crs">CRS 命令约定<a class="headerlink" href="#crs" title="Permanent link">&para;</a></h2>
+<p><code>chatup crs</code> 的默认目标是本地开发环境：</p>
+<ul>
+<li>默认安装目录：<code>~/.chatarch/crs/local</code></li>
+<li>默认 CRS 端口：<code>12392</code></li>
+<li>默认 Redis 端口：<code>6379</code></li>
+<li>secret 文件：写入安装目录下的 <code>.local-secrets.env</code>，并使用受限权限。</li>
+<li>默认会启动服务并运行 smoke check。</li>
+</ul>
+<p>常用形式：</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>chatup<span class="w"> </span>crs<span class="w"> </span>--install-dir<span class="w"> </span>~/.chatarch/crs/local<span class="w"> </span>--port<span class="w"> </span><span class="m">12392</span><span class="w"> </span>--redis-port<span class="w"> </span><span class="m">6379</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>chatup<span class="w"> </span>crs<span class="w"> </span>--no-start<span class="w"> </span>--no-smoke
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.sections", "navigation.top", "content.code.copy"], "search": "../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+    
+  </body>
+</html>
