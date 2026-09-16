@@ -24,6 +24,7 @@ chatup
 |-- crs         # Install local Claude Relay Service + Redis + smoke check
 |-- cc-connect  # Install CC Connect CLI and runtime dependencies
 |-- claude      # Configure Claude Code CLI and config files
+|-- chatgpt     # Install the new ChatGPT desktop app (includes Codex)
 |-- codex       # Configure Codex CLI and config files
 |-- opencode    # Configure OpenCode CLI and config files
 |-- hermes      # Install Hermes Agent and optional WebUI
@@ -85,6 +86,10 @@ Local-service commands use user-level layouts by default:
 | `chatup mysql` | `~/.chatarch/chatdata` | MySQL binds to `127.0.0.1:3307` by default and can create a user-level service. |
 | `chatup nginx` | `~/.chatarch/nginx` | Does not write `/etc/nginx` or reload system services; can render entry templates. |
 | `chatup crs` | `~/.chatarch/crs/local` | Local CRS + Redis + smoke check with restricted secret-file permissions. |
+
+## Desktop App
+
+`chatup chatgpt` installs the official new ChatGPT desktop app including Codex through Homebrew on macOS or the exact Microsoft Store product on Windows. `--dry-run` has no side effects; installation is checked through the package manager. Native app/cache paths are owned by the package manager and OpenAI, not ChatArch. No launch, login, Codex CLI config changes or automatic Linux preview installation. See the [desktop install contract](commands.md#chatgpt-desktop).
 
 ## Agent Toolchains
 

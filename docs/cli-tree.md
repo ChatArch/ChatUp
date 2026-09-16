@@ -25,6 +25,7 @@ chatup
 ├── frp                 # 安装 FRP Client/Server
 ├── nodejs              # 安装 nvm 与默认 LTS Node.js
 ├── uv                  # 安装 uv 和 ~/.chatarch/venv
+├── chatgpt              # 安装新版 ChatGPT 桌面应用（含 Codex）
 ├── codex               # 安装/配置 Codex CLI
 ├── cursor-agent        # 安装/配置 Cursor Agent CLI
 ├── opencode            # 安装/配置 OpenCode
@@ -37,6 +38,16 @@ chatup
 ```
 
 运行 `chatup --tree` 可回读带参数签名和命令目的的真实注册树；`chatup --tree-brief` 保留相同节点和说明，但省略参数签名。完整参数见 [命令参考](commands.md)。
+
+## ChatGPT 桌面应用
+
+```text
+chatup chatgpt
+├── --dry-run   # 只显示安装计划，不执行
+└── -y, --yes   # 接受 Windows Store 来源和包协议
+```
+
+安装含 Codex 的新版 ChatGPT 桌面应用，不是 Codex CLI 或 ChatGPT Classic。macOS 走 Homebrew，Windows 使用官方 Microsoft Store 精确 ID。前提、Linux preview 指引、原生目录和 Python 接口见[桌面安装约定](commands.md#chatgpt-desktop)。
 
 ## Twikoo
 

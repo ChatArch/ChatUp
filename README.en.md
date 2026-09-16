@@ -41,16 +41,27 @@ chatup nginx proxy-pass ./gitea-local.conf --set SERVER_NAME=gitea.local.example
 chatup crs --install-dir ~/.chatarch/crs/local --port 12392 --redis-port 6379
 ```
 
+## ChatGPT / Codex Desktop App
+
+```bash
+chatup chatgpt --dry-run
+chatup chatgpt
+chatup chatgpt --yes  # Accept first-time Microsoft Store agreements on Windows
+```
+
+Installs the official new ChatGPT desktop app including Codex. Requires Homebrew on macOS or WinGet on Windows. Linux preview installation follows the [official manual instructions](https://learn.chatgpt.com/docs/linux/linux-app). Existing `chatup codex` still installs/configures the Codex CLI. No automatic launch, login or upgrade of existing installations. See the [full contract](https://arch.gh.wzhecnu.cn/ChatUp/en/commands/#chatgpt-desktop).
+
 ## Current Capabilities
 
 | Capability group | Commands |
 | --- | --- |
 | Base runtime | `doctor`, `uv`, `nodejs`, `docker`, `zsh`, `chrome-for-testing`, `chromedriver`, `playwright`, `frp` |
 | Workspace scaffold | `workspace` |
+| Official desktop app | `chatgpt` (includes Codex) |
 | Local service installers | `gitea`, `mysql`, `nginx`, `crs` |
 | Agent toolchains | `cc-connect`, `claude`, `codex`, `cursor-agent`, `opencode`, `hermes`, `lark-cli` |
 
-New install targets stay under `~/.chatarch/...`, for example `~/.chatarch/chrome-for-testing`, `~/.chatarch/chromedriver`, `~/.chatarch/playwright`, `~/.chatarch/chattea`, `~/.chatarch/discourse`, `~/.chatarch/zulip`, `~/.chatarch/chatdata`, `~/.chatarch/nginx`, and `~/.chatarch/crs/local`. `cursor-agent`, `discourse`, and `zulip` register typed ChatEnv profiles; an explicitly selected profile is isolated from credentials in the process environment. ChatStyle renders the CLI tree from the registered command surface. See `docs/capability-map.en.md` for the full capability boundary.
+Desktop apps use native package-manager paths; ChatArch-managed install targets stay under `~/.chatarch/...`, for example `~/.chatarch/chrome-for-testing`, `~/.chatarch/chromedriver`, `~/.chatarch/playwright`, `~/.chatarch/chattea`, `~/.chatarch/discourse`, `~/.chatarch/zulip`, `~/.chatarch/chatdata`, `~/.chatarch/nginx`, and `~/.chatarch/crs/local`. `cursor-agent`, `discourse`, and `zulip` register typed ChatEnv profiles; an explicitly selected profile is isolated from credentials in the process environment. ChatStyle renders the CLI tree from the registered command surface. See `docs/capability-map.en.md` for the full capability boundary.
 
 ## Development
 
