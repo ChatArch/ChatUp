@@ -129,6 +129,8 @@ Sources: [OpenAI downloads](https://chatgpt.com/download/), [official Windows in
 
 `chatup codex` configures the OpenAI Codex CLI (`~/.codex/config.toml` and `~/.codex/auth.json`):
 
+The fallback model is `gpt-5.6-sol` (GPT-5.6 Sol), used only when no model is configured. An explicit `--model`, the selected OpenAI profile, and (when no profile is selected) existing Codex config, process environment and the active profile retain their existing precedence. User-configured models are not forcibly replaced by the fallback.
+
 - `-e, --env VALUE` is the credential source: a file path is read as an env file; otherwise `VALUE` is treated as a ChatEnv `OpenAI` profile name.
 - When `-e PROFILE` selects a ChatEnv profile, ChatUp reads only that explicit profile. It does not backfill missing secrets from the active profile, an existing Codex config, or process environment variables. Profile files are loaded without interpolation; unresolved `${...}` references fail instead of falling back to the process environment.
 - ChatEnv profile names cannot contain path separators, `.` or `..`; pass an existing file path when file-based config is intended.
@@ -141,7 +143,7 @@ Common forms:
 ```bash
 chatup codex -e apple -I
 chatup codex -e ~/.chatarch/envs/OpenAI/.env -I
-chatup codex --api-key "$OPENAI_API_KEY" --base-url https://example.invalid/openai/v1 --model gpt-5.5 -I
+chatup codex --api-key "$OPENAI_API_KEY" --base-url https://example.invalid/openai/v1 --model gpt-5.6-sol -I
 ```
 
 ## Cursor Agent Command Contract

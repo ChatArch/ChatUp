@@ -297,8 +297,90 @@ def test_codex_env_profile_prompt_defaults_stay_inside_selected_profile(
     assert 'model = "apple-model"' in config_text
 
 
-def test_codex_default_model_matches_shared_openai_default():
-    from chatenv.configs import OpenAIConfig
+def test_codex_default_model_is_gpt_5_6_sol():
     import chatup.setup.codex as codex_setup
 
-    assert codex_setup.DEFAULT_MODEL == OpenAIConfig.OPENAI_API_MODEL.default
+    assert codex_setup.DEFAULT_MODEL == "gpt-5.6-sol"
+
+
+@pytest.fixture
+def isolated_codex_runtime(tmp_path, monkeypatch):
+    import chatup.setup.codex as codex_setup
+
+    home = tmp_path / "home"
+    envs_dir = tmp_path / "chatarch" / "envs"
+    _set_test_home(monkeypatch, home)
+    for key in ("OPENAI_API_KEY", "OPENAI_API_BASE", "OPENAI_API_MODEL"):
+        monkeypatch.delenv(key, raising=False)
+    monkeypatch.setattr(codex_setup, "CHATARCH_ENV_DIR", envs_dir)
+    monkeypatch.setattr(codex_setup, "CHATARCH_ENV_FILE", envs_dir / ".env")
+    monkeypatch.setattr(codex_setup, "ensure_nodejs_requirement", lambda **kwargs: None)
+    monkeypatch.setattr(codex_setup, "should_install_global_npm_package", lambda *a, **k: False)
+    return codex_setup, home, envs_dir
+
+
+@pytest.mark.parametrize("named_profile", [False, True])
+def test_codex_cli_writes_sol_when_no_model_is_selected(isolated_codex_runtime, monkeypatch, named_profile):
+    from click.testing import CliRunner
+    from chatup.cli import main
+
+    _module, home, envs_dir = isolated_codex_runtime
+    if named_profile:
+        _write_env(envs_dir / "OpenAI" / "selected.env", {"OPENAI_API_KEY": "test-profile-key"})
+        # Selecting a profile must not pull an unrelated process model.
+        monkeypatch.setenv("OPENAI_API_MODEL", "outside-model")
+        args = ["codex", "-e", "selected", "-I"]
+    else:
+        args = ["codex", "--api-key", "test-key", "-I"]
+    result = CliRunner().invoke(main, args)
+    assert result.exit_code == 0, result.output
+    content = (home / ".codex" / "config.toml").read_text(encoding="utf-8")
+    assert 'model = "gpt-5.6-sol"' in content
+    assert 'wire_api = "responses"' in content
+
+
+@pytest.mark.parametrize("source", ["cli", "profile", "existing", "process", "active-profile"])
+def test_codex_explicit_model_sources_still_override_fallback(isolated_codex_runtime, monkeypatch, source):
+    module, home, envs_dir = isolated_codex_runtime
+    kwargs = {"api_key": "test-key", "interactive": False}
+    if source == "cli":
+        kwargs["model"] = "gpt-5.5"
+    elif source == "profile":
+        _write_env(envs_dir / "OpenAI" / "selected.env", {"OPENAI_API_MODEL": "gpt-5.5"})
+        kwargs["env_ref"] = "selected"
+    elif source == "existing":
+        config = home / ".codex" / "config.toml"
+        config.parent.mkdir(parents=True)
+        config.write_text('model = "gpt-5.5"\n', encoding="utf-8")
+    elif source == "process":
+        monkeypatch.setenv("OPENAI_API_MODEL", "gpt-5.5")
+    else:
+        _write_env(envs_dir / "OpenAI" / ".env", {"OPENAI_API_MODEL": "gpt-5.5"})
+    module.setup_codex(**kwargs)
+    assert 'model = "gpt-5.5"' in (home / ".codex" / "config.toml").read_text(encoding="utf-8")
+
+
+def test_codex_interactive_model_fallback_is_sol(isolated_codex_runtime, monkeypatch):
+    module, home, _envs_dir = isolated_codex_runtime
+    monkeypatch.setattr(module, "resolve_interactive_mode", lambda **kwargs: (True, True, True, False, True))
+    monkeypatch.setattr(module, "resolve_install_only_mode", lambda **kwargs: (False, False))
+    monkeypatch.setattr(module, "prompt_sensitive_value", lambda _label, value, _mask: value)
+    fallbacks = {}
+
+    def prompt(label, *candidates, fallback=None):
+        fallbacks[label] = fallback
+        return next((value for value in candidates if value), fallback)
+
+    monkeypatch.setattr(module, "prompt_text_value", prompt)
+    module.setup_codex(api_key="test-key", interactive=True)
+    assert fallbacks["default model (optional)"] == "gpt-5.6-sol"
+    assert 'model = "gpt-5.6-sol"' in (home / ".codex" / "config.toml").read_text(encoding="utf-8")
+
+
+def test_codex_help_names_the_fallback_model():
+    from click.testing import CliRunner
+    from chatup.cli import main
+
+    result = CliRunner().invoke(main, ["codex", "--help"])
+    assert result.exit_code == 0
+    assert "gpt-5.6-sol" in result.output

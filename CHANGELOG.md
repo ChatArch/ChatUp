@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### 变更
+- `chatup codex` 的默认模型改为 `gpt-5.6-sol`（GPT-5.6 Sol）；仅修改未配置模型时的兜底值，保留显式参数、profile、已有配置和环境值的优先级。
+
 ### 新增
 - `chatup chatgpt` 安装新版官方 ChatGPT 桌面应用（含 Codex），与现有 `chatup codex` CLI 配置入口分离。
 - macOS 使用 Homebrew `homebrew/cask/chatgpt`，Windows 使用官方 Microsoft Store 精确 ID `9PLM9XGG6VKS`。

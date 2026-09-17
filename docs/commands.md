@@ -129,6 +129,8 @@ result = setup_chatgpt(dry_run=True)
 
 `chatup codex` 配置 OpenAI Codex CLI（`~/.codex/config.toml` 与 `~/.codex/auth.json`）：
 
+默认模型为 `gpt-5.6-sol`（GPT-5.6 Sol），仅在没有可用的模型配置时兜底。显式 `--model`、所选 OpenAI profile，以及未显式选择 profile 时的已有 Codex 配置、进程环境和 active profile 仍按原优先级生效；不会把用户已配置的模型强制覆盖成默认值。
+
 - `-e, --env VALUE` 是凭据来源：`VALUE` 是文件路径时按 env 文件读取，否则按 ChatEnv `OpenAI` profile 名读取。
 - 当 `-e PROFILE` 选择 ChatEnv profile 时，ChatUp 只读取这个显式 profile，不会从 active profile、既有 Codex 配置或进程环境变量回填缺失的 secret；profile 文件按无插值方式读取，包含 `${...}` 这类未解析变量会失败而不会回填进程环境。
 - ChatEnv profile 名不能包含路径分隔符、`.` 或 `..`；如果要传文件路径，该路径必须真实存在。
@@ -141,7 +143,7 @@ result = setup_chatgpt(dry_run=True)
 ```bash
 chatup codex -e apple -I
 chatup codex -e ~/.chatarch/envs/OpenAI/.env -I
-chatup codex --api-key "$OPENAI_API_KEY" --base-url https://example.invalid/openai/v1 --model gpt-5.5 -I
+chatup codex --api-key "$OPENAI_API_KEY" --base-url https://example.invalid/openai/v1 --model gpt-5.6-sol -I
 ```
 
 ## Cursor Agent 命令约定

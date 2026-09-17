@@ -6,7 +6,7 @@ import click
 from chatstyle import INTERACTIVE_OPTION_HELP
 
 from chatup.setup.claude import setup_claude
-from chatup.setup.codex import setup_codex
+from chatup.setup.codex import DEFAULT_MODEL as DEFAULT_CODEX_MODEL, setup_codex
 from chatup.setup.chatgpt import setup_chatgpt
 from chatup.setup.cursor_agent import CREDENTIAL_STORE_CHOICES, setup_cursor_agent
 from chatup.setup.cc_connect import setup_cc_connect
@@ -1312,7 +1312,10 @@ SETUP_COMMAND_ELEMENTS = (
             ),
             SetupOptionElement(
                 param_decls=("--model",),
-                kwargs={"default": None, "help": "Optional default model name."},
+                kwargs={
+                    "default": None,
+                    "help": f"Optional model override; fallback: {DEFAULT_CODEX_MODEL}.",
+                },
             ),
             SetupOptionElement(
                 param_decls=("-e", "--env"),
