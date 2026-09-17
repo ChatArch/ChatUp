@@ -25,6 +25,7 @@ chatup
 ├── frp                 # Install FRP Client/Server
 ├── nodejs              # Install nvm and default LTS Node.js
 ├── uv                  # Install uv and ~/.chatarch/venv
+├── chatgpt             # Install the new ChatGPT desktop app (includes Codex)
 ├── codex               # Install/configure Codex CLI
 ├── cursor-agent        # Install/configure Cursor Agent CLI
 ├── opencode            # Install/configure OpenCode
@@ -37,6 +38,16 @@ chatup
 ```
 
 Run `chatup --tree` to read back the registered tree with parameter signatures and command purposes. `chatup --tree-brief` keeps the same nodes and descriptions while omitting signatures. See [Command Reference](commands.md) for complete options.
+
+## ChatGPT Desktop
+
+```text
+chatup chatgpt
+├── --dry-run   # Show the install plan without running it
+└── -y, --yes   # Accept Windows Store source/package agreements
+```
+
+Installs the new ChatGPT desktop app including Codex, not the Codex CLI or ChatGPT Classic. macOS uses Homebrew; Windows uses the exact official Microsoft Store ID. See the [desktop install contract](commands.md#chatgpt-desktop) for prerequisites, Linux preview guidance, native storage paths and Python APIs.
 
 ## Twikoo
 

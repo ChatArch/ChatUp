@@ -43,16 +43,27 @@ chatup nginx proxy-pass ./gitea-local.conf --set SERVER_NAME=gitea.local.example
 chatup crs --install-dir ~/.chatarch/crs/local --port 12392 --redis-port 6379
 ```
 
+## ChatGPT / Codex 桌面应用
+
+```bash
+chatup chatgpt --dry-run
+chatup chatgpt
+chatup chatgpt --yes  # Windows 首次安装时接受 Store 协议
+```
+
+安装包含 Codex 的新版官方 ChatGPT 桌面应用。macOS 需要 Homebrew，Windows 需要 WinGet；Linux preview 暂按[官方说明](https://learn.chatgpt.com/docs/linux/linux-app)手动安装。现有 `chatup codex` 仍安装/配置 Codex CLI。不会自动启动、登录或升级已有应用；[完整约定](https://arch.gh.wzhecnu.cn/ChatUp/commands/#chatgpt-desktop)。
+
 ## 当前能力
 
 | 能力组 | 命令 |
 | --- | --- |
 | 基础运行环境 | `doctor`、`uv`、`nodejs`、`docker`、`zsh`、`chrome-for-testing`、`chromedriver`、`playwright`、`frp` |
 | 工作区脚手架 | `workspace` |
+| 官方桌面应用 | `chatgpt`（含 Codex） |
 | 本地服务安装 | `gitea`、`discourse`、`zulip`、`mysql`、`nginx`、`crs` |
 | Agent 工具链 | `cc-connect`、`claude`、`codex`、`cursor-agent`、`opencode`、`hermes`、`lark-cli` |
 
-所有新增安装项默认目录都收敛到 `~/.chatarch/...`，例如 `~/.chatarch/chrome-for-testing`、`~/.chatarch/chromedriver`、`~/.chatarch/playwright`、`~/.chatarch/chattea`、`~/.chatarch/discourse`、`~/.chatarch/zulip`、`~/.chatarch/chatdata`、`~/.chatarch/nginx` 和 `~/.chatarch/crs/local`。`cursor-agent` 额外注册 ChatEnv `CursorAgent` profile，`discourse`/`zulip` 注册管理员凭据 profile，并支持 `-e/--env` 从 env 文件或 profile 快速配置；显式选择 profile 时不会混入进程环境中的其他账号凭据。CLI 树由 ChatStyle 的注册表渲染。更完整的能力边界见 `docs/capability-map.md`。
+桌面应用使用系统包管理器的原生目录；ChatArch 自管安装项默认目录收敛到 `~/.chatarch/...`，例如 `~/.chatarch/chrome-for-testing`、`~/.chatarch/chromedriver`、`~/.chatarch/playwright`、`~/.chatarch/chattea`、`~/.chatarch/discourse`、`~/.chatarch/zulip`、`~/.chatarch/chatdata`、`~/.chatarch/nginx` 和 `~/.chatarch/crs/local`。`cursor-agent` 额外注册 ChatEnv `CursorAgent` profile，`discourse`/`zulip` 注册管理员凭据 profile，并支持 `-e/--env` 从 env 文件或 profile 快速配置；显式选择 profile 时不会混入进程环境中的其他账号凭据。CLI 树由 ChatStyle 的注册表渲染。更完整的能力边界见 `docs/capability-map.md`。
 
 ## 开发
 

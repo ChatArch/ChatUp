@@ -6,7 +6,8 @@ import click
 from chatstyle import INTERACTIVE_OPTION_HELP
 
 from chatup.setup.claude import setup_claude
-from chatup.setup.codex import setup_codex
+from chatup.setup.codex import DEFAULT_MODEL as DEFAULT_CODEX_MODEL, setup_codex
+from chatup.setup.chatgpt import setup_chatgpt
 from chatup.setup.cursor_agent import CREDENTIAL_STORE_CHOICES, setup_cursor_agent
 from chatup.setup.cc_connect import setup_cc_connect
 import chatup.setup.crs as crs_module
@@ -118,6 +119,20 @@ def zsh_setup(omz, aliases, login_shell, interactive, log_level):
         login_shell=login_shell,
         log_level=log_level,
     )
+
+
+def chatgpt_setup(dry_run, yes):
+    try:
+        result = setup_chatgpt(dry_run=dry_run, yes=yes)
+    except RuntimeError as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(result["app"])
+    if result["status"] == "planned":
+        click.echo("预览安装命令（未执行）：" + " ".join(result["command"]))
+    elif result["status"] == "already_installed":
+        click.echo("已安装，并已通过包管理器回读确认；未升级或启动应用。")
+    else:
+        click.echo("安装完成，已通过包管理器回读确认。请手动打开 ChatGPT 并登录。")
 
 
 def codex_setup(api_key, base_url, model, env, interactive, install_only, log_level):
@@ -1254,6 +1269,21 @@ SETUP_COMMAND_ELEMENTS = (
         ),
     ),
     SetupCommandElement(
+        name="chatgpt",
+        help="Install the official ChatGPT desktop app (includes Codex), not the Codex CLI.",
+        callback=chatgpt_setup,
+        options=(
+            SetupOptionElement(
+                param_decls=("--dry-run",),
+                kwargs={"is_flag": True, "help": "Show the install plan without executing or downloading anything."},
+            ),
+            SetupOptionElement(
+                param_decls=("--yes", "-y"),
+                kwargs={"is_flag": True, "help": "Accept Microsoft Store source/package agreements on Windows."},
+            ),
+        ),
+    ),
+    SetupCommandElement(
         name="codex",
         help="Configure Codex CLI and config files.",
         callback=codex_setup,
@@ -1282,7 +1312,10 @@ SETUP_COMMAND_ELEMENTS = (
             ),
             SetupOptionElement(
                 param_decls=("--model",),
-                kwargs={"default": None, "help": "Optional default model name."},
+                kwargs={
+                    "default": None,
+                    "help": f"Optional model override; fallback: {DEFAULT_CODEX_MODEL}.",
+                },
             ),
             SetupOptionElement(
                 param_decls=("-e", "--env"),

@@ -30,7 +30,7 @@ from chatup.setup.nodejs import (
 from chatup.utils.custom_logger import setup_logger
 from chatup.utils.platforming import chmod_private
 
-DEFAULT_MODEL = "gpt-5.5"
+DEFAULT_MODEL = "gpt-5.6-sol"
 DEFAULT_BASE_URL = "https://api.openai.com/v1"
 DEFAULT_AUTH_METHOD = "apikey"
 _ENV_VAR_REF_RE = re.compile(r"\$(?:\{[^}]+\}|[A-Za-z_][A-Za-z0-9_]*)")

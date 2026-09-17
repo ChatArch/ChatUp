@@ -26,6 +26,7 @@ chatup
 |-- crs         # 安装本地 Claude Relay Service + Redis + smoke check
 |-- cc-connect  # 安装 CC Connect CLI 和运行依赖
 |-- claude      # 配置 Claude Code CLI 和配置文件
+|-- chatgpt      # 安装新版 ChatGPT 桌面应用（含 Codex）
 |-- codex       # 配置 Codex CLI 和配置文件
 |-- opencode    # 配置 OpenCode CLI 和配置文件
 |-- hermes      # 安装 Hermes Agent 和可选 WebUI
@@ -91,6 +92,10 @@ chatup crs                 # 准备本地 CRS、Redis、secret、admin SPA 和 s
 | `chatup mysql` | `~/.chatarch/chatdata` | MySQL 默认监听 `127.0.0.1:3307`，可创建 user-level service。 |
 | `chatup nginx` | `~/.chatarch/nginx` | 不写 `/etc/nginx`，不重载系统服务；可生成入口模板。 |
 | `chatup crs` | `~/.chatarch/crs/local` | 本地 CRS + Redis + smoke check；secret 文件权限受限。 |
+
+## 桌面应用
+
+`chatup chatgpt` 通过 macOS Homebrew 或 Windows 官方 Microsoft Store 精确 ID 安装含 Codex 的新版 ChatGPT 桌面应用。`--dry-run` 无副作用，安装后回读包管理器记录。应用与缓存使用包管理器/OpenAI 的原生目录，不属于 ChatArch 自管状态。不启动应用、不登录、不改 Codex CLI 配置，也不自动安装 Linux preview。详见[桌面安装约定](commands.md#chatgpt-desktop)。
 
 ## Agent 工具链
 

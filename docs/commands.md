@@ -27,6 +27,7 @@ chatup
 |-- crs         # 安装本地 Claude Relay Service + Redis + smoke check
 |-- cc-connect  # 安装 CC Connect CLI 和运行依赖
 |-- claude      # 配置 Claude Code CLI 和配置文件
+|-- chatgpt      # 安装新版 ChatGPT 桌面应用（含 Codex）
 |-- codex       # 配置 Codex CLI 和配置文件
 |-- cursor-agent # 配置 Cursor Agent CLI 登录态和配置文件
 |-- opencode    # 配置 OpenCode CLI 和配置文件
@@ -90,9 +91,45 @@ chatup
 | `chatup cc-connect` | 安装 CC Connect CLI 和运行依赖。 |
 | `chatup lark-cli` | 配置官方 lark-cli，并复用 ChatEnv 飞书配置。 |
 
+## ChatGPT 桌面应用 {#chatgpt-desktop}
+
+`chatup chatgpt` 安装官方新版 ChatGPT 桌面应用，包含 Codex。它不是 `chatup codex`（Codex CLI），也不安装 ChatGPT Classic 或已弃用的 `codex-app`。
+
+| 平台 | 安装来源 | 前提 |
+| --- | --- | --- |
+| macOS | `brew install --cask homebrew/cask/chatgpt` | 已安装 [Homebrew](https://brew.sh/)，系统与架构要求由当前 cask 检查 |
+| Windows | `winget install --id 9PLM9XGG6VKS --exact --source msstore` | PATH 中有 WinGet，允许访问 Microsoft Store |
+| Linux | [官方 Linux preview 安装说明](https://learn.chatgpt.com/docs/linux/linux-app) | ChatUp 暂不自动化 Linux 安装，不执行 sudo、软件源配置或整机升级 |
+
+```bash
+chatup chatgpt --dry-run  # 只显示当前系统的安装命令，不联网、不下载
+chatup chatgpt            # 安装桌面应用
+chatup chatgpt --yes      # Windows：明确接受 Microsoft Store 来源和包协议
+```
+
+Windows 使用非交互安装；首次安装若需要接受 Store 协议，请使用 `--yes`。macOS 上该标志不改变安装行为。缺少包管理器时返回安装指引，不自动 bootstrap Homebrew/WinGet。已有包管理器登记的安装会跳过，不自动升级（Windows 使用 `--no-upgrade`）；若 macOS 仍登记旧 `1.x` ChatGPT Classic，会明确要求手动迁移，而不冒充新版安装成功。手动安装导致冲突时交给包管理器报错，不强制覆盖。
+
+成功表示包管理器安装记录已经回读确认，不代表应用已启动或登录。应用目录、下载缓存和运行数据由 Homebrew/Microsoft Store 与官方应用管理，使用原生平台布局（macOS 通常为 `/Applications/ChatGPT.app`），而不是 ChatArch 服务目录。ChatUp 不写桌面应用登录态，不更改 Codex CLI 配置；安装后请手动打开 ChatGPT 并登录。
+
+Python 调用不需要经由 CLI：
+
+```python
+from chatup.setup.chatgpt import plan_chatgpt_install, setup_chatgpt
+
+plan = plan_chatgpt_install()  # 纯计划，不要求本机已有包管理器
+result = setup_chatgpt(dry_run=True)
+# 真正安装：setup_chatgpt(yes=True)
+```
+
+返回值含 `app`、`platform`、`manager`、`package`、`command`、`verify_command`；安装 API 另含 `status`（`planned` / `already_installed` / `installed`）和 `verified`。失败或超时抛出 `RuntimeError`，CLI 非零退出；超时后先检查包管理器状态再重试。
+
+来源：[OpenAI 下载页](https://chatgpt.com/download/)、[Windows 官方安装指引](https://learn.chatgpt.com/docs/windows/windows-app)、[Homebrew ChatGPT](https://formulae.brew.sh/cask/chatgpt)。
+
 ## Codex 命令约定
 
 `chatup codex` 配置 OpenAI Codex CLI（`~/.codex/config.toml` 与 `~/.codex/auth.json`）：
+
+默认模型为 `gpt-5.6-sol`（GPT-5.6 Sol），仅在没有可用的模型配置时兜底。显式 `--model`、所选 OpenAI profile，以及未显式选择 profile 时的已有 Codex 配置、进程环境和 active profile 仍按原优先级生效；不会把用户已配置的模型强制覆盖成默认值。
 
 - `-e, --env VALUE` 是凭据来源：`VALUE` 是文件路径时按 env 文件读取，否则按 ChatEnv `OpenAI` profile 名读取。
 - 当 `-e PROFILE` 选择 ChatEnv profile 时，ChatUp 只读取这个显式 profile，不会从 active profile、既有 Codex 配置或进程环境变量回填缺失的 secret；profile 文件按无插值方式读取，包含 `${...}` 这类未解析变量会失败而不会回填进程环境。
@@ -106,7 +143,7 @@ chatup
 ```bash
 chatup codex -e apple -I
 chatup codex -e ~/.chatarch/envs/OpenAI/.env -I
-chatup codex --api-key "$OPENAI_API_KEY" --base-url https://example.invalid/openai/v1 --model gpt-5.5 -I
+chatup codex --api-key "$OPENAI_API_KEY" --base-url https://example.invalid/openai/v1 --model gpt-5.6-sol -I
 ```
 
 ## Cursor Agent 命令约定

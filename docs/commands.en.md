@@ -27,6 +27,7 @@ chatup
 |-- crs         # Install local Claude Relay Service + Redis + smoke check
 |-- cc-connect  # Install CC Connect CLI and runtime dependencies
 |-- claude      # Configure Claude Code CLI and config files
+|-- chatgpt      # Install the new ChatGPT desktop app (includes Codex)
 |-- codex       # Configure Codex CLI and config files
 |-- cursor-agent # Configure Cursor Agent CLI auth and config files
 |-- opencode    # Configure OpenCode CLI and config files
@@ -90,9 +91,45 @@ chatup
 | `chatup cc-connect` | Install the CC Connect CLI and runtime dependencies. |
 | `chatup lark-cli` | Configure the official lark-cli and reuse ChatEnv Feishu/Lark config. |
 
+## ChatGPT Desktop App {#chatgpt-desktop}
+
+`chatup chatgpt` installs the official new ChatGPT desktop app, including Codex. It is separate from `chatup codex` (the Codex CLI), and does not install ChatGPT Classic or the deprecated `codex-app` cask.
+
+| Platform | Install source | Prerequisites |
+| --- | --- | --- |
+| macOS | `brew install --cask homebrew/cask/chatgpt` | Existing [Homebrew](https://brew.sh/); the current cask checks OS and CPU requirements |
+| Windows | `winget install --id 9PLM9XGG6VKS --exact --source msstore` | WinGet on PATH and Microsoft Store access |
+| Linux | [Official Linux preview instructions](https://learn.chatgpt.com/docs/linux/linux-app) | Not automated by ChatUp; no sudo, repository configuration or full-system upgrade |
+
+```bash
+chatup chatgpt --dry-run  # Show the current OS install command; no network/download
+chatup chatgpt            # Install the desktop app
+chatup chatgpt --yes      # Windows: explicitly accept Store source/package agreements
+```
+
+Windows installation is non-interactive. Use `--yes` when first-time Store agreements need acceptance. This flag does not change macOS behavior. Missing package managers produce installation guidance instead of bootstrapping Homebrew/WinGet. A package-manager-registered installation is skipped, not upgraded (`--no-upgrade` on Windows). A registered legacy `1.x` ChatGPT Classic cask produces a manual-migration error instead of reporting the new app as installed. Conflicts with manually installed apps remain package-manager errors; ChatUp does not force an overwrite.
+
+Success means the package manager installation record was read back, not that the app was launched or authenticated. Homebrew/Microsoft Store and the official app own application paths, caches and runtime data using native layouts (typically `/Applications/ChatGPT.app` on macOS), rather than ChatArch service directories. ChatUp does not write desktop login state or change Codex CLI configuration. Open ChatGPT and sign in manually after installation.
+
+Call the Python API without shelling out to the CLI:
+
+```python
+from chatup.setup.chatgpt import plan_chatgpt_install, setup_chatgpt
+
+plan = plan_chatgpt_install()  # Pure plan; no package manager required
+result = setup_chatgpt(dry_run=True)
+# Actual installation: setup_chatgpt(yes=True)
+```
+
+Results include `app`, `platform`, `manager`, `package`, `command`, and `verify_command`. The install API adds `status` (`planned` / `already_installed` / `installed`) and `verified`. Failures/timeouts raise `RuntimeError` and produce a nonzero CLI exit. Check package-manager state before retrying after a timeout.
+
+Sources: [OpenAI downloads](https://chatgpt.com/download/), [official Windows instructions](https://learn.chatgpt.com/docs/windows/windows-app), [Homebrew ChatGPT](https://formulae.brew.sh/cask/chatgpt).
+
 ## Codex Command Contract
 
 `chatup codex` configures the OpenAI Codex CLI (`~/.codex/config.toml` and `~/.codex/auth.json`):
+
+The fallback model is `gpt-5.6-sol` (GPT-5.6 Sol), used only when no model is configured. An explicit `--model`, the selected OpenAI profile, and (when no profile is selected) existing Codex config, process environment and the active profile retain their existing precedence. User-configured models are not forcibly replaced by the fallback.
 
 - `-e, --env VALUE` is the credential source: a file path is read as an env file; otherwise `VALUE` is treated as a ChatEnv `OpenAI` profile name.
 - When `-e PROFILE` selects a ChatEnv profile, ChatUp reads only that explicit profile. It does not backfill missing secrets from the active profile, an existing Codex config, or process environment variables. Profile files are loaded without interpolation; unresolved `${...}` references fail instead of falling back to the process environment.
@@ -106,7 +143,7 @@ Common forms:
 ```bash
 chatup codex -e apple -I
 chatup codex -e ~/.chatarch/envs/OpenAI/.env -I
-chatup codex --api-key "$OPENAI_API_KEY" --base-url https://example.invalid/openai/v1 --model gpt-5.5 -I
+chatup codex --api-key "$OPENAI_API_KEY" --base-url https://example.invalid/openai/v1 --model gpt-5.6-sol -I
 ```
 
 ## Cursor Agent Command Contract
