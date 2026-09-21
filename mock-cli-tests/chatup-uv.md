@@ -12,3 +12,9 @@ Mock/unit coverage should avoid running the real official installer or mutating 
 - forced recreation uses `uv venv --clear --force`.
 - existing same-version venv repair uses `uv venv --allow-existing`.
 - the venv creation path uses `uv venv --seed` so `pip` is available.
+- ready and created environments update only existing Bash/Zsh rc files by default.
+- `--activate` explicitly enables updates; `--no-activate` leaves existing configuration unchanged.
+- repeated setup and retargeting reuse the ChatUV block without modifying surrounding content.
+- relative paths are persisted as absolute paths; quoted paths work in real Bash/Zsh.
+- Windows skips rc updates; failed venv verification and malformed blocks do not overwrite rc contents.
+- tests isolate HOME, USERPROFILE and CHATARCH_HOME; real CLI smoke uses `--no-activate` unless HOME is isolated.

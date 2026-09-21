@@ -39,6 +39,19 @@ chatup
 
 运行 `chatup --tree` 可回读带参数签名和命令目的的真实注册树；`chatup --tree-brief` 保留相同节点和说明，但省略参数签名。完整参数见 [命令参考](commands.md)。
 
+## Python 运行环境
+
+```text
+chatup uv
+├── --venv, --venv-path PATH           # 目标 venv，默认 ~/.chatarch/venv
+├── --python, --python-version TEXT   # Python 版本，默认 3.12
+├── -f, --force                       # 显式重建环境
+├── --activate / --no-activate        # 更新已有 Bash/Zsh rc，默认开启
+└── --log-level TEXT                  # 日志级别
+```
+
+不创建缺失的 rc 文件；Windows 跳过此项。`--no-activate` 保持现有启动配置不变。详见[快速开始](quickstart.md)。
+
 ## ChatGPT 桌面应用
 
 ```text

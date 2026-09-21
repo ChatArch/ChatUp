@@ -31,6 +31,8 @@ chatup playwright install 1.61.1 -I
 chatup workspace default ~/Playground
 ```
 
+`chatup uv` 默认更新已有 `~/.bashrc`、`~/.zshrc` 的自动激活块；使用 `chatup uv --no-activate` 可保持启动配置不变。不会创建缺失的 rc 文件，Windows 跳过此项。
+
 常见安装命令：
 
 ```bash
@@ -52,6 +54,8 @@ chatup chatgpt --yes  # Windows 首次安装时接受 Store 协议
 ```
 
 安装包含 Codex 的新版官方 ChatGPT 桌面应用。macOS 需要 Homebrew，Windows 需要 WinGet；Linux preview 暂按[官方说明](https://learn.chatgpt.com/docs/linux/linux-app)手动安装。现有 `chatup codex` 仍安装/配置 Codex CLI。不会自动启动、登录或升级已有应用；[完整约定](https://arch.gh.wzhecnu.cn/ChatUp/commands/#chatgpt-desktop)。
+
+`chatup codex`、`chatup hermes` 未配置模型时默认使用 `gpt-5.6-terra`；用户指定的模型和已有配置仍优先。
 
 ## 当前能力
 

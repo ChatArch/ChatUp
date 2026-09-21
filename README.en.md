@@ -31,6 +31,8 @@ chatup playwright install 1.61.1 -I
 chatup workspace default ~/Playground
 ```
 
+`chatup uv` updates auto-activation in existing `~/.bashrc` and `~/.zshrc` by default. Use `chatup uv --no-activate` to leave startup configuration unchanged. Missing rc files are not created, and Windows skips this step.
+
 Common install commands:
 
 ```bash
@@ -50,6 +52,8 @@ chatup chatgpt --yes  # Accept first-time Microsoft Store agreements on Windows
 ```
 
 Installs the official new ChatGPT desktop app including Codex. Requires Homebrew on macOS or WinGet on Windows. Linux preview installation follows the [official manual instructions](https://learn.chatgpt.com/docs/linux/linux-app). Existing `chatup codex` still installs/configures the Codex CLI. No automatic launch, login or upgrade of existing installations. See the [full contract](https://arch.gh.wzhecnu.cn/ChatUp/en/commands/#chatgpt-desktop).
+
+`chatup codex` and `chatup hermes` default to `gpt-5.6-terra` only when no model is configured; explicit choices and existing configuration retain precedence.
 
 ## Current Capabilities
 

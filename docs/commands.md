@@ -70,7 +70,7 @@ chatup
 | 命令 | 当前能力 |
 |---|---|
 | `chatup doctor` | 检查 ChatUp 是否可调用。 |
-| `chatup uv` | 安装 `uv` 并创建 ChatArch Python 运行环境。 |
+| `chatup uv` | 安装 `uv` 并创建 ChatArch Python 运行环境；`--activate / --no-activate` 控制已有 Bash/Zsh 启动配置更新，默认开启。见[快速开始](quickstart.md)。 |
 | `chatup nodejs` | 安装 nvm 和默认 LTS Node.js。 |
 | `chatup docker` | 检查 Docker 环境，并在需要时给出 sudo 相关建议。 |
 | `chatup zsh` | 配置 zsh、oh-my-zsh、插件、主题和 shell alias。 |
@@ -87,7 +87,7 @@ chatup
 | `chatup codex` | 配置 Codex CLI 和配置文件。 |
 | `chatup cursor-agent` | 安装/验证 Cursor Agent CLI，并安全复制 `auth.json`、`cli-config.json` 和 `agent-cli-state.json`。 |
 | `chatup opencode` | 配置 OpenCode CLI 和配置文件。 |
-| `chatup hermes` | 安装 Hermes Agent 和可选 Hermes WebUI。 |
+| `chatup hermes` | 安装 Hermes Agent 和可选 Hermes WebUI；未配置模型时兜底为 `gpt-5.6-terra`，显式模型、profile、已有配置和环境值仍优先。 |
 | `chatup cc-connect` | 安装 CC Connect CLI 和运行依赖。 |
 | `chatup lark-cli` | 配置官方 lark-cli，并复用 ChatEnv 飞书配置。 |
 
@@ -129,7 +129,7 @@ result = setup_chatgpt(dry_run=True)
 
 `chatup codex` 配置 OpenAI Codex CLI（`~/.codex/config.toml` 与 `~/.codex/auth.json`）：
 
-默认模型为 `gpt-5.6-sol`（GPT-5.6 Sol），仅在没有可用的模型配置时兜底。显式 `--model`、所选 OpenAI profile，以及未显式选择 profile 时的已有 Codex 配置、进程环境和 active profile 仍按原优先级生效；不会把用户已配置的模型强制覆盖成默认值。
+默认模型为 `gpt-5.6-terra`（GPT-5.6 Terra），仅在没有可用的模型配置时兜底。显式 `--model`、所选 OpenAI profile，以及未显式选择 profile 时的已有 Codex 配置、进程环境和 active profile 仍按原优先级生效；不会把用户已配置的模型强制覆盖成默认值。
 
 - `-e, --env VALUE` 是凭据来源：`VALUE` 是文件路径时按 env 文件读取，否则按 ChatEnv `OpenAI` profile 名读取。
 - 当 `-e PROFILE` 选择 ChatEnv profile 时，ChatUp 只读取这个显式 profile，不会从 active profile、既有 Codex 配置或进程环境变量回填缺失的 secret；profile 文件按无插值方式读取，包含 `${...}` 这类未解析变量会失败而不会回填进程环境。
@@ -143,7 +143,7 @@ result = setup_chatgpt(dry_run=True)
 ```bash
 chatup codex -e apple -I
 chatup codex -e ~/.chatarch/envs/OpenAI/.env -I
-chatup codex --api-key "$OPENAI_API_KEY" --base-url https://example.invalid/openai/v1 --model gpt-5.6-sol -I
+chatup codex --api-key "$OPENAI_API_KEY" --base-url https://example.invalid/openai/v1 --model gpt-5.6-terra -I
 ```
 
 ## Cursor Agent 命令约定

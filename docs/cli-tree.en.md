@@ -39,7 +39,20 @@ chatup
 
 Run `chatup --tree` to read back the registered tree with parameter signatures and command purposes. `chatup --tree-brief` keeps the same nodes and descriptions while omitting signatures. See [Command Reference](commands.md) for complete options.
 
-## ChatGPT Desktop
+## Python Runtime
+
+```text
+chatup uv
+├── --venv, --venv-path PATH           # Target venv; default ~/.chatarch/venv
+├── --python, --python-version TEXT   # Python version; default 3.12
+├── -f, --force                       # Explicitly recreate the environment
+├── --activate / --no-activate        # Update existing Bash/Zsh rc; enabled by default
+└── --log-level TEXT                  # Log level
+```
+
+Missing rc files are not created; Windows skips this step. `--no-activate` leaves startup configuration unchanged. See [Quick Start](quickstart.md).
+
+## ChatGPT Desktop App
 
 ```text
 chatup chatgpt

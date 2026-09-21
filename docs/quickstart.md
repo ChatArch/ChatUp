@@ -46,6 +46,18 @@ chatup uv
 - 安装或复用 `uv`。
 - 创建 `~/.chatarch/venv`。
 - 默认使用 Python 3.12。
+- `--activate` 默认开启：新建或复用环境成功后，在已有 `~/.bashrc`、`~/.zshrc` 中更新自动激活块。下次启动相应 shell 时生效；当前 shell 仍需手动 `source <venv>/bin/activate`。
+- 不创建缺失的 rc 文件；复用 ChatUV 标记，重复执行不重复添加，块外用户内容保留。写完并同步后原子替换，保留原权限及符号链接；失败时保留原文件。Windows 不修改 Bash/Zsh 配置。
+
+只准备运行环境而不改启动配置：
+
+```bash
+chatup uv --no-activate
+```
+
+`--no-activate` 不移除以前的激活块。若要停止已配置的自动激活，请从对应 rc 文件中手动移除 `# >>> chatuv activate >>>` 到 `# <<< chatuv activate <<<` 之间的块。
+
+Python 调用可使用 `setup_uv(shell_activate=False)`；`chatup.setup.uv.configure_shell_activation(venv_path, home=...)` 可单独更新已有 rc，返回 `updated`、`unchanged`、`missing` 和 `skipped`。
 
 如需自定义路径：
 
