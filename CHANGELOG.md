@@ -2,8 +2,16 @@
 
 ## Unreleased
 
+## 0.2.16
+
+### 修复
+- `chatup uv` 默认在已有 `~/.bashrc` 和 `~/.zshrc` 中追加或更新 ChatArch venv 自动激活块；新建、修复和复用环境均生效，不创建缺失的 rc 文件。
+- 新增 `--activate / --no-activate`，默认开启；关闭时不修改或移除已有启动配置，Windows 跳过 Bash/Zsh 更新。
+- 复用 ChatUV 标记，避免重复激活；保留块外用户内容，以绝对路径和 shell quoting 处理自定义 venv，未变化的 rc 不重复写入。
+- rc 文件写完并同步后原子替换，保留原权限和符号链接；写入失败时保留原始配置。
+
 ### 变更
-- `chatup codex` 的默认模型改为 `gpt-5.6-sol`（GPT-5.6 Sol）；仅修改未配置模型时的兜底值，保留显式参数、profile、已有配置和环境值的优先级。
+- `chatup codex` 和 `chatup hermes` 的默认模型统一为 `gpt-5.6-terra`（GPT-5.6 Terra）；仅修改未配置模型时的兜底值，保留显式参数、profile、已有配置和环境值的优先级。
 
 ### 新增
 - `chatup chatgpt` 安装新版官方 ChatGPT 桌面应用（含 Codex），与现有 `chatup codex` CLI 配置入口分离。

@@ -23,7 +23,7 @@ logger = setup_logger("setup_hermes")
 CHATARCH_HERMES_INSTALLER_URL = (
     "https://raw.githubusercontent.com/ChatArch/hermes-agent/main/scripts/install.sh"
 )
-DEFAULT_MODEL = "gpt-5.4-mini"
+DEFAULT_MODEL = "gpt-5.6-terra"
 DEFAULT_BASE_URL = "https://api.openai.com/v1"
 DEFAULT_WEBUI_HOST = "127.0.0.1"
 DEFAULT_WEBUI_PORT = 8787

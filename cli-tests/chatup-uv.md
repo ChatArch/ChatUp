@@ -16,13 +16,16 @@ Expected:
 - default venv is `~/.chatarch/venv`
 - default Python version is `3.12`
 - `--force` is available for explicit recreation
+- `--activate / --no-activate` is available and defaults to `activate`
+- activation updates only existing `~/.bashrc` / `~/.zshrc` on POSIX
+- existing ChatUV activation blocks are updated, not duplicated; `--no-activate` leaves them untouched
 
 ## Task-local install smoke
 
 Use a task-local target instead of mutating the default global ChatArch venv:
 
 ```bash
-chatup uv --venv ./playground/uv-smoke-venv --python 3.12
+chatup uv --venv ./playground/uv-smoke-venv --python 3.12 --no-activate
 ./playground/uv-smoke-venv/bin/python -m pip --version
 ```
 

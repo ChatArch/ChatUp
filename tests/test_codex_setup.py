@@ -297,10 +297,10 @@ def test_codex_env_profile_prompt_defaults_stay_inside_selected_profile(
     assert 'model = "apple-model"' in config_text
 
 
-def test_codex_default_model_is_gpt_5_6_sol():
+def test_codex_default_model_is_gpt_5_6_terra():
     import chatup.setup.codex as codex_setup
 
-    assert codex_setup.DEFAULT_MODEL == "gpt-5.6-sol"
+    assert codex_setup.DEFAULT_MODEL == "gpt-5.6-terra"
 
 
 @pytest.fixture
@@ -320,7 +320,7 @@ def isolated_codex_runtime(tmp_path, monkeypatch):
 
 
 @pytest.mark.parametrize("named_profile", [False, True])
-def test_codex_cli_writes_sol_when_no_model_is_selected(isolated_codex_runtime, monkeypatch, named_profile):
+def test_codex_cli_writes_terra_when_no_model_is_selected(isolated_codex_runtime, monkeypatch, named_profile):
     from click.testing import CliRunner
     from chatup.cli import main
 
@@ -335,7 +335,7 @@ def test_codex_cli_writes_sol_when_no_model_is_selected(isolated_codex_runtime, 
     result = CliRunner().invoke(main, args)
     assert result.exit_code == 0, result.output
     content = (home / ".codex" / "config.toml").read_text(encoding="utf-8")
-    assert 'model = "gpt-5.6-sol"' in content
+    assert 'model = "gpt-5.6-terra"' in content
     assert 'wire_api = "responses"' in content
 
 
@@ -360,7 +360,7 @@ def test_codex_explicit_model_sources_still_override_fallback(isolated_codex_run
     assert 'model = "gpt-5.5"' in (home / ".codex" / "config.toml").read_text(encoding="utf-8")
 
 
-def test_codex_interactive_model_fallback_is_sol(isolated_codex_runtime, monkeypatch):
+def test_codex_interactive_model_fallback_is_terra(isolated_codex_runtime, monkeypatch):
     module, home, _envs_dir = isolated_codex_runtime
     monkeypatch.setattr(module, "resolve_interactive_mode", lambda **kwargs: (True, True, True, False, True))
     monkeypatch.setattr(module, "resolve_install_only_mode", lambda **kwargs: (False, False))
@@ -373,8 +373,8 @@ def test_codex_interactive_model_fallback_is_sol(isolated_codex_runtime, monkeyp
 
     monkeypatch.setattr(module, "prompt_text_value", prompt)
     module.setup_codex(api_key="test-key", interactive=True)
-    assert fallbacks["default model (optional)"] == "gpt-5.6-sol"
-    assert 'model = "gpt-5.6-sol"' in (home / ".codex" / "config.toml").read_text(encoding="utf-8")
+    assert fallbacks["default model (optional)"] == "gpt-5.6-terra"
+    assert 'model = "gpt-5.6-terra"' in (home / ".codex" / "config.toml").read_text(encoding="utf-8")
 
 
 def test_codex_help_names_the_fallback_model():
@@ -383,4 +383,4 @@ def test_codex_help_names_the_fallback_model():
 
     result = CliRunner().invoke(main, ["codex", "--help"])
     assert result.exit_code == 0
-    assert "gpt-5.6-sol" in result.output
+    assert "gpt-5.6-terra" in result.output

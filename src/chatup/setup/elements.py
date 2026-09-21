@@ -38,7 +38,7 @@ from chatup.setup.gitea import (
     DEFAULT_WORK_DIR as DEFAULT_GITEA_WORK_DIR,
     setup_gitea,
 )
-from chatup.setup.hermes import setup_hermes
+from chatup.setup.hermes import DEFAULT_MODEL as DEFAULT_HERMES_MODEL, setup_hermes
 from chatup.setup.lark_cli import setup_lark_cli
 from chatup.setup.mysql import (
     DEFAULT_MYSQL_BIND_ADDRESS,
@@ -103,8 +103,14 @@ def nodejs_setup(interactive, log_level):
     setup_nodejs(interactive=interactive, log_level=log_level)
 
 
-def uv_setup(venv, python_version, force, log_level):
-    setup_uv(venv=venv, python_version=python_version, force=force, log_level=log_level)
+def uv_setup(venv, python_version, force, log_level, shell_activate):
+    setup_uv(
+        venv=venv,
+        python_version=python_version,
+        force=force,
+        log_level=log_level,
+        shell_activate=shell_activate,
+    )
 
 
 def docker_setup(sudo, interactive, log_level):
@@ -1266,6 +1272,14 @@ SETUP_COMMAND_ELEMENTS = (
                     "help": "Clear and recreate the target environment if it already exists.",
                 },
             ),
+            SetupOptionElement(
+                param_decls=("--activate/--no-activate", "shell_activate"),
+                kwargs={
+                    "default": True,
+                    "show_default": True,
+                    "help": "Update auto-activation in existing ~/.bashrc and ~/.zshrc (POSIX only).",
+                },
+            ),
         ),
     ),
     SetupCommandElement(
@@ -1578,7 +1592,7 @@ SETUP_COMMAND_ELEMENTS = (
             ),
             SetupOptionElement(
                 param_decls=("--model",),
-                kwargs={"default": None, "help": "Hermes default model."},
+                kwargs={"default": None, "help": f"Hermes model override; fallback: {DEFAULT_HERMES_MODEL}."},
             ),
             SetupOptionElement(
                 param_decls=("--with-webui-env",),

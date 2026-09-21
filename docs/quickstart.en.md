@@ -46,6 +46,18 @@ Default behavior:
 - Install or reuse `uv`.
 - Create `~/.chatarch/venv`.
 - Use Python 3.12 by default.
+- `--activate` is enabled by default: after creating or reusing the environment, update the auto-activation block in existing `~/.bashrc` and `~/.zshrc`. It takes effect in the next matching shell; the current shell still needs `source <venv>/bin/activate`.
+- Do not create missing rc files. Reuse ChatUV markers without duplicate blocks and preserve user content outside them. Write and sync before atomically replacing each file, preserving permissions and symlinks; failed writes leave the original file intact. Windows does not modify Bash/Zsh configuration.
+
+To prepare the environment without changing startup configuration:
+
+```bash
+chatup uv --no-activate
+```
+
+`--no-activate` does not remove a previously configured activation block. To stop existing auto-activation, manually remove the block between `# >>> chatuv activate >>>` and `# <<< chatuv activate <<<` in the corresponding rc file.
+
+Python callers can use `setup_uv(shell_activate=False)`. Call `chatup.setup.uv.configure_shell_activation(venv_path, home=...)` to update existing rc files separately; it returns `updated`, `unchanged`, `missing`, and `skipped`.
 
 To customize the target:
 

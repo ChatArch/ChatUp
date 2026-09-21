@@ -492,6 +492,9 @@ def test_uv_help_exposes_defaults():
 def test_uv_setup_creates_default_chatarch_python_env(monkeypatch, tmp_path):
     import chatup.setup.uv as uv_setup
 
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))
+
     created = []
     readiness = iter([False, True])
     monkeypatch.setattr(uv_setup, "DEFAULT_VENV_PATH", tmp_path / "default-venv")
@@ -513,6 +516,9 @@ def test_uv_setup_creates_default_chatarch_python_env(monkeypatch, tmp_path):
 
 def test_uv_setup_accepts_custom_path_python_and_force(monkeypatch, tmp_path):
     import chatup.setup.uv as uv_setup
+
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))
 
     target = tmp_path / "custom-venv"
     created = []
