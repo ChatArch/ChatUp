@@ -16,7 +16,8 @@ chatup
 |-- zsh         # 配置 zsh / oh-my-zsh / 插件 / alias
 |-- chrome              # 按当前系统安装普通 Google Chrome
 |-- iterm               # 安装 iTerm2（仅限 macOS）
-|-- macos               # 勾选安装 Snipaste、iTerm2、Chrome，默认全选
+|-- macos               # 勾选 macOS 应用，Apple Silicon 可选 Blender
+|-- remotion            # 初始化带锁定依赖的本地视频项目
 |-- chrome-for-testing # 管理 Google Chrome for Testing 浏览器
 |-- chromedriver       # 管理 ChromeDriver WebDriver server
 |-- playwright         # 管理 Playwright package 与 Chromium browser
@@ -96,12 +97,13 @@ chatup
 
 ## macOS 常用应用 {#macos}
 
-`chatup macos` 仅限 macOS，目前提供 Snipaste、iTerm2、Google Chrome 三个选项，默认全部勾选。
+`chatup macos` 仅限 macOS。Apple Silicon 提供 Snipaste、iTerm2、Google Chrome、Blender 四个选项，默认全部勾选；Intel 只提供前三项。
 
 ```bash
 chatup macos
 chatup macos --app snipaste
 chatup macos --app iterm --app chrome
+chatup macos --app blender
 chatup macos -I
 chatup macos --dry-run
 chatup macos -i --dry-run
@@ -110,15 +112,39 @@ chatup macos -i --dry-run
 | 参数 / 场景 | 行为 |
 | --- | --- |
 | 终端中不传 `--app` | 显示默认全选菜单；空格切换、回车确认、Ctrl-C 取消。全部取消勾选后正常退出，不安装。 |
-| `--app snipaste\|iterm\|chrome` | 只安装指定应用；可重复，自动去重，默认不再询问。 |
+| `--app snipaste\|iterm\|chrome\|blender` | 只安装指定应用；可重复，自动去重，默认不再询问。Blender 仅支持 Apple Silicon。 |
 | `-i` | 强制显示菜单，显式 `--app` 作为预选项；没有终端时安装前报错。 |
-| `-I`、无终端或 `CHATARCH_AUTO_PROMPT=0` | 不询问；执行显式选择，未指定时安装全部三项。 |
+| `-I`、无终端或 `CHATARCH_AUTO_PROMPT=0` | 不询问；执行显式选择，未指定时安装当前架构支持的全部选项。 |
 | `--dry-run` | 默认不询问，只打印所选应用的来源和安装路径；可配合 `-i` 先勾选。不联网、不执行安装、不写目录。 |
 | `--log-level DEBUG\|INFO\|WARNING\|ERROR` | 设置安装日志级别，默认 `INFO`。 |
 
-Snipaste 从[官方网站](https://www.snipaste.com/)提供的 [macOS 下载地址](https://dl.snipaste.com/mac)获取 DMG。三个应用均复用[原生 macOS 安装流程](#chrome-iterm)，无需 Homebrew，校验应用身份与官方签名后安装到 `/Applications`，不可写时使用 `~/Applications`。已有应用验证后复用；不自动升级或启动应用。Snipaste 首次截图所需的系统权限由用户在 macOS 中授权。
+Snipaste 从[官方网站](https://www.snipaste.com/)提供的 [macOS 下载地址](https://dl.snipaste.com/mac)获取 DMG。应用均复用[原生 macOS 安装流程](#chrome-iterm)，无需 Homebrew，校验应用身份与官方签名后安装到 `/Applications`，不可写时使用 `~/Applications`。已有应用验证后复用；不自动升级或启动应用。Snipaste 首次截图所需的系统权限由用户在 macOS 中授权。
+
+Blender 固定使用[官方 5.2.2 LTS Apple Silicon DMG](https://download.blender.org/release/Blender5.2/blender-5.2.2-macos-arm64.dmg)，对照[官方 SHA-256](https://download.blender.org/release/Blender5.2/blender-5.2.2.sha256)校验后才挂载，再检查版本、开发者签名和 Gatekeeper 公证。已有 Blender 验证后保留，不覆盖或降级。Intel Mac 上显式选择 Blender 会在安装任何选项前报错；此版本未实现 Intel 安装。
 
 按选择顺序逐个安装；遇到错误立即停止，已完成的安装保留，再次运行会验证并复用。非 macOS 系统在任何安装前报错，即使只选择 Chrome。
+
+## Remotion 视频项目 {#remotion}
+
+`chatup remotion PROJECT_DIR` 创建 Remotion 4.0.530 / React 19.1.0 项目，附带可渲染的 3 秒 720p 示例和完整 npm 锁文件。需要已有 Node.js >=18.12、npm >=9；安装前检查，不替换系统运行环境。
+
+```bash
+chatup remotion ./my-video --dry-run -I
+chatup remotion ./my-video -I
+chatup remotion ./my-video -I  # 再次验证已有项目，不覆盖源码
+chatup remotion ./my-video --browser-executable /path/to/chrome -I
+cd my-video
+npm run studio
+npm run render -- --browser-executable='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+```
+
+终端中省略目录会询问，默认建议当前目录下的 `remotion-video`；显式目录直接执行。`-i` 强制询问，`-I` 禁止询问；无终端或 `CHATARCH_AUTO_PROMPT=0` 时缺少目录会报错。`--dry-run` 只预览，不运行 Node/npm、不联网、不创建目录。`--log-level` 支持 `DEBUG|INFO|WARNING|ERROR`，默认 `INFO`。
+
+首次安装在目标目录旁暂存模板并执行 `npm ci --ignore-scripts --include=optional --no-audit --no-fund`，验证四个直接依赖版本后才移入目标路径。依赖仅安装到项目，不运行依赖生命周期脚本；失败时清理暂存目录。已有无关目录、文件和目标符号链接会被拒绝。ChatUp 通过 `.chatup-remotion.json` 识别自己创建的项目；再次运行只验证，不重装依赖或修改用户源码。依赖被修改或缺失时返回错误，用户可在项目中自行修复，不会自动覆盖。
+
+初始化检测已安装的 Chrome/Chromium，或接受 `--browser-executable PATH`，并输出使用该浏览器的渲染命令。不启动 Studio、不下载浏览器；没有本机浏览器时仍可创建项目，并提示先用 `chatup chrome` 安装。直接运行不带浏览器参数的 Remotion render 可能由 Remotion 下载浏览器。macOS 可先运行 `chatup macos --app chrome --app blender` 准备桌面工具；Remotion 项目应放在自己的项目目录。
+
+真实安装与 MP4 渲染已在 Apple Silicon macOS、Node 24.21.0、npm 11.19.0 验证；其他系统使用相同的 Node/npm 项目流程，原生安装与渲染尚未逐个平台实测。
 
 ## Chrome 与 iTerm2 {#chrome-iterm}
 

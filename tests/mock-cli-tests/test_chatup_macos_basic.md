@@ -1,17 +1,19 @@
 # macOS application selection test design
 
-`chatup macos` offers exactly Snipaste, iTerm2 and Google Chrome, all checked by
-default. It reuses the native desktop installer and only runs on macOS.
+`chatup macos` offers Snipaste, iTerm2, Google Chrome and Blender on Apple Silicon,
+all checked by default. Intel excludes Blender and keeps the first three.
+It reuses the native desktop installer and only runs on macOS.
 
 ## Selection and execution
 
 - On a macOS TTY, no explicit `--app` opens a ChatStyle checkbox with all three
-  apps checked. Space toggles choices; Enter installs only the remaining choices.
+  original apps plus Blender checked on Apple Silicon. Space toggles choices;
+  Enter installs only the remaining choices.
 - `--app snipaste` selects only Snipaste; repeated `--app` selects a subset and
   duplicate values install once. Explicit apps skip automatic prompts.
 - `-i` forces selection, using explicit apps as the initial checked values when
   supplied. `-I`, disabled auto prompting, and non-TTY execution use the specified
-  apps or all three defaults without prompting. Forced interaction without a TTY
+  apps or all supported defaults without prompting. Forced interaction without a TTY
   must fail before installation.
 - Empty selection is a successful no-op. Ctrl-C cancels before any install.
 - Reject unknown names and unsupported operating systems before downloading or

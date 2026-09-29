@@ -17,6 +17,8 @@ def _install(app: str, **kwargs) -> None:
         click.echo(f"{result['app']} install plan ({result['platform']}):")
         if "url" in result:
             click.echo(f"Download: {result['url']}")
+        if "sha256" in result:
+            click.echo(f"SHA-256: {result['sha256']}")
         if "path" in result:
             click.echo(f"Install to: {result['path']} (verify publisher signature)")
         if "command" in result:

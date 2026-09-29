@@ -46,13 +46,25 @@ chatup crs --install-dir ~/.chatarch/crs/local --port 12392 --redis-port 6379
 ## macOS Apps
 
 ```bash
-chatup macos                       # Choose apps; Snipaste, iTerm2 and Chrome are all selected
+chatup macos                       # Choose apps; all four are selected on Apple Silicon
 chatup macos --app snipaste         # Install only Snipaste
-chatup macos -I                    # Install all three without prompting
+chatup macos --app blender          # Install Blender 5.2.2 LTS (Apple Silicon)
+chatup macos -I                    # Install all supported apps without prompting
 chatup macos --dry-run             # Preview the installation plan
 ```
 
-macOS only. In a terminal, use Space to toggle apps and Enter to install; deselecting all apps exits without installation. Repeat `--app snipaste|iterm|chrome` to select several apps. Official downloads require no Homebrew, and verified existing apps are reused. See the [macOS install command](https://arch.gh.wzhecnu.cn/ChatUp/en/commands/#macos).
+macOS only. Apple Silicon selects Snipaste, iTerm2, Chrome and Blender by default; Intel retains the first three. In a terminal, use Space to toggle apps and Enter to install; deselecting all apps exits without installation. Repeat `--app snipaste|iterm|chrome|blender` to select several apps. Official downloads require no Homebrew, and verified existing apps are reused. See the [macOS install command](https://arch.gh.wzhecnu.cn/ChatUp/en/commands/#macos).
+
+## Remotion Video Projects
+
+```bash
+chatup remotion ./my-video --dry-run -I
+chatup remotion ./my-video -I
+cd my-video
+npm run studio
+```
+
+Requires existing Node.js >=18.12 and npm >=9. Creates a locked Remotion 4.0.530 project, detects local Chrome and prints a render command. Existing unrelated directories are protected; Node is not replaced and browsers are not downloaded. Projects live in the specified directory. On supported Macs, `chatup macos --app blender --app chrome` prepares the desktop tools. See the [Remotion setup contract](https://arch.gh.wzhecnu.cn/ChatUp/en/commands/#remotion).
 
 ## Chrome and iTerm2
 
@@ -83,7 +95,8 @@ Installs the official new ChatGPT desktop app including Codex. Requires Homebrew
 | --- | --- |
 | Base runtime | `doctor`, `uv`, `nodejs`, `docker`, `zsh`, `chrome-for-testing`, `chromedriver`, `playwright`, `frp` |
 | Workspace scaffold | `workspace` |
-| Desktop apps | `macos` (Snipaste/iTerm2/Chrome selection), `chrome`, `iterm` (macOS only), `chatgpt` (includes Codex) |
+| Desktop apps | `macos` (Snipaste/iTerm2/Chrome/Blender selection), `chrome`, `iterm` (macOS only), `chatgpt` (includes Codex) |
+| Video projects | `remotion` |
 | Local service installers | `gitea`, `mysql`, `nginx`, `crs` |
 | Agent toolchains | `cc-connect`, `claude`, `codex`, `cursor-agent`, `opencode`, `hermes`, `lark-cli` |
 
