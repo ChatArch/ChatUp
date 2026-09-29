@@ -16,6 +16,7 @@ chatup
 |-- zsh         # Configure zsh / oh-my-zsh / plugins / aliases
 |-- chrome              # Install regular Google Chrome for the current OS
 |-- iterm               # Install iTerm2 (macOS only)
+|-- macos               # Select Snipaste, iTerm2 and Chrome; all selected by default
 |-- chrome-for-testing # Manage Google Chrome for Testing browsers
 |-- chromedriver       # Manage ChromeDriver WebDriver servers
 |-- playwright         # Manage Playwright packages and Chromium browsers
@@ -90,6 +91,8 @@ Local-service commands use user-level layouts by default:
 | `chatup crs` | `~/.chatarch/crs/local` | Local CRS + Redis + smoke check with restricted secret-file permissions. |
 
 ## Desktop App
+
+`chatup macos` offers Snipaste, iTerm2 and Chrome checkboxes, all selected by default, on macOS only. It supports explicit `--app` subsets, `-I` for scripts and `--dry-run` previews, using signed official downloads without Homebrew. See the [macOS install command](commands.md#macos).
 
 `chatup chrome` installs regular Google Chrome for the current OS. `chatup iterm` installs iTerm2 on macOS. Both support `--dry-run` and reuse verified existing installations; macOS does not require Homebrew. See the [install contract](commands.md#chrome-iterm).
 

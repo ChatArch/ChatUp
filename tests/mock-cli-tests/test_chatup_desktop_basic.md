@@ -4,6 +4,9 @@ The new `chrome` command installs regular Google Chrome, separate from the
 existing Chrome for Testing artifact backend. `iterm` installs iTerm2 on macOS.
 These cases mock external downloads and system commands; no host app is installed.
 
+The macOS installation/idempotency case also covers Snipaste via
+`chatup macos --app snipaste -I`, added with the macOS application selector.
+
 ## Plans and platform boundaries
 
 - Prepare Darwin (arm64/x86_64), Windows, Linux x86_64 and unsupported OS/CPU cases.

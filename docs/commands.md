@@ -16,6 +16,7 @@ chatup
 |-- zsh         # 配置 zsh / oh-my-zsh / 插件 / alias
 |-- chrome              # 按当前系统安装普通 Google Chrome
 |-- iterm               # 安装 iTerm2（仅限 macOS）
+|-- macos               # 勾选安装 Snipaste、iTerm2、Chrome，默认全选
 |-- chrome-for-testing # 管理 Google Chrome for Testing 浏览器
 |-- chromedriver       # 管理 ChromeDriver WebDriver server
 |-- playwright         # 管理 Playwright package 与 Chromium browser
@@ -92,6 +93,32 @@ chatup
 | `chatup hermes` | 安装 Hermes Agent 和可选 Hermes WebUI；未配置模型时兜底为 `gpt-5.6-terra`，显式模型、profile、已有配置和环境值仍优先。 |
 | `chatup cc-connect` | 安装 CC Connect CLI 和运行依赖。 |
 | `chatup lark-cli` | 配置官方 lark-cli，并复用 ChatEnv 飞书配置。 |
+
+## macOS 常用应用 {#macos}
+
+`chatup macos` 仅限 macOS，目前提供 Snipaste、iTerm2、Google Chrome 三个选项，默认全部勾选。
+
+```bash
+chatup macos
+chatup macos --app snipaste
+chatup macos --app iterm --app chrome
+chatup macos -I
+chatup macos --dry-run
+chatup macos -i --dry-run
+```
+
+| 参数 / 场景 | 行为 |
+| --- | --- |
+| 终端中不传 `--app` | 显示默认全选菜单；空格切换、回车确认、Ctrl-C 取消。全部取消勾选后正常退出，不安装。 |
+| `--app snipaste\|iterm\|chrome` | 只安装指定应用；可重复，自动去重，默认不再询问。 |
+| `-i` | 强制显示菜单，显式 `--app` 作为预选项；没有终端时安装前报错。 |
+| `-I`、无终端或 `CHATARCH_AUTO_PROMPT=0` | 不询问；执行显式选择，未指定时安装全部三项。 |
+| `--dry-run` | 默认不询问，只打印所选应用的来源和安装路径；可配合 `-i` 先勾选。不联网、不执行安装、不写目录。 |
+| `--log-level DEBUG\|INFO\|WARNING\|ERROR` | 设置安装日志级别，默认 `INFO`。 |
+
+Snipaste 从[官方网站](https://www.snipaste.com/)提供的 [macOS 下载地址](https://dl.snipaste.com/mac)获取 DMG。三个应用均复用[原生 macOS 安装流程](#chrome-iterm)，无需 Homebrew，校验应用身份与官方签名后安装到 `/Applications`，不可写时使用 `~/Applications`。已有应用验证后复用；不自动升级或启动应用。Snipaste 首次截图所需的系统权限由用户在 macOS 中授权。
+
+按选择顺序逐个安装；遇到错误立即停止，已完成的安装保留，再次运行会验证并复用。非 macOS 系统在任何安装前报错，即使只选择 Chrome。
 
 ## Chrome 与 iTerm2 {#chrome-iterm}
 

@@ -45,6 +45,17 @@ chatup nginx proxy-pass ./gitea-local.conf --set SERVER_NAME=gitea.local.example
 chatup crs --install-dir ~/.chatarch/crs/local --port 12392 --redis-port 6379
 ```
 
+## macOS 常用应用
+
+```bash
+chatup macos                       # 勾选安装，默认全选 Snipaste、iTerm2、Chrome
+chatup macos --app snipaste         # 只安装 Snipaste
+chatup macos -I                    # 不询问，安装默认三项
+chatup macos --dry-run             # 只预览安装计划
+```
+
+仅限 macOS。终端中用空格切换勾选，回车安装；取消全部勾选则直接退出。可重复传入 `--app snipaste|iterm|chrome` 选择多个应用。直接使用官方安装包，无需 Homebrew，已有应用验证后复用。详见[macOS 安装入口](https://arch.gh.wzhecnu.cn/ChatUp/commands/#macos)。
+
 ## Chrome 与 iTerm2
 
 ```bash
@@ -74,7 +85,7 @@ chatup chatgpt --yes  # Windows 首次安装时接受 Store 协议
 | --- | --- |
 | 基础运行环境 | `doctor`、`uv`、`nodejs`、`docker`、`zsh`、`chrome-for-testing`、`chromedriver`、`playwright`、`frp` |
 | 工作区脚手架 | `workspace` |
-| 桌面应用 | `chrome`、`iterm`（仅 macOS）、`chatgpt`（含 Codex） |
+| 桌面应用 | `macos`（Snipaste/iTerm2/Chrome 多选）、`chrome`、`iterm`（仅 macOS）、`chatgpt`（含 Codex） |
 | 本地服务安装 | `gitea`、`discourse`、`zulip`、`mysql`、`nginx`、`crs` |
 | Agent 工具链 | `cc-connect`、`claude`、`codex`、`cursor-agent`、`opencode`、`hermes`、`lark-cli` |
 

@@ -16,6 +16,7 @@ chatup
 |-- zsh         # Configure zsh / oh-my-zsh / plugins / aliases
 |-- chrome              # Install regular Google Chrome for the current OS
 |-- iterm               # Install iTerm2 (macOS only)
+|-- macos               # Select Snipaste, iTerm2 and Chrome; all selected by default
 |-- chrome-for-testing # Manage Google Chrome for Testing browsers
 |-- chromedriver       # Manage ChromeDriver WebDriver servers
 |-- playwright         # Manage Playwright packages and Chromium browsers
@@ -92,6 +93,32 @@ chatup
 | `chatup hermes` | Install Hermes Agent and optional Hermes WebUI; fall back to `gpt-5.6-terra` only when no model is configured. Explicit models, profiles, existing config and environment values retain precedence. |
 | `chatup cc-connect` | Install the CC Connect CLI and runtime dependencies. |
 | `chatup lark-cli` | Configure the official lark-cli and reuse ChatEnv Feishu/Lark config. |
+
+## macOS Apps {#macos}
+
+`chatup macos` is macOS-only and currently offers Snipaste, iTerm2 and Google Chrome, all selected by default.
+
+```bash
+chatup macos
+chatup macos --app snipaste
+chatup macos --app iterm --app chrome
+chatup macos -I
+chatup macos --dry-run
+chatup macos -i --dry-run
+```
+
+| Option / context | Behavior |
+| --- | --- |
+| Terminal without `--app` | Show all three checked; Space toggles, Enter confirms, Ctrl-C cancels. Deselecting everything exits successfully without installation. |
+| `--app snipaste\|iterm\|chrome` | Install only the named apps; repeat to select several. Duplicates are removed and no prompt appears by default. |
+| `-i` | Force the menu, using explicit `--app` values as preselection; fail before installation if no terminal is available. |
+| `-I`, no terminal, or `CHATARCH_AUTO_PROMPT=0` | Skip prompts and install explicit selections, or all three if none were specified. |
+| `--dry-run` | Skip automatic prompting and preview selected sources/paths. Add `-i` to choose first. No network, installer execution, or directory writes. |
+| `--log-level DEBUG\|INFO\|WARNING\|ERROR` | Set installer logging; defaults to `INFO`. |
+
+Snipaste uses the [macOS DMG download](https://dl.snipaste.com/mac) linked by its [official website](https://www.snipaste.com/). All three apps share the [native macOS install flow](#chrome-iterm), without Homebrew: verify bundle identity and official publisher signature, then install to `/Applications`, falling back to `~/Applications` if needed. Existing apps are verified and reused, without automatic upgrades or launch. Users grant Snipaste's screen-capture permissions through macOS when first needed.
+
+Apps install sequentially in selection order. An error stops subsequent installations; earlier successes remain and are reused on the next run. Other operating systems fail before installation, even when only Chrome is selected.
 
 ## Chrome and iTerm2 {#chrome-iterm}
 

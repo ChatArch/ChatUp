@@ -105,7 +105,8 @@ def mac_install(desktop, monkeypatch, tmp_path):
         calls.append(command)
         if command[0].endswith("hdiutil") and command[1] == "attach":
             mount = Path(command[command.index("-mountpoint") + 1])
-            shutil.copytree(tmp_path / "source" / "Google Chrome.app", mount / "Google Chrome.app")
+            for source in (tmp_path / "source").iterdir():
+                shutil.copytree(source, mount / source.name)
         elif command[0].endswith("ditto"):
             shutil.copytree(command[1], command[2], symlinks=True)
         return subprocess.CompletedProcess(command, 0, "", "")
@@ -115,7 +116,7 @@ def mac_install(desktop, monkeypatch, tmp_path):
     return apps, user_apps, cache, calls
 
 
-@pytest.mark.parametrize("app", ["chrome", "iterm"])
+@pytest.mark.parametrize("app", ["chrome", "iterm", "snipaste"])
 def test_mac_install_verifies_and_is_idempotent(desktop, mac_install, app):
     apps, _, cache, calls = mac_install
     first = desktop.setup_desktop_app(app)
@@ -126,10 +127,11 @@ def test_mac_install_verifies_and_is_idempotent(desktop, mac_install, app):
     assert not list(cache.iterdir())
     assert any(command[0].endswith("codesign") and desktop.MAC_APPS[app]["team_id"] in command[-2] for command in calls)
     assert all(command[-2].startswith("=anchor ") for command in calls if command[0].endswith("codesign"))
-    if app == "chrome":
+    if desktop.MAC_APPS[app]["format"] == "dmg":
         assert calls[-1][1] == "detach"
     calls.clear()
-    repeated = CliRunner().invoke(main, [app])
+    args = ["macos", "--app", "snipaste", "-I"] if app == "snipaste" else [app]
+    repeated = CliRunner().invoke(main, args)
     assert repeated.exit_code == 0, repeated.output
     assert "Already installed" in repeated.output
     assert all(command[0].endswith("codesign") for command in calls)

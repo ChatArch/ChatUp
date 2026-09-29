@@ -34,6 +34,7 @@ chatup
 ├── workspace           # Initialize a ChatArch workspace
 ├── chrome              # Install regular Google Chrome for the current OS
 ├── iterm               # Install iTerm2 (macOS only)
+├── macos               # Select Snipaste, iTerm2 and Chrome; all selected by default
 ├── chrome-for-testing  # Manage Google Chrome for Testing browsers
 ├── chromedriver        # Manage ChromeDriver WebDriver servers
 └── playwright          # Manage Playwright packages and Chromium browsers
@@ -53,6 +54,14 @@ chatup uv
 ```
 
 Missing rc files are not created; Windows skips this step. `--no-activate` leaves startup configuration unchanged. See [Quick Start](quickstart.md).
+
+## macOS Apps
+
+```text
+chatup macos [--app snipaste|iterm|chrome]... [--dry-run] [--log-level LEVEL] [-i|-I]
+```
+
+macOS only, with Snipaste, iTerm2 and Chrome checked by default. Space toggles and Enter installs. Repeat `--app` to select a subset, use `-I` to skip prompts, or `--dry-run` to preview. See the [macOS install contract](commands.md#macos).
 
 ## Chrome and iTerm2
 

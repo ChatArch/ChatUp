@@ -1,4 +1,4 @@
-"""Native installers for regular Google Chrome and the macOS iTerm2 app."""
+"""Native installers for Google Chrome and supported macOS desktop apps."""
 from __future__ import annotations
 
 import logging
@@ -35,6 +35,14 @@ MAC_APPS = {
         "url": "https://iterm2.com/downloads/stable/latest",
         "format": "zip",
     },
+    "snipaste": {
+        "app": "Snipaste",
+        "bundle": "Snipaste.app",
+        "bundle_id": "com.Snipaste",
+        "team_id": "NGTL73P583",
+        "url": "https://dl.snipaste.com/mac",
+        "format": "dmg",
+    },
 }
 LINUX_PACKAGES = {
     "apt-get": ("deb", ["install"]),
@@ -59,8 +67,8 @@ def plan_desktop_install(
     spec = MAC_APPS[app]
     system = platform.system()
     plan = {"app": spec["app"], "platform": system}
-    if app == "iterm" and system != "Darwin":
-        raise RuntimeError(f"iTerm2 is supported on macOS only; current platform: {system}.")
+    if app != "chrome" and system != "Darwin":
+        raise RuntimeError(f"{spec['app']} is supported on macOS only; current platform: {system}.")
     if system == "Darwin":
         if platform.machine().lower() not in {"arm64", "aarch64", "x86_64", "amd64"}:
             raise RuntimeError(f"Unsupported macOS architecture: {platform.machine()}.")
