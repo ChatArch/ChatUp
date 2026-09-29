@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.2.18
+
+### 修复
+- `chatup zsh` 将官方源安装快捷名称由 `pypi` 改为 `pypip`；保留原命令及镜像 URL，`tspip` 不变。
+
 ## 0.2.16
 
 ### 修复
