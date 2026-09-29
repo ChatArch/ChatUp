@@ -202,7 +202,7 @@ def _install_macos(plan: dict[str, Any]) -> dict[str, Any]:
             if detached.returncode:
                 _run(["/usr/bin/hdiutil", "detach", "-force", str(mount)], timeout=120, check=False)
         # Never recursively clean up a still-mounted disk image.
-        if not mount.is_mount():
+        if not os.path.ismount(mount):
             shutil.rmtree(work)
         else:
             logger.warning("Disk image still mounted at %s; installer cache retained at %s", mount, work)
