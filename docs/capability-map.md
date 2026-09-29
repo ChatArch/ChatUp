@@ -14,6 +14,8 @@ chatup
 |-- nodejs      # 安装 nvm 和默认 LTS Node.js
 |-- docker      # 检查 Docker 环境，并提示 sudo 配置
 |-- zsh         # 配置 zsh / oh-my-zsh / 插件 / alias
+|-- chrome              # 按当前系统安装普通 Google Chrome
+|-- iterm               # 安装 iTerm2（仅限 macOS）
 |-- chrome-for-testing # 管理 Google Chrome for Testing 浏览器
 |-- chromedriver       # 管理 ChromeDriver WebDriver server
 |-- playwright         # 管理 Playwright package 与 Chromium browser
@@ -94,6 +96,8 @@ chatup crs                 # 准备本地 CRS、Redis、secret、admin SPA 和 s
 | `chatup crs` | `~/.chatarch/crs/local` | 本地 CRS + Redis + smoke check；secret 文件权限受限。 |
 
 ## 桌面应用
+
+`chatup chrome` 按系统安装普通 Google Chrome；`chatup iterm` 在 macOS 安装 iTerm2。两个命令支持 `--dry-run`，验证并复用已有安装，macOS 无需 Homebrew。详见[安装约定](commands.md#chrome-iterm)。
 
 `chatup chatgpt` 通过 macOS Homebrew 或 Windows 官方 Microsoft Store 精确 ID 安装含 Codex 的新版 ChatGPT 桌面应用。`--dry-run` 无副作用，安装后回读包管理器记录。应用与缓存使用包管理器/OpenAI 的原生目录，不属于 ChatArch 自管状态。不启动应用、不登录、不改 Codex CLI 配置，也不自动安装 Linux preview。详见[桌面安装约定](commands.md#chatgpt-desktop)。
 

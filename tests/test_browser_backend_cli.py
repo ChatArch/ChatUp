@@ -14,7 +14,9 @@ def test_browser_artifacts_have_independent_top_level_backends():
     assert "chrome-for-testing" in commands
     assert "chromedriver" in commands
     assert "playwright" in commands
-    assert "chrome" not in commands
+    assert "chrome" in commands
+    assert not isinstance(main.commands["chrome"], click.Group)
+    assert "regular Google Chrome" in main.commands["chrome"].help
     assert "browser" not in commands
     assert "chromium" not in commands
 
