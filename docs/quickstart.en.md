@@ -10,7 +10,7 @@
 
 - **Workspace**
 
-    Use `chatup workspace default ~/Playground` to initialize the ChatArch collaboration layout.
+    Use `chatup workspace ~/Playground` to initialize the ChatArch collaboration layout.
 
 - **Local Services**
 
@@ -98,7 +98,7 @@ See [CLI Tree](cli-tree.md) for all options and the Python API.
 ## Initialize a Workspace
 
 ```bash
-chatup workspace default ~/Playground
+chatup workspace ~/Playground
 ```
 
 This creates the base ChatArch workspace structure:

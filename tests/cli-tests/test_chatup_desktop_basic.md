@@ -1,4 +1,4 @@
-# Chrome / iTerm2 real acceptance
+# Chrome / Snipaste / iTerm2 real acceptance
 
 ## Initial environment
 
@@ -31,5 +31,32 @@ open -a 'Google Chrome'
 open -a iTerm
 ```
 
-Windows/Linux installation routes are covered by mock tests in CI. A real
-Windows/Linux installer result must be reported separately from that coverage.
+## Windows execution and expected results
+
+Use an authorized Windows desktop with WinGet available. Record whether Chrome
+and Snipaste already exist, then run the following commands when their system
+installation is explicitly requested.
+
+1. Run both dry runs and confirm the exact WinGet IDs `Google.Chrome.EXE` (current
+   user scope) and `liule.Snipaste`, with no installer process started.
+2. Run `chatup chrome --yes` and `chatup snipaste --yes`. Confirm that each
+   command checks the exact package ID before and after installation, then
+   reports verified success. Chrome must also verify its installed executable's
+   Google LLC Authenticode signature, product identity and version.
+3. Repeat both commands and confirm already-installed output without upgrades.
+4. Start both installed applications manually and confirm they are available;
+   the CLI must not launch them, change Chrome defaults, or change Snipaste
+   preferences.
+
+```powershell
+chatup --version
+chatup chrome --dry-run
+chatup snipaste --dry-run
+chatup chrome --yes
+chatup snipaste --yes
+chatup chrome --yes
+chatup snipaste --yes
+```
+
+Linux installation routes remain covered by mock tests in CI. A real Linux
+installer result must be reported separately from that coverage.

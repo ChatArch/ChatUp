@@ -33,6 +33,7 @@ chatup
 ├── hermes              # 安装 Hermes Agent 与可选 WebUI
 ├── workspace           # 初始化 ChatArch workspace
 ├── chrome              # 按当前系统安装普通 Google Chrome
+├── snipaste            # 在 macOS 或 Windows 安装 Snipaste
 ├── iterm               # 安装 iTerm2（仅限 macOS）
 ├── macos               # 勾选 macOS 应用，Apple Silicon 可选 Blender
 ├── remotion            # 初始化带锁定依赖的本地视频项目
@@ -72,14 +73,15 @@ chatup remotion [PROJECT_DIR] [--browser-executable PATH] [--dry-run] [--log-lev
 
 创建锁定依赖的本地视频项目。缺少目录时在终端中询问；不覆盖已有无关目录。项目安装、运行环境要求和浏览器策略见 [Remotion 约定](commands.md#remotion)。
 
-## Chrome 与 iTerm2
+## Chrome、Snipaste 与 iTerm2
 
 ```text
 chatup chrome [--dry-run] [--sudo] [-y|--yes] [--log-level LEVEL]
+chatup snipaste [--dry-run] [-y|--yes] [--log-level LEVEL]
 chatup iterm [--dry-run] [--log-level LEVEL]
 ```
 
-Chrome 安装普通系统浏览器；iTerm2 仅限 macOS。详见[安装约定](commands.md#chrome-iterm)。
+Chrome 安装普通系统浏览器；Snipaste 支持 macOS 和 Windows；iTerm2 仅限 macOS。详见[安装约定](commands.md#chrome-iterm)。
 
 ## ChatGPT 桌面应用
 

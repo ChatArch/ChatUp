@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 from pathlib import Path
+import os
+import shutil
+import stat
 import subprocess
 
 import click
@@ -27,14 +30,60 @@ Topic directories such as `chatarch/package-development` and `chatarch/package-r
 """
 
 
+def _resolve_git_command() -> str | None:
+    git = shutil.which("git")
+    if git:
+        return git
+    if os.name != "nt":
+        return None
+
+    candidates: list[Path] = []
+    local_app_data = os.environ.get("LOCALAPPDATA")
+    if local_app_data:
+        candidates.extend(
+            [
+                Path(local_app_data) / "Programs" / "Git" / "cmd" / "git.exe",
+                Path(local_app_data) / "Programs" / "Git" / "bin" / "git.exe",
+            ]
+        )
+    for env_name in ("ProgramFiles", "ProgramFiles(x86)"):
+        root = os.environ.get(env_name)
+        if root:
+            candidates.extend(
+                [
+                    Path(root) / "Git" / "cmd" / "git.exe",
+                    Path(root) / "Git" / "bin" / "git.exe",
+                ]
+            )
+
+    for candidate in candidates:
+        if candidate.is_file():
+            return str(candidate)
+    return None
+
+
+_GIT_NOT_FOUND_MESSAGE = (
+    "Git executable not found. Install Git and make sure `git` is available on PATH. "
+    "On Windows, standard Git for Windows locations are also supported. "
+    "Then rerun this command."
+)
+
+
 def _run_git(
     args: list[str], workdir: Path | None = None
 ) -> subprocess.CompletedProcess[str]:
-    command = ["git"]
+    git = _resolve_git_command()
+    if git is None:
+        raise click.ClickException(_GIT_NOT_FOUND_MESSAGE)
+
+    command = [git]
     if workdir is not None:
         command.extend(["-C", str(workdir)])
     command.extend(args)
-    return subprocess.run(command, capture_output=True, text=True)
+    try:
+        return subprocess.run(command, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    except FileNotFoundError as exc:
+        raise click.ClickException(_GIT_NOT_FOUND_MESSAGE) from exc
 
 
 def _clone_or_update_repo(
@@ -92,15 +141,85 @@ def apply_chattool_option(
     }
 
 
+def _paths_point_to_same_entry(source: Path, target: Path) -> bool:
+    try:
+        return source.exists() and target.exists() and source.samefile(target)
+    except OSError:
+        return False
+
+
+def _is_windows_reparse_point(path: Path) -> bool:
+    if os.name != "nt":
+        return False
+    try:
+        info = path.stat(follow_symlinks=False)
+    except (AttributeError, OSError, ValueError):
+        return False
+    return info.st_reparse_tag == stat.IO_REPARSE_TAG_MOUNT_POINT
+
+
+def _remove_link_path(path: Path) -> None:
+    if os.name == "nt" and path.is_dir():
+        path.rmdir()
+    else:
+        path.unlink()
+
+
+def _create_windows_junction(source: Path, target: Path) -> None:
+    comspec = os.environ.get("ComSpec", "cmd")
+    # Pass paths through quoted environment expansion, not cmd command syntax.
+    env = {**os.environ, "CHATUP_LINK_SOURCE": str(source), "CHATUP_LINK_TARGET": str(target)}
+    command = (
+        f'{subprocess.list2cmdline([comspec])} /d /v:off /c '
+        'mklink /J "%CHATUP_LINK_TARGET%" "%CHATUP_LINK_SOURCE%"'
+    )
+    result = subprocess.run(
+        command,
+        capture_output=True,
+        text=True,
+        errors="replace",
+        env=env,
+    )
+    if result.returncode != 0:
+        message = result.stderr.strip() or result.stdout.strip()
+        raise click.ClickException(message or f"Failed to create junction: {target}")
+
+
+def _create_windows_link_fallback(source: Path, target: Path, original: OSError) -> None:
+    if os.name != "nt":
+        raise click.ClickException(
+            f"Failed to create symlink {target} -> {source}: {original}"
+        ) from original
+    try:
+        if source.is_dir():
+            _create_windows_junction(source.resolve(), target)
+        else:
+            os.link(source, target)
+    except (OSError, click.ClickException) as exc:
+        raise click.ClickException(
+            "Failed to create a workspace link on Windows. Enable Developer Mode "
+            "or run with symlink privileges; directory junction/file hard-link "
+            f"fallback also failed for {target} -> {source}: {exc}"
+        ) from exc
+
+
 def _ensure_symlink(source: Path, target: Path) -> None:
     target.parent.mkdir(parents=True, exist_ok=True)
-    if target.is_symlink():
-        target.unlink()
+    if target.is_symlink() or _is_windows_reparse_point(target):
+        if _paths_point_to_same_entry(source, target):
+            return
+        _remove_link_path(target)
     elif target.exists():
+        if _paths_point_to_same_entry(source, target):
+            return
         raise click.ClickException(
-            f"Refusing to replace existing non-symlink path: {target}"
+            f"Refusing to replace existing non-link path: {target}"
         )
-    target.symlink_to(source)
+
+    try:
+        target.symlink_to(source, target_is_directory=source.is_dir())
+    except OSError as exc:
+        _create_windows_link_fallback(source, target, exc)
 
 
 def _ensure_local_skill_group(workspace_dir: Path) -> Path:

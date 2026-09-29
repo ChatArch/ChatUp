@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.2.21
+
+### Added
+- Add `chatup snipaste` for verified Snipaste installation on macOS and Windows. Windows uses the exact WinGet `liule.Snipaste` package, accepts agreements only with `--yes`, and verifies package-manager records before reporting success.
+
+### Fixed
+- Use the versioned `Google.Chrome.EXE` WinGet package for current-user Windows Chrome installation, avoiding floating MSI hash mismatches without bypassing verification. Verify the installed executable's Google signature, identity and version, and reuse existing user/machine installations.
+- Make `chatup workspace` optional module setup friendlier on Windows: detect Git for Windows in common install locations, report a clear error when Git is missing, pass the directory symlink flag, and fall back to junctions/hard links when symlink privileges are unavailable.
+- Preserve spaces and shell metacharacters in Windows junction paths, decode Git output as UTF-8, and mark extracted directory symlinks correctly on Windows.
+- Refresh workspace documentation examples to use the supported single-argument workspace path form.
+
 ## 0.2.20
 
 ### Added

@@ -5,15 +5,15 @@
 ## Basic Command
 
 ```bash
-chatup workspace default ~/Playground
+chatup workspace ~/Playground
 ```
 
 Common options:
 
 ```bash
-chatup workspace default ~/Playground --language zh
-chatup workspace default ~/Playground --with-memory --memory-source https://github.com/ChatArch/ChatMemory.git
-chatup workspace default ~/Playground --dry-run
+chatup workspace ~/Playground --language zh
+chatup workspace ~/Playground --with-memory --memory-source https://github.com/ChatArch/ChatMemory.git
+chatup workspace ~/Playground --dry-run
 ```
 
 ## Generated Structure
@@ -64,3 +64,8 @@ Playground/core/ChatGH
 ```
 
 Task records remain under `projects/`. This keeps PRs, tests, and source changes in repositories while process notes, reports, and temporary outputs stay in the outer workspace.
+
+## Windows Compatibility
+
+- `--with-chattool`, `--with-chatblog`, and `--with-memory` require Git; on Windows, ChatUp also checks common Git for Windows install locations when the current terminal `PATH` has not refreshed yet.
+- When Windows symlink privileges are unavailable, workspace setup falls back to directory junctions for directories and hard links for files. If those fallbacks fail, the command reports an actionable error.

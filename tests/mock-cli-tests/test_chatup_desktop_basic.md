@@ -1,7 +1,8 @@
 # Chrome / iTerm2 CLI test design
 
-The new `chrome` command installs regular Google Chrome, separate from the
-existing Chrome for Testing artifact backend. `iterm` installs iTerm2 on macOS.
+The `chrome` command installs regular Google Chrome, separate from the existing
+Chrome for Testing artifact backend. `snipaste` installs Snipaste on macOS or
+Windows, while `iterm` installs iTerm2 on macOS.
 These cases mock external downloads and system commands; no host app is installed.
 
 The macOS installation/idempotency case also covers Snipaste via
@@ -10,9 +11,12 @@ The macOS installation/idempotency case also covers Snipaste via
 ## Plans and platform boundaries
 
 - Prepare Darwin (arm64/x86_64), Windows, Linux x86_64 and unsupported OS/CPU cases.
-- Chrome selects Google's universal macOS DMG, exact WinGet `Google.Chrome`, or
-  the official stable DEB/RPM through apt/dnf/yum/zypper. iTerm2 selects its
-  official stable ZIP on Darwin and rejects other systems before any side effect.
+- Chrome selects Google's universal macOS DMG, exact WinGet `Google.Chrome.EXE`
+  with `--scope user` (versioned official download, hash verification intact), or
+  the official stable DEB/RPM through apt/dnf/yum/zypper. Snipaste selects the
+  verified macOS DMG path or exact WinGet `liule.Snipaste`; it rejects Linux
+  before any side effect. iTerm2 selects its official stable ZIP on Darwin and
+  rejects other systems before any side effect.
 - `--dry-run` prints the plan, without downloads, subprocesses or directory writes.
 - Linux without root or `--sudo` fails with the required command before download;
   `--yes` forwards package-manager agreement/noninteractive switches.
@@ -20,6 +24,7 @@ The macOS installation/idempotency case also covers Snipaste via
 ```sh
 chatup chrome --dry-run
 chatup chrome --dry-run --sudo --yes
+chatup snipaste --dry-run
 chatup iterm --dry-run
 ```
 
@@ -45,6 +50,13 @@ chatup iterm
 ```
 
 ## Errors and package-manager verification
+
+- Windows Chrome uses WinGet's versioned official EXE for the current user.
+  Verify the installed chrome.exe Authenticode status, exact Google LLC publisher,
+  product identity and version before reporting success or reusing an existing
+  user/machine installation. Reject invalid binaries and stale package records.
+- Dry runs must not execute PowerShell or create a cache. WinGet hash mismatches
+  remain failures; never bypass package verification or silently change installers.
 
 - Exercise download, signature, copy, timeout and subprocess failures: exit
   nonzero, report the cause and never claim successful installation.

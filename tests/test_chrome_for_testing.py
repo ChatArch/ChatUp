@@ -263,7 +263,7 @@ def test_resolve_rejects_non_object_metadata(tmp_path):
         )
 
 
-def test_force_install_rejects_symlink_root(tmp_path):
+def test_force_install_rejects_symlink_root(tmp_path, require_symlink_privilege):
     home = tmp_path / "chrome-for-testing"
     outside = tmp_path / "outside"
     outside.mkdir()
@@ -281,7 +281,7 @@ def test_force_install_rejects_symlink_root(tmp_path):
         )
 
 
-def test_install_rejects_untrusted_resolver_identity_and_parent_symlink(tmp_path):
+def test_install_rejects_untrusted_resolver_identity_and_parent_symlink(tmp_path, require_symlink_privilege):
     home = tmp_path / "chrome-for-testing"
     downloaded = False
 
@@ -402,7 +402,22 @@ def test_safe_extract_rejects_path_traversal_and_special_files(tmp_path):
         safe_extract_chrome_for_testing_zip(special, tmp_path / "special-out")
 
 
-def test_safe_extract_allows_internal_symlink_and_rejects_escape(tmp_path):
+def test_safe_extract_marks_directory_symlinks(tmp_path, monkeypatch):
+    internal = tmp_path / "internal.zip"
+    with zipfile.ZipFile(internal, "w") as bundle:
+        bundle.writestr("app/Versions/1/chrome", "binary")
+        link = zipfile.ZipInfo("app/Versions/Current")
+        link.external_attr = (stat.S_IFLNK | 0o777) << 16
+        bundle.writestr(link, "1")
+
+    calls = []
+    monkeypatch.setattr(Path, "symlink_to", lambda self, target, target_is_directory=False:
+                        calls.append((target, target_is_directory)))
+    safe_extract_chrome_for_testing_zip(internal, tmp_path / "output")
+    assert calls == [("1", True)]
+
+
+def test_safe_extract_allows_internal_symlink_and_rejects_escape(tmp_path, require_symlink_privilege):
     internal = tmp_path / "internal.zip"
     with zipfile.ZipFile(internal, "w") as bundle:
         bundle.writestr("app/Versions/1/chrome", "binary")

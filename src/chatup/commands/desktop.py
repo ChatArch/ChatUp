@@ -44,6 +44,15 @@ def chrome_cli(**kwargs) -> None:
     _install("chrome", **kwargs)
 
 
+@click.command(name="snipaste")
+@click.option("--dry-run", is_flag=True, help="Show the installation plan without downloading or installing.")
+@click.option("--yes", "-y", is_flag=True, help="Accept Windows agreements.")
+@click.option("--log-level", type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"], case_sensitive=False), default="INFO")
+def snipaste_cli(**kwargs) -> None:
+    """Install Snipaste for macOS or Windows."""
+    _install("snipaste", **kwargs)
+
+
 @click.command(name="iterm")
 @click.option("--dry-run", is_flag=True, help="Show the installation plan without downloading or installing.")
 @click.option("--log-level", type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"], case_sensitive=False), default="INFO")

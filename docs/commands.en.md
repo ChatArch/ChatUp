@@ -15,6 +15,7 @@ chatup
 |-- docker      # Check Docker and show sudo guidance when needed
 |-- zsh         # Configure zsh / oh-my-zsh / plugins / aliases
 |-- chrome              # Install regular Google Chrome for the current OS
+|-- snipaste            # Install Snipaste on macOS or Windows
 |-- iterm               # Install iTerm2 (macOS only)
 |-- macos               # Select supported macOS apps, including Blender on Apple Silicon
 |-- remotion            # Initialize a locked local video project
@@ -146,35 +147,38 @@ Initialization detects local Chrome/Chromium or accepts `--browser-executable PA
 
 Real installation and MP4 rendering were verified on Apple Silicon macOS with Node 24.21.0 and npm 11.19.0. Other systems use the same Node/npm project flow, but native installation and rendering have not been exercised on every platform.
 
-## Chrome and iTerm2 {#chrome-iterm}
+## Chrome, Snipaste, and iTerm2 {#chrome-iterm}
 
-`chatup chrome` installs regular Google Chrome. `chatup iterm` installs iTerm2 on macOS only.
+`chatup chrome` installs regular Google Chrome. `chatup snipaste` installs Snipaste on macOS or Windows. `chatup iterm` installs iTerm2 on macOS only.
 
-| Platform | Chrome installation | iTerm2 |
-| --- | --- | --- |
-| macOS Intel / Apple Silicon | Google's official universal stable DMG, no Homebrew needed | Official stable ZIP |
-| Windows | Exact WinGet package `Google.Chrome`, silent installation | Unsupported, exits with an error |
-| Linux x86_64 | Official stable DEB (apt-get) or RPM (dnf/yum/zypper) | Unsupported, exits with an error |
-| Linux ARM / other systems | Explicit unsupported-platform error | Unsupported |
+| Platform | Chrome installation | Snipaste | iTerm2 |
+| --- | --- | --- | --- |
+| macOS Intel / Apple Silicon | Google's official universal stable DMG, no Homebrew needed | Official DMG | Official stable ZIP |
+| Windows | Exact WinGet package `Google.Chrome.EXE`, silent current-user installation | Exact WinGet package `liule.Snipaste`, silent installation | Unsupported, exits with an error |
+| Linux x86_64 | Official stable DEB (apt-get) or RPM (dnf/yum/zypper) | Unsupported, exits with an error | Unsupported, exits with an error |
+| Linux ARM / other systems | Explicit unsupported-platform error | Unsupported, exits with an error | Unsupported |
 
 ```bash
 chatup chrome
+chatup snipaste
 chatup iterm
 chatup chrome --dry-run
+chatup snipaste --dry-run
 chatup iterm --dry-run
 chatup chrome --sudo --yes   # Linux: allow sudo and package confirmation
 chatup chrome --yes          # Windows: accept source and package agreements
+chatup snipaste --yes        # Windows: accept source and package agreements
 ```
 
-Both commands accept `--log-level DEBUG|INFO|WARNING|ERROR`. There are no required inputs or input prompts. `--dry-run` only reads local platform/paths and prints the plan, without network requests, installer processes or directory writes.
+All three commands accept `--log-level DEBUG|INFO|WARNING|ERROR`. There are no required inputs or input prompts. `--dry-run` only reads local platform/paths and prints the plan, without network requests, installer processes or directory writes.
 
 macOS reuses existing apps in `/Applications` or `~/Applications`. New apps go to writable `/Applications`, falling back to `~/Applications`. Downloads are checked for bundle ID, version, executable, minimum macOS version and official Developer ID signature, then copied into staging and renamed into place. Invalid existing apps cause an error and are not overwritten. Commands do not upgrade, launch, log in, or change browser/terminal defaults. Temporary downloads use `~/.chatarch/cache/desktop` (respecting `CHATARCH_HOME`); staging is cleaned and DMGs detached afterward.
 
-Linux needs a supported package manager. Non-root users must explicitly pass `--sudo`; otherwise installation stops with instructions. Root may install directly. The package manager resolves dependencies/system requirements, and `google-chrome --version` verifies the result. Windows requires [WinGet](https://aka.ms/getwinget); exact package records are checked before and after installation, without upgrading existing Chrome.
+Linux needs a supported package manager. Non-root users must explicitly pass `--sudo`; otherwise installation stops with instructions. Root may install directly. The package manager resolves dependencies/system requirements, and `google-chrome --version` verifies the result. Windows installation requires [WinGet](https://aka.ms/getwinget); exact `Google.Chrome.EXE` or `liule.Snipaste` package records are checked before and after installation, without upgrading existing apps. Chrome uses a versioned official EXE with WinGet hash verification intact, avoiding drift between a floating MSI URL and its manifest. Its installed `chrome.exe` must also have a valid Google LLC signature, expected product identity and version. Valid existing user/machine Chrome installations in standard directories are reused without reinstallation; invalid executables or records without executables are errors.
 
 Desktop installers do not write CFT/ChromeDriver/Playwright metadata, browser profiles or cookies. Automation artifacts retain their independent backends.
 
-Sources: [Google Chrome](https://www.google.com/chrome/), [iTerm2 downloads](https://iterm2.com/downloads.html).
+Sources: [Google Chrome](https://www.google.com/chrome/), [Snipaste](https://www.snipaste.com/), [iTerm2 downloads](https://iterm2.com/downloads.html).
 
 ## ChatGPT Desktop App {#chatgpt-desktop}
 

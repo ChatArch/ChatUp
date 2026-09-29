@@ -400,7 +400,7 @@ def test_chromedriver_rejects_non_object_metadata(tmp_path):
         )
 
 
-def test_chromedriver_force_install_rejects_symlink_root(tmp_path):
+def test_chromedriver_force_install_rejects_symlink_root(tmp_path, require_symlink_privilege):
     home = tmp_path / "chromedriver"
     outside = tmp_path / "outside"
     outside.mkdir()
@@ -419,7 +419,7 @@ def test_chromedriver_force_install_rejects_symlink_root(tmp_path):
 
 
 def test_driver_install_rejects_untrusted_resolver_identity_and_parent_symlink(
-    tmp_path,
+    tmp_path, require_symlink_privilege,
 ):
     home = tmp_path / "chromedriver"
     downloaded = False

@@ -268,32 +268,48 @@ def test_iterm_rejects_unsafe_zip(desktop, mac_install, monkeypatch, unsafe):
         desktop.setup_desktop_app("iterm")
 
 
-@pytest.mark.parametrize("already_installed", [True, False])
-def test_windows_exact_package_is_verified(desktop, monkeypatch, already_installed):
+@pytest.mark.parametrize(
+    "app,package_id,already_installed",
+    [
+        ("chrome", "Google.Chrome.EXE", True),
+        ("chrome", "Google.Chrome.EXE", False),
+        ("snipaste", "liule.Snipaste", True),
+        ("snipaste", "liule.Snipaste", False),
+    ],
+)
+def test_windows_exact_package_is_verified(desktop, monkeypatch, app, package_id, already_installed):
     monkeypatch.setattr(desktop.platform, "system", lambda: "Windows")
     monkeypatch.setattr(desktop.shutil, "which", lambda _: "C:/Program Files/winget.exe")
     calls = []
 
+    monkeypatch.setattr(desktop, "_windows_chrome", lambda: (
+        {"binary": "chrome.exe", "version": "154.0.0.1"}
+        if already_installed or any(c[1] == "install" for c in calls) else None
+    ))
+
     def run(command, **kwargs):
         calls.append(command)
-        assert "--exact" in command and "Google.Chrome" in command
+        assert "--exact" in command and package_id in command
         assert "--accept-source-agreements" in command
         if command[1] == "list":
             present = already_installed or len(calls) > 1
-            return subprocess.CompletedProcess(command, 0 if present else 1, "Google Chrome Google.Chrome 123" if present else "", "")
+            return subprocess.CompletedProcess(command, 0 if present else 1, f"App {package_id} 123" if present else "", "")
         assert "--no-upgrade" in command and "--silent" in command
+        if app == "chrome":
+            assert command[command.index("--scope") + 1] == "user"
         assert "--accept-package-agreements" in command
         return subprocess.CompletedProcess(command, 0, "", "")
 
     monkeypatch.setattr(desktop, "_run", run)
-    result = CliRunner().invoke(main, ["chrome", "--yes"])
+    result = CliRunner().invoke(main, [app, "--yes"])
     assert result.exit_code == 0, result.output
     assert "Installation verified" in result.output
-    assert len(calls) == (1 if already_installed else 3)
+    assert len(calls) == (0 if app == "chrome" and already_installed else 1 if already_installed else 3)
 
 
 def test_windows_missing_manager_and_failed_verification(desktop, monkeypatch):
     monkeypatch.setattr(desktop.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(desktop, "_windows_chrome", lambda: None)
     monkeypatch.setattr(desktop.shutil, "which", lambda _: None)
     with pytest.raises(RuntimeError, match="getwinget"):
         desktop.setup_desktop_app("chrome")
@@ -301,6 +317,14 @@ def test_windows_missing_manager_and_failed_verification(desktop, monkeypatch):
     monkeypatch.setattr(desktop, "_run", lambda command, **k: subprocess.CompletedProcess(command, 0, "Other app", ""))
     with pytest.raises(RuntimeError, match="verification failed"):
         desktop.setup_desktop_app("chrome")
+
+
+def test_snipaste_rejects_linux_before_any_side_effect(desktop, monkeypatch):
+    monkeypatch.setattr(desktop.platform, "system", lambda: "Linux")
+    monkeypatch.setattr(desktop, "_download", lambda *a: pytest.fail("must not download"))
+    result = CliRunner().invoke(main, ["snipaste", "--dry-run"])
+    assert result.exit_code != 0
+    assert "macOS and Windows only" in result.output
 
 
 def test_linux_requires_explicit_privilege_before_download(desktop, monkeypatch):

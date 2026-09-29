@@ -5,15 +5,15 @@
 ## 基本命令
 
 ```bash
-chatup workspace default ~/Playground
+chatup workspace ~/Playground
 ```
 
 常用选项：
 
 ```bash
-chatup workspace default ~/Playground --language zh
-chatup workspace default ~/Playground --with-memory --memory-source https://github.com/ChatArch/ChatMemory.git
-chatup workspace default ~/Playground --dry-run
+chatup workspace ~/Playground --language zh
+chatup workspace ~/Playground --with-memory --memory-source https://github.com/ChatArch/ChatMemory.git
+chatup workspace ~/Playground --dry-run
 ```
 
 ## 生成结构
@@ -64,3 +64,8 @@ Playground/core/ChatGH
 ```
 
 任务记录仍然放在 `projects/` 中。这样可以让 PR、测试和源码变更保持在仓库里，而过程记录、报告和临时输出留在 workspace 外层。
+
+## Windows 兼容性
+
+- `--with-chattool`、`--with-chatblog` 和 `--with-memory` 需要 Git；在 Windows 上会自动识别常见的 Git for Windows 安装位置，即使当前终端的 `PATH` 尚未刷新。
+- 当 Windows 没有符号链接权限时，workspace 会对目录链接回退为 junction，对文件链接回退为 hard link；如果这些兜底也失败，命令会给出可操作的错误提示。

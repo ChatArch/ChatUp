@@ -28,7 +28,7 @@ chatup doctor
 chatup uv
 chatup chrome-for-testing install --channel stable -I
 chatup playwright install 1.61.1 -I
-chatup workspace default ~/Playground
+chatup workspace ~/Playground
 ```
 
 `chatup uv` updates auto-activation in existing `~/.bashrc` and `~/.zshrc` by default. Use `chatup uv --no-activate` to leave startup configuration unchanged. Missing rc files are not created, and Windows skips this step.
@@ -66,16 +66,17 @@ npm run studio
 
 Requires existing Node.js >=18.12 and npm >=9. Creates a locked Remotion 4.0.530 project, detects local Chrome and prints a render command. Existing unrelated directories are protected; Node is not replaced and browsers are not downloaded. Projects live in the specified directory. On supported Macs, `chatup macos --app blender --app chrome` prepares the desktop tools. See the [Remotion setup contract](https://arch.gh.wzhecnu.cn/ChatUp/en/commands/#remotion).
 
-## Chrome and iTerm2
+## Chrome, Snipaste, and iTerm2
 
 ```bash
 chatup chrome --dry-run
 chatup chrome             # Install regular Google Chrome for the current OS
+chatup snipaste           # Install Snipaste on macOS or Windows
 chatup iterm              # Install iTerm2, macOS only
 chatup chrome --sudo --yes # Linux: allow elevation and package confirmation
 ```
 
-macOS downloads official DMG/ZIP artifacts and verifies publisher signatures, without Homebrew. Apps go to `/Applications`, falling back to `~/Applications` if needed. Windows uses WinGet `Google.Chrome`; Linux x86_64 uses official DEB/RPM packages with apt/dnf/yum/zypper. Existing apps are verified and reused; defaults and profiles are unchanged. Automation browsers remain under `chatup chrome-for-testing`. See the [install contract](https://arch.gh.wzhecnu.cn/ChatUp/en/commands/#chrome-iterm).
+macOS downloads official DMG/ZIP artifacts and verifies publisher signatures, without Homebrew. Apps go to `/Applications`, falling back to `~/Applications` if needed. Windows uses exact WinGet packages `Google.Chrome.EXE` (current user) and `liule.Snipaste`, with `--yes` required to accept first-time agreements. Chrome also verifies the installed executable's Google signature, product identity and version. Linux x86_64 supports Chrome through official DEB/RPM packages with apt/dnf/yum/zypper. Existing apps are verified and reused; defaults and profiles are unchanged. Automation browsers remain under `chatup chrome-for-testing`. See the [install contract](https://arch.gh.wzhecnu.cn/ChatUp/en/commands/#chrome-iterm).
 
 ## ChatGPT / Codex Desktop App
 
@@ -95,7 +96,7 @@ Installs the official new ChatGPT desktop app including Codex. Requires Homebrew
 | --- | --- |
 | Base runtime | `doctor`, `uv`, `nodejs`, `docker`, `zsh`, `chrome-for-testing`, `chromedriver`, `playwright`, `frp` |
 | Workspace scaffold | `workspace` |
-| Desktop apps | `macos` (Snipaste/iTerm2/Chrome/Blender selection), `chrome`, `iterm` (macOS only), `chatgpt` (includes Codex) |
+| Desktop apps | `macos` (Snipaste/iTerm2/Chrome/Blender selection), `chrome`, `snipaste` (macOS/Windows), `iterm` (macOS only), `chatgpt` (includes Codex) |
 | Video projects | `remotion` |
 | Local service installers | `gitea`, `mysql`, `nginx`, `crs` |
 | Agent toolchains | `cc-connect`, `claude`, `codex`, `cursor-agent`, `opencode`, `hermes`, `lark-cli` |
