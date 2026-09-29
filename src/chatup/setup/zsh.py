@@ -120,7 +120,7 @@ addkernel (){
 
 # pip install
 alias tspip="pip install -i https://pypi.tuna.tsinghua.edu.cn/simple"
-alias pypi='pip install -i https://pypi.python.org/simple'
+alias pypip='pip install -i https://pypi.python.org/simple'
 
 # kill process
 kport (){

@@ -9,6 +9,9 @@
 - Install Snipaste on macOS from its official DMG, verifying its bundle identity and Developer ID signature through the existing staged desktop installer. Reuse existing Chrome and iTerm2 installations.
 - Include ChatStyle's TUI dependencies so default installations provide the checkbox menu. Non-interactive runs install explicit choices or the three defaults; unsupported systems fail before installation.
 
+### 修复
+- `chatup zsh` 将官方源安装快捷名称由 `pypi` 改为 `pypip`；保留原命令及镜像 URL，`tspip` 不变。
+
 ## 0.2.17
 
 ### Added
