@@ -34,7 +34,8 @@ chatup
 ├── workspace           # Initialize a ChatArch workspace
 ├── chrome              # Install regular Google Chrome for the current OS
 ├── iterm               # Install iTerm2 (macOS only)
-├── macos               # Select Snipaste, iTerm2 and Chrome; all selected by default
+├── macos               # Select supported macOS apps, including Blender on Apple Silicon
+├── remotion            # Initialize a locked local video project
 ├── chrome-for-testing  # Manage Google Chrome for Testing browsers
 ├── chromedriver        # Manage ChromeDriver WebDriver servers
 └── playwright          # Manage Playwright packages and Chromium browsers
@@ -58,10 +59,18 @@ Missing rc files are not created; Windows skips this step. `--no-activate` leave
 ## macOS Apps
 
 ```text
-chatup macos [--app snipaste|iterm|chrome]... [--dry-run] [--log-level LEVEL] [-i|-I]
+chatup macos [--app snipaste|iterm|chrome|blender]... [--dry-run] [--log-level LEVEL] [-i|-I]
 ```
 
-macOS only, with Snipaste, iTerm2 and Chrome checked by default. Space toggles and Enter installs. Repeat `--app` to select a subset, use `-I` to skip prompts, or `--dry-run` to preview. See the [macOS install contract](commands.md#macos).
+macOS only, with Snipaste, iTerm2, Chrome and Blender checked by default on Apple Silicon; Intel retains the first three. Space toggles and Enter installs. Repeat `--app` to select a subset, use `-I` to skip prompts, or `--dry-run` to preview. See the [macOS install contract](commands.md#macos).
+
+## Remotion Video Projects
+
+```text
+chatup remotion [PROJECT_DIR] [--browser-executable PATH] [--dry-run] [--log-level LEVEL] [-i|-I]
+```
+
+Create a local video project with locked dependencies. Missing directories prompt in a terminal, and existing unrelated paths are protected. See the [Remotion contract](commands.md#remotion) for runtime requirements and browser behavior.
 
 ## Chrome and iTerm2
 

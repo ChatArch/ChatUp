@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.2.20
+
+### Added
+- Add Blender to `chatup macos` on Apple Silicon, selected by default with the existing apps. Verify the pinned official Blender 5.2.2 LTS DMG SHA-256, bundle version, publisher signature and notarization; reuse existing verified installs. Intel retains the original three default apps and rejects explicit Blender selection before installation.
+- Add `chatup remotion PROJECT_DIR` with a locked Remotion 4.0.530 / React 19.1.0 starter, Node/npm checks, safe staged project creation, existing-directory protection and dependency verification on repeated runs. Install dependencies locally without lifecycle scripts or global runtime changes.
+- Detect existing Chrome/Chromium for render guidance, support explicit browser paths, interactive directory selection and read-only previews, and package the reproducible starter and lockfile in wheel/sdist.
+
 ## 0.2.19
 
 ### Added

@@ -16,7 +16,8 @@ chatup
 |-- zsh         # Configure zsh / oh-my-zsh / plugins / aliases
 |-- chrome              # Install regular Google Chrome for the current OS
 |-- iterm               # Install iTerm2 (macOS only)
-|-- macos               # Select Snipaste, iTerm2 and Chrome; all selected by default
+|-- macos               # Select supported macOS apps, including Blender on Apple Silicon
+|-- remotion            # Initialize a locked local video project
 |-- chrome-for-testing # Manage Google Chrome for Testing browsers
 |-- chromedriver       # Manage ChromeDriver WebDriver servers
 |-- playwright         # Manage Playwright packages and Chromium browsers
@@ -96,12 +97,13 @@ chatup
 
 ## macOS Apps {#macos}
 
-`chatup macos` is macOS-only and currently offers Snipaste, iTerm2 and Google Chrome, all selected by default.
+`chatup macos` is macOS-only. Apple Silicon offers Snipaste, iTerm2, Google Chrome and Blender, all selected by default; Intel retains the first three apps.
 
 ```bash
 chatup macos
 chatup macos --app snipaste
 chatup macos --app iterm --app chrome
+chatup macos --app blender
 chatup macos -I
 chatup macos --dry-run
 chatup macos -i --dry-run
@@ -109,16 +111,40 @@ chatup macos -i --dry-run
 
 | Option / context | Behavior |
 | --- | --- |
-| Terminal without `--app` | Show all three checked; Space toggles, Enter confirms, Ctrl-C cancels. Deselecting everything exits successfully without installation. |
-| `--app snipaste\|iterm\|chrome` | Install only the named apps; repeat to select several. Duplicates are removed and no prompt appears by default. |
+| Terminal without `--app` | Show all supported apps checked; Space toggles, Enter confirms, Ctrl-C cancels. Deselecting everything exits successfully without installation. |
+| `--app snipaste\|iterm\|chrome\|blender` | Install only the named apps; repeat to select several. Duplicates are removed and no prompt appears by default. Blender requires Apple Silicon. |
 | `-i` | Force the menu, using explicit `--app` values as preselection; fail before installation if no terminal is available. |
-| `-I`, no terminal, or `CHATARCH_AUTO_PROMPT=0` | Skip prompts and install explicit selections, or all three if none were specified. |
+| `-I`, no terminal, or `CHATARCH_AUTO_PROMPT=0` | Skip prompts and install explicit selections, or every app supported on the current architecture. |
 | `--dry-run` | Skip automatic prompting and preview selected sources/paths. Add `-i` to choose first. No network, installer execution, or directory writes. |
 | `--log-level DEBUG\|INFO\|WARNING\|ERROR` | Set installer logging; defaults to `INFO`. |
 
-Snipaste uses the [macOS DMG download](https://dl.snipaste.com/mac) linked by its [official website](https://www.snipaste.com/). All three apps share the [native macOS install flow](#chrome-iterm), without Homebrew: verify bundle identity and official publisher signature, then install to `/Applications`, falling back to `~/Applications` if needed. Existing apps are verified and reused, without automatic upgrades or launch. Users grant Snipaste's screen-capture permissions through macOS when first needed.
+Snipaste uses the [macOS DMG download](https://dl.snipaste.com/mac) linked by its [official website](https://www.snipaste.com/). Apps share the [native macOS install flow](#chrome-iterm), without Homebrew: verify bundle identity and official publisher signature, then install to `/Applications`, falling back to `~/Applications` if needed. Existing apps are verified and reused, without automatic upgrades or launch. Users grant Snipaste's screen-capture permissions through macOS when first needed.
+
+Blender uses the pinned [official 5.2.2 LTS Apple Silicon DMG](https://download.blender.org/release/Blender5.2/blender-5.2.2-macos-arm64.dmg), checked against its [official SHA-256](https://download.blender.org/release/Blender5.2/blender-5.2.2.sha256) before mounting, followed by version, publisher signature and Gatekeeper notarization checks. Existing Blender installations are verified and preserved, without overwrites or downgrades. Explicit Blender selection on Intel fails before installing any selected app; Intel installation is not implemented in this release.
 
 Apps install sequentially in selection order. An error stops subsequent installations; earlier successes remain and are reused on the next run. Other operating systems fail before installation, even when only Chrome is selected.
+
+## Remotion Video Projects {#remotion}
+
+`chatup remotion PROJECT_DIR` creates a Remotion 4.0.530 / React 19.1.0 project with a complete npm lockfile and a renderable 3-second 720p example. Existing Node.js >=18.12 and npm >=9 are checked before installation; the system runtime is not replaced.
+
+```bash
+chatup remotion ./my-video --dry-run -I
+chatup remotion ./my-video -I
+chatup remotion ./my-video -I  # Verify the existing project and preserve source edits
+chatup remotion ./my-video --browser-executable /path/to/chrome -I
+cd my-video
+npm run studio
+npm run render -- --browser-executable='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+```
+
+Without a directory, a terminal prompt suggests `remotion-video` under the current directory. An explicit directory skips automatic prompting. `-i` forces the prompt; `-I` disables it. Missing input fails without a terminal or when `CHATARCH_AUTO_PROMPT=0`. `--dry-run` only previews: no Node/npm execution, network requests or directory creation. `--log-level` accepts `DEBUG|INFO|WARNING|ERROR`, defaulting to `INFO`.
+
+New projects are staged beside the target. ChatUp runs `npm ci --ignore-scripts --include=optional --no-audit --no-fund`, verifies the four direct dependency versions and then renames the project into place. Dependencies stay local and their lifecycle scripts do not run. Failures clean staging. Existing unrelated directories, files and symlink targets are rejected. The `.chatup-remotion.json` marker identifies managed projects; repeated runs verify them without reinstalling dependencies or replacing source edits. Missing or changed dependencies cause an error for the user to repair inside the project, never an automatic overwrite.
+
+Initialization detects local Chrome/Chromium or accepts `--browser-executable PATH`, then prints the corresponding render command. It does not start Studio or download browsers. A missing browser does not prevent project creation; the output recommends `chatup chrome` before rendering. Running Remotion render without an explicit browser can trigger Remotion's own browser download. On supported Macs, `chatup macos --app chrome --app blender` prepares desktop tools; Remotion belongs in its own project directory.
+
+Real installation and MP4 rendering were verified on Apple Silicon macOS with Node 24.21.0 and npm 11.19.0. Other systems use the same Node/npm project flow, but native installation and rendering have not been exercised on every platform.
 
 ## Chrome and iTerm2 {#chrome-iterm}
 

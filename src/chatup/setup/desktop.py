@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import hashlib
 import os
 from pathlib import Path
 import platform
@@ -43,6 +44,18 @@ MAC_APPS = {
         "url": "https://dl.snipaste.com/mac",
         "format": "dmg",
     },
+    "blender": {
+        "app": "Blender",
+        "bundle": "Blender.app",
+        "bundle_id": "org.blenderfoundation.blender",
+        "team_id": "68UA947AUU",
+        "url": "https://download.blender.org/release/Blender5.2/blender-5.2.2-macos-arm64.dmg",
+        "format": "dmg",
+        "architectures": ("arm64", "aarch64"),
+        "download_version": "5.2.2",
+        "sha256": "dc4125399b8bfefe283cc1624d6cfc7809d1cac20ace51072127eb371f31f210",
+        "notarized": True,
+    },
 }
 LINUX_PACKAGES = {
     "apt-get": ("deb", ["install"]),
@@ -72,6 +85,8 @@ def plan_desktop_install(
     if system == "Darwin":
         if platform.machine().lower() not in {"arm64", "aarch64", "x86_64", "amd64"}:
             raise RuntimeError(f"Unsupported macOS architecture: {platform.machine()}.")
+        if spec.get("architectures") and platform.machine().lower() not in spec["architectures"]:
+            raise RuntimeError(f"{spec['app']} installation supports Apple Silicon macOS only; current architecture: {platform.machine()}.")
         directories = _mac_app_dirs()
         existing = next((d / spec["bundle"] for d in directories if (d / spec["bundle"]).exists()), None)
         directory = directories[0] if os.access(directories[0], os.W_OK) else directories[1]
@@ -167,6 +182,8 @@ def _mac_bundle(plan: dict[str, Any], path: Path) -> dict[str, str]:
         raise RuntimeError(f"Cannot verify {plan['app']} at {path}: {exc}. Existing apps are never overwritten.") from exc
     requirement = f'=anchor apple generic and certificate leaf[subject.OU] = "{plan["team_id"]}"'
     _run(["/usr/bin/codesign", "--verify", "--deep", "--strict", "-R", requirement, str(path)], timeout=120)
+    if plan.get("notarized"):
+        _run(["/usr/sbin/spctl", "--assess", "--type", "execute", str(path)], timeout=120)
     return {"path": str(path), "binary": str(binary), "version": str(version)}
 
 
@@ -181,6 +198,14 @@ def _install_macos(plan: dict[str, Any]) -> dict[str, Any]:
     try:
         archive = work / f"download.{plan['format']}"
         _download(plan["url"], archive)
+        if plan.get("sha256"):
+            digest = hashlib.sha256()
+            with archive.open("rb") as source_file:
+                for block in iter(lambda: source_file.read(1024 * 1024), b""):
+                    digest.update(block)
+            if digest.hexdigest() != plan["sha256"]:
+                raise RuntimeError(f"{plan['app']} download SHA-256 verification failed.")
+            logger.info("Verified official SHA-256 for %s", plan["app"])
         if plan["format"] == "dmg":
             mount.mkdir()
             _run(["/usr/bin/hdiutil", "attach", str(archive), "-mountpoint", str(mount),
@@ -191,7 +216,9 @@ def _install_macos(plan: dict[str, Any]) -> dict[str, Any]:
             source = work / "unpacked" / plan["bundle"]
             safe_extract_zip(archive, source.parent, label=plan["app"])
         logger.info("Verifying %s publisher signature and app bundle", plan["app"])
-        _mac_bundle(plan, source)
+        source_details = _mac_bundle(plan, source)
+        if plan.get("download_version") and source_details["version"] != plan["download_version"]:
+            raise RuntimeError(f"Unexpected downloaded {plan['app']} version: {source_details['version']}.")
         target.parent.mkdir(parents=True, exist_ok=True)
         # Stage on the target filesystem so the final app appears in one rename.
         with tempfile.TemporaryDirectory(prefix=".chatup-", dir=target.parent) as staging:

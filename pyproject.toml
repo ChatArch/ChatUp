@@ -62,6 +62,9 @@ include-package-data = true
 "chatup.setup" = [
     "assets/*.sh",
     "assets/hermes/*.sh",
+    "assets/remotion/*.json",
+    "assets/remotion/.gitignore",
+    "assets/remotion/src/*.jsx",
     "workspace/templates/default/zh/*.md",
     "workspace/templates/default/zh/projects/*.md",
     "workspace/templates/default/zh/discussion/*.md",

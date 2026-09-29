@@ -1,4 +1,5 @@
 import importlib
+import hashlib
 from pathlib import Path
 import plistlib
 import shutil
@@ -74,7 +75,7 @@ def make_bundle(path, spec):
     binary.chmod(0o755)
     (contents / "Info.plist").write_bytes(plistlib.dumps({
         "CFBundleIdentifier": spec["bundle_id"], "CFBundleExecutable": spec["app"],
-        "CFBundleShortVersionString": "123.4.5", "LSMinimumSystemVersion": "14.0",
+        "CFBundleShortVersionString": spec.get("download_version", "123.4.5"), "LSMinimumSystemVersion": "14.0",
     }))
 
 
@@ -83,6 +84,10 @@ def mac_install(desktop, monkeypatch, tmp_path):
     # Keep simulated app bundles out of macOS application search results.
     tmp_path = tmp_path / "desktop.noindex"
     tmp_path.mkdir()
+    monkeypatch.setitem(desktop.MAC_APPS, "blender", {
+        **desktop.MAC_APPS["blender"],
+        "sha256": hashlib.sha256(b"disk image fixture").hexdigest(),
+    })
     apps = tmp_path / "Applications"
     apps.mkdir()
     user_apps = tmp_path / "user" / "Applications"
@@ -120,13 +125,13 @@ def mac_install(desktop, monkeypatch, tmp_path):
     shutil.rmtree(tmp_path)
 
 
-@pytest.mark.parametrize("app", ["chrome", "iterm", "snipaste"])
+@pytest.mark.parametrize("app", ["chrome", "iterm", "snipaste", "blender"])
 def test_mac_install_verifies_and_is_idempotent(desktop, mac_install, app):
     apps, _, cache, calls = mac_install
     first = desktop.setup_desktop_app(app)
     assert first["status"] == "installed"
     assert first["verified"] is True
-    assert first["version"] == "123.4.5"
+    assert first["version"] == desktop.MAC_APPS[app].get("download_version", "123.4.5")
     assert Path(first["path"]) == apps / desktop.MAC_APPS[app]["bundle"]
     assert not list(cache.iterdir())
     assert any(command[0].endswith("codesign") and desktop.MAC_APPS[app]["team_id"] in command[-2] for command in calls)
@@ -134,11 +139,59 @@ def test_mac_install_verifies_and_is_idempotent(desktop, mac_install, app):
     if desktop.MAC_APPS[app]["format"] == "dmg":
         assert calls[-1][1] == "detach"
     calls.clear()
-    args = ["macos", "--app", "snipaste", "-I"] if app == "snipaste" else [app]
+    args = ["macos", "--app", app, "-I"] if app in {"snipaste", "blender"} else [app]
     repeated = CliRunner().invoke(main, args)
     assert repeated.exit_code == 0, repeated.output
     assert "Already installed" in repeated.output
-    assert all(command[0].endswith("codesign") for command in calls)
+    assert all(command[0].endswith(("codesign", "spctl")) for command in calls)
+
+
+def test_blender_dry_run_has_pinned_official_digest(desktop, monkeypatch):
+    monkeypatch.setattr(desktop, "_run", lambda *a, **k: pytest.fail("must not execute"))
+    result = CliRunner().invoke(main, ["macos", "--app", "blender", "--dry-run", "-I"])
+    assert result.exit_code == 0, result.output
+    assert "blender-5.2.2-macos-arm64.dmg" in result.output
+    assert "dc4125399b8bfefe283cc1624d6cfc7809d1cac20ace51072127eb371f31f210" in result.output
+
+
+@pytest.mark.parametrize("system,machine", [("Darwin", "x86_64"), ("Linux", "arm64"), ("Windows", "AMD64")])
+def test_blender_rejects_unverified_platforms(desktop, monkeypatch, system, machine):
+    monkeypatch.setattr(desktop.platform, "system", lambda: system)
+    monkeypatch.setattr(desktop.platform, "machine", lambda: machine)
+    with pytest.raises(RuntimeError, match="macOS only"):
+        desktop.plan_desktop_install("blender")
+
+
+def test_blender_checksum_failure_precedes_mount(desktop, mac_install):
+    apps, _, cache, calls = mac_install
+    desktop.MAC_APPS["blender"]["sha256"] = "0" * 64
+    with pytest.raises(RuntimeError, match="SHA-256"):
+        desktop.setup_desktop_app("blender")
+    assert not (apps / "Blender.app").exists()
+    assert not list(cache.iterdir())
+    assert not any(command[0].endswith("hdiutil") for command in calls)
+
+
+@pytest.mark.parametrize("failure", ["signature", "notarization", "version", "copy"])
+def test_blender_failed_verification_or_copy_detaches_image(desktop, mac_install, monkeypatch, failure):
+    apps, _, cache, calls = mac_install
+    original = desktop._run
+
+    def run(command, **kwargs):
+        suffix = {"signature": "codesign", "notarization": "spctl", "copy": "ditto"}.get(failure)
+        if suffix and command[0].endswith(suffix):
+            raise RuntimeError(failure + " failed")
+        return original(command, **kwargs)
+
+    monkeypatch.setattr(desktop, "_run", run)
+    if failure == "version":
+        original_bundle = desktop._mac_bundle
+        monkeypatch.setattr(desktop, "_mac_bundle", lambda *a: {**original_bundle(*a), "version": "0.0.1"})
+    with pytest.raises(RuntimeError):
+        desktop.setup_desktop_app("blender")
+    assert not (apps / "Blender.app").exists()
+    assert not list(cache.iterdir())
+    assert calls[-1][1] == "detach"
 
 
 def test_mac_reuses_user_application(desktop, mac_install):

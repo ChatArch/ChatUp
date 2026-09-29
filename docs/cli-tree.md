@@ -34,7 +34,8 @@ chatup
 ├── workspace           # 初始化 ChatArch workspace
 ├── chrome              # 按当前系统安装普通 Google Chrome
 ├── iterm               # 安装 iTerm2（仅限 macOS）
-├── macos               # 勾选安装 Snipaste、iTerm2、Chrome，默认全选
+├── macos               # 勾选 macOS 应用，Apple Silicon 可选 Blender
+├── remotion            # 初始化带锁定依赖的本地视频项目
 ├── chrome-for-testing  # 管理 Google Chrome for Testing 浏览器
 ├── chromedriver        # 管理 ChromeDriver WebDriver server
 └── playwright          # 管理 Playwright package 与 Chromium browser
@@ -58,10 +59,18 @@ chatup uv
 ## macOS 常用应用
 
 ```text
-chatup macos [--app snipaste|iterm|chrome]... [--dry-run] [--log-level LEVEL] [-i|-I]
+chatup macos [--app snipaste|iterm|chrome|blender]... [--dry-run] [--log-level LEVEL] [-i|-I]
 ```
 
-仅限 macOS，默认勾选 Snipaste、iTerm2、Chrome。空格切换、回车安装；可重复 `--app` 选择子集，`-I` 不询问，`--dry-run` 只预览。详见[macOS 安装约定](commands.md#macos)。
+仅限 macOS，Apple Silicon 默认勾选 Snipaste、iTerm2、Chrome、Blender；Intel 保持前三项。空格切换、回车安装；可重复 `--app` 选择子集，`-I` 不询问，`--dry-run` 只预览。详见[macOS 安装约定](commands.md#macos)。
+
+## Remotion 视频项目
+
+```text
+chatup remotion [PROJECT_DIR] [--browser-executable PATH] [--dry-run] [--log-level LEVEL] [-i|-I]
+```
+
+创建锁定依赖的本地视频项目。缺少目录时在终端中询问；不覆盖已有无关目录。项目安装、运行环境要求和浏览器策略见 [Remotion 约定](commands.md#remotion)。
 
 ## Chrome 与 iTerm2
 

@@ -1,0 +1,16 @@
+{
+  "name": "local-remotion-starter",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "studio": "remotion studio src/index.jsx",
+    "render": "remotion render src/index.jsx Welcome out/welcome.mp4",
+    "compositions": "remotion compositions src/index.jsx"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.530",
+    "remotion": "4.0.530",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  }
+}

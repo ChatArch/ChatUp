@@ -12,6 +12,7 @@ def macos(monkeypatch):
     command = importlib.import_module("chatup.commands.macos")
     policy = importlib.import_module("chatup.interaction.policy")
     monkeypatch.setattr(command.platform, "system", lambda: "Darwin")
+    monkeypatch.setattr(command.platform, "machine", lambda: "arm64")
     monkeypatch.setattr(policy, "is_interactive_available", lambda: False)
     monkeypatch.delenv("CHATARCH_AUTO_PROMPT", raising=False)
     calls = []
@@ -20,11 +21,11 @@ def macos(monkeypatch):
 
 
 @pytest.mark.parametrize("args", [[], ["-I"], ["--dry-run"]])
-def test_default_selection_is_all_three_without_a_tty(macos, args):
+def test_default_selection_is_all_supported_apps_without_a_tty(macos, args):
     _, _, calls = macos
     result = CliRunner().invoke(main, ["macos", *args])
     assert result.exit_code == 0, result.output
-    assert [app for app, _ in calls] == ["snipaste", "iterm", "chrome"]
+    assert [app for app, _ in calls] == ["snipaste", "iterm", "chrome", "blender"]
     assert "Selected apps: Snipaste, iTerm2, Google Chrome" in result.output
     assert all(options["dry_run"] == ("--dry-run" in args) for _, options in calls)
 
@@ -45,8 +46,8 @@ def test_tty_checkboxes_default_to_all_and_respect_deselection(macos, monkeypatc
     monkeypatch.setattr(policy, "is_interactive_available", lambda: True)
 
     def choose(message, **kwargs):
-        assert kwargs["default_values"] == ["snipaste", "iterm", "chrome"]
-        assert len(kwargs["choices"]) == 3
+        assert kwargs["default_values"] == ["snipaste", "iterm", "chrome", "blender"]
+        assert len(kwargs["choices"]) == 4
         return selection
 
     monkeypatch.setattr(command, "ask_checkbox", choose)
@@ -81,7 +82,7 @@ def test_noninteractive_and_dry_run_skip_prompts_on_a_tty(macos, monkeypatch, ar
     monkeypatch.setattr(command, "ask_checkbox", lambda *a, **k: pytest.fail("must not prompt"))
     result = CliRunner().invoke(main, ["macos", *args])
     assert result.exit_code == 0, result.output
-    assert len(calls) == 3
+    assert len(calls) == 4
 
 
 def test_forced_interactive_without_tty_does_not_install(macos):
@@ -122,6 +123,22 @@ def test_invalid_app_is_rejected(macos):
     assert not calls
 
 
+def test_intel_defaults_keep_the_three_supported_apps(macos, monkeypatch):
+    command, _, calls = macos
+    monkeypatch.setattr(command.platform, "machine", lambda: "x86_64")
+    result = CliRunner().invoke(main, ["macos", "-I"])
+    assert result.exit_code == 0, result.output
+    assert [app for app, _ in calls] == ["snipaste", "iterm", "chrome"]
+
+
+def test_intel_explicit_blender_fails_before_any_install(macos, monkeypatch):
+    command, _, calls = macos
+    monkeypatch.setattr(command.platform, "machine", lambda: "x86_64")
+    result = CliRunner().invoke(main, ["macos", "--app", "chrome", "--app", "blender", "-I"])
+    assert result.exit_code != 0 and "Apple Silicon" in result.output
+    assert not calls
+
+
 def test_install_failure_stops_remaining_apps(macos, monkeypatch):
     command, _, calls = macos
 
@@ -148,7 +165,7 @@ def test_real_dry_run_does_not_execute_or_download(monkeypatch):
     assert result.exit_code == 0, result.output
     for expected in ("Snipaste", "iTerm2", "Google Chrome", "https://dl.snipaste.com/mac"):
         assert expected in result.output
-    assert result.output.count("Dry run:") == 3
+    assert result.output.count("Dry run:") == 4
 
 
 @pytest.mark.parametrize("system", ["Linux", "Windows"])

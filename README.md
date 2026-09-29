@@ -48,13 +48,25 @@ chatup crs --install-dir ~/.chatarch/crs/local --port 12392 --redis-port 6379
 ## macOS 常用应用
 
 ```bash
-chatup macos                       # 勾选安装，默认全选 Snipaste、iTerm2、Chrome
+chatup macos                       # 勾选安装，Apple Silicon 默认全选四项
 chatup macos --app snipaste         # 只安装 Snipaste
-chatup macos -I                    # 不询问，安装默认三项
+chatup macos --app blender          # 安装 Blender 5.2.2 LTS（Apple Silicon）
+chatup macos -I                    # 不询问，安装当前机器支持的全部选项
 chatup macos --dry-run             # 只预览安装计划
 ```
 
-仅限 macOS。终端中用空格切换勾选，回车安装；取消全部勾选则直接退出。可重复传入 `--app snipaste|iterm|chrome` 选择多个应用。直接使用官方安装包，无需 Homebrew，已有应用验证后复用。详见[macOS 安装入口](https://arch.gh.wzhecnu.cn/ChatUp/commands/#macos)。
+仅限 macOS。Apple Silicon 默认勾选 Snipaste、iTerm2、Chrome、Blender；Intel 保持前三项。终端中用空格切换勾选，回车安装；取消全部勾选则直接退出。可重复传入 `--app snipaste|iterm|chrome|blender` 选择多个应用。直接使用官方安装包，无需 Homebrew，已有应用验证后复用。详见[macOS 安装入口](https://arch.gh.wzhecnu.cn/ChatUp/commands/#macos)。
+
+## Remotion 视频项目
+
+```bash
+chatup remotion ./my-video --dry-run -I
+chatup remotion ./my-video -I
+cd my-video
+npm run studio
+```
+
+需要已有 Node.js >=18.12 和 npm >=9。创建带锁文件的 Remotion 4.0.530 项目，检测本机 Chrome 并输出渲染命令；不覆盖已有无关目录，也不替换 Node 或下载浏览器。项目放在指定目录，已有 Blender/Chrome 可通过 `chatup macos --app blender --app chrome` 验证或安装。详见[Remotion 安装约定](https://arch.gh.wzhecnu.cn/ChatUp/commands/#remotion)。
 
 ## Chrome 与 iTerm2
 
@@ -85,7 +97,8 @@ chatup chatgpt --yes  # Windows 首次安装时接受 Store 协议
 | --- | --- |
 | 基础运行环境 | `doctor`、`uv`、`nodejs`、`docker`、`zsh`、`chrome-for-testing`、`chromedriver`、`playwright`、`frp` |
 | 工作区脚手架 | `workspace` |
-| 桌面应用 | `macos`（Snipaste/iTerm2/Chrome 多选）、`chrome`、`iterm`（仅 macOS）、`chatgpt`（含 Codex） |
+| 桌面应用 | `macos`（Snipaste/iTerm2/Chrome/Blender 多选）、`chrome`、`iterm`（仅 macOS）、`chatgpt`（含 Codex） |
+| 视频项目 | `remotion` |
 | 本地服务安装 | `gitea`、`discourse`、`zulip`、`mysql`、`nginx`、`crs` |
 | Agent 工具链 | `cc-connect`、`claude`、`codex`、`cursor-agent`、`opencode`、`hermes`、`lark-cli` |
 

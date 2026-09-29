@@ -9,8 +9,9 @@ test artifacts under the task's playground.
 ## Execution and expected result
 
 1. Invoke `chatup macos -i --dry-run` in a real PTY. Check that exactly Snipaste,
-   iTerm2 and Chrome are selected by default; Enter previews all three.
-2. Invoke the same command again, toggle off two apps and verify only the selected
+   iTerm2, Chrome and Blender are selected by default on Apple Silicon; Enter
+   previews all four. Intel retains the first three.
+2. Invoke the same command again, toggle off all but one app and verify only the selected
    app appears in the plan. Empty selection must not install anything.
 3. Run `chatup macos -I` to install the default group. Snipaste is downloaded from
    its official source, validated and installed; Chrome/iTerm2 are verified and reused.
