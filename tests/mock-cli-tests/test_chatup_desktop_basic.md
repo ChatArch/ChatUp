@@ -25,7 +25,9 @@ chatup iterm --dry-run
 
 ## macOS installation and repeated execution
 
-- Build temporary app fixtures with bundle ID, executable and version.
+- Build temporary app fixtures with bundle ID, executable and version inside a
+  `.noindex` directory, and remove them during fixture teardown. macOS must not
+  list simulated apps in Spotlight or the application launcher after testing.
 - Verify existing apps in `/Applications` or `~/Applications` before downloading.
 - A fresh install downloads official HTTPS artifacts, mounts the DMG or safely
   extracts the ZIP, verifies the publisher signature and bundle, copies to a

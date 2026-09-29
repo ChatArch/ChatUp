@@ -80,6 +80,9 @@ def make_bundle(path, spec):
 
 @pytest.fixture
 def mac_install(desktop, monkeypatch, tmp_path):
+    # Keep simulated app bundles out of macOS application search results.
+    tmp_path = tmp_path / "desktop.noindex"
+    tmp_path.mkdir()
     apps = tmp_path / "Applications"
     apps.mkdir()
     user_apps = tmp_path / "user" / "Applications"
@@ -113,7 +116,8 @@ def mac_install(desktop, monkeypatch, tmp_path):
 
     monkeypatch.setattr(desktop, "_download", download)
     monkeypatch.setattr(desktop, "_run", run)
-    return apps, user_apps, cache, calls
+    yield apps, user_apps, cache, calls
+    shutil.rmtree(tmp_path)
 
 
 @pytest.mark.parametrize("app", ["chrome", "iterm", "snipaste"])
