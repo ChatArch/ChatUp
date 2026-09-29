@@ -43,6 +43,17 @@ chatup nginx proxy-pass ./gitea-local.conf --set SERVER_NAME=gitea.local.example
 chatup crs --install-dir ~/.chatarch/crs/local --port 12392 --redis-port 6379
 ```
 
+## Chrome and iTerm2
+
+```bash
+chatup chrome --dry-run
+chatup chrome             # Install regular Google Chrome for the current OS
+chatup iterm              # Install iTerm2, macOS only
+chatup chrome --sudo --yes # Linux: allow elevation and package confirmation
+```
+
+macOS downloads official DMG/ZIP artifacts and verifies publisher signatures, without Homebrew. Apps go to `/Applications`, falling back to `~/Applications` if needed. Windows uses WinGet `Google.Chrome`; Linux x86_64 uses official DEB/RPM packages with apt/dnf/yum/zypper. Existing apps are verified and reused; defaults and profiles are unchanged. Automation browsers remain under `chatup chrome-for-testing`. See the [install contract](https://arch.gh.wzhecnu.cn/ChatUp/en/commands/#chrome-iterm).
+
 ## ChatGPT / Codex Desktop App
 
 ```bash
@@ -61,11 +72,11 @@ Installs the official new ChatGPT desktop app including Codex. Requires Homebrew
 | --- | --- |
 | Base runtime | `doctor`, `uv`, `nodejs`, `docker`, `zsh`, `chrome-for-testing`, `chromedriver`, `playwright`, `frp` |
 | Workspace scaffold | `workspace` |
-| Official desktop app | `chatgpt` (includes Codex) |
+| Desktop apps | `chrome`, `iterm` (macOS only), `chatgpt` (includes Codex) |
 | Local service installers | `gitea`, `mysql`, `nginx`, `crs` |
 | Agent toolchains | `cc-connect`, `claude`, `codex`, `cursor-agent`, `opencode`, `hermes`, `lark-cli` |
 
-Desktop apps use native package-manager paths; ChatArch-managed install targets stay under `~/.chatarch/...`, for example `~/.chatarch/chrome-for-testing`, `~/.chatarch/chromedriver`, `~/.chatarch/playwright`, `~/.chatarch/chattea`, `~/.chatarch/discourse`, `~/.chatarch/zulip`, `~/.chatarch/chatdata`, `~/.chatarch/nginx`, and `~/.chatarch/crs/local`. `cursor-agent`, `discourse`, and `zulip` register typed ChatEnv profiles; an explicitly selected profile is isolated from credentials in the process environment. ChatStyle renders the CLI tree from the registered command surface. See `docs/capability-map.en.md` for the full capability boundary.
+Desktop apps use native application paths; ChatArch-managed install targets stay under `~/.chatarch/...`, for example `~/.chatarch/chrome-for-testing`, `~/.chatarch/chromedriver`, `~/.chatarch/playwright`, `~/.chatarch/chattea`, `~/.chatarch/discourse`, `~/.chatarch/zulip`, `~/.chatarch/chatdata`, `~/.chatarch/nginx`, and `~/.chatarch/crs/local`. `cursor-agent`, `discourse`, and `zulip` register typed ChatEnv profiles; an explicitly selected profile is isolated from credentials in the process environment. ChatStyle renders the CLI tree from the registered command surface. See `docs/capability-map.en.md` for the full capability boundary.
 
 ## Development
 

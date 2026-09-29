@@ -14,6 +14,8 @@ chatup
 |-- nodejs      # 安装 nvm 和默认 LTS Node.js
 |-- docker      # 检查 Docker 环境，并提示 sudo 配置
 |-- zsh         # 配置 zsh / oh-my-zsh / 插件 / alias
+|-- chrome              # 按当前系统安装普通 Google Chrome
+|-- iterm               # 安装 iTerm2（仅限 macOS）
 |-- chrome-for-testing # 管理 Google Chrome for Testing 浏览器
 |-- chromedriver       # 管理 ChromeDriver WebDriver server
 |-- playwright         # 管理 Playwright package 与 Chromium browser
@@ -90,6 +92,36 @@ chatup
 | `chatup hermes` | 安装 Hermes Agent 和可选 Hermes WebUI；未配置模型时兜底为 `gpt-5.6-terra`，显式模型、profile、已有配置和环境值仍优先。 |
 | `chatup cc-connect` | 安装 CC Connect CLI 和运行依赖。 |
 | `chatup lark-cli` | 配置官方 lark-cli，并复用 ChatEnv 飞书配置。 |
+
+## Chrome 与 iTerm2 {#chrome-iterm}
+
+`chatup chrome` 安装普通 Google Chrome；`chatup iterm` 安装 iTerm2，且仅限 macOS。
+
+| 系统 | Chrome 安装路径 | iTerm2 |
+| --- | --- | --- |
+| macOS Intel / Apple Silicon | Google 官方 universal stable DMG，无需 Homebrew | iTerm2 官方 stable ZIP |
+| Windows | WinGet 精确选择 `Google.Chrome`，silent 安装 | 不支持，返回错误 |
+| Linux x86_64 | 官方 stable DEB（apt-get）或 RPM（dnf/yum/zypper） | 不支持，返回错误 |
+| Linux ARM / 其他系统 | 明确返回不支持错误 | 不支持 |
+
+```bash
+chatup chrome
+chatup iterm
+chatup chrome --dry-run
+chatup iterm --dry-run
+chatup chrome --sudo --yes   # Linux 允许 sudo 并自动确认包安装
+chatup chrome --yes          # Windows 明确接受来源和包协议
+```
+
+两个命令支持 `--log-level DEBUG|INFO|WARNING|ERROR`；没有必填参数，不会触发补参交互。`--dry-run` 只检查本机平台/路径并打印计划，不联网、不执行安装程序、不写目录。
+
+macOS 优先复用 `/Applications` 或 `~/Applications` 中已有的应用，否则安装到可写的 `/Applications`，不可写时回退到 `~/Applications`。下载后校验 bundle ID、版本、可执行文件、最低 macOS 版本和官方 Developer ID 签名，再暂存复制并原子移入目标位置。已有异常应用会报错，不覆盖；不会自动升级、启动、登录或更改默认浏览器/终端。安装缓存暂存于 `~/.chatarch/cache/desktop`（遵循 `CHATARCH_HOME`），完成后清理并卸载 DMG。
+
+Linux 需要对应系统包管理器；普通用户必须显式提供 `--sudo`，否则安装前返回操作提示，root 可直接安装。包管理器负责依赖和系统要求，安装后回读 `google-chrome --version`。Windows 需要 [WinGet](https://aka.ms/getwinget)，安装前后按精确包 ID 回读，不自动升级已有 Chrome。
+
+这些桌面安装入口不写 CFT/ChromeDriver/Playwright metadata、浏览器 profile 或 Cookie。自动化制品继续使用各自的独立 backend。
+
+来源：[Google Chrome](https://www.google.com/chrome/)、[iTerm2 下载](https://iterm2.com/downloads.html)。
 
 ## ChatGPT 桌面应用 {#chatgpt-desktop}
 
@@ -191,7 +223,7 @@ chatup cursor-agent -e work --credential-store file-wrapper -I
 
 ## 浏览器制品 backend 约定
 
-ChatUp 不提供通用 `browser` group，也不再提供含义模糊的 `chrome` 命令：
+`chatup chrome` 安装普通桌面浏览器。自动化制品仍由独立 backend 管理：
 
 - `chatup chrome-for-testing` 管理真正可启动的 Google Chrome for Testing 浏览器，默认 home 为 `~/.chatarch/chrome-for-testing`；
 - `chatup chromedriver` 管理 ChromeDriver WebDriver server，默认 home 为 `~/.chatarch/chromedriver`；

@@ -45,6 +45,17 @@ chatup nginx proxy-pass ./gitea-local.conf --set SERVER_NAME=gitea.local.example
 chatup crs --install-dir ~/.chatarch/crs/local --port 12392 --redis-port 6379
 ```
 
+## Chrome 与 iTerm2
+
+```bash
+chatup chrome --dry-run
+chatup chrome             # 按系统安装普通 Google Chrome
+chatup iterm              # 安装 iTerm2，仅限 macOS
+chatup chrome --sudo --yes # Linux：允许提权并确认包安装
+```
+
+macOS 直接下载官方 DMG/ZIP 并校验开发者签名，无需 Homebrew；默认装到 `/Applications`，不可写时使用 `~/Applications`。Windows 使用 WinGet `Google.Chrome`；Linux x86_64 使用官方 DEB/RPM 与 apt/dnf/yum/zypper。已安装时验证并复用，不改默认浏览器、终端或用户配置。自动化浏览器仍使用 `chatup chrome-for-testing`。详见[安装约定](https://arch.gh.wzhecnu.cn/ChatUp/commands/#chrome-iterm)。
+
 ## ChatGPT / Codex 桌面应用
 
 ```bash
@@ -63,11 +74,11 @@ chatup chatgpt --yes  # Windows 首次安装时接受 Store 协议
 | --- | --- |
 | 基础运行环境 | `doctor`、`uv`、`nodejs`、`docker`、`zsh`、`chrome-for-testing`、`chromedriver`、`playwright`、`frp` |
 | 工作区脚手架 | `workspace` |
-| 官方桌面应用 | `chatgpt`（含 Codex） |
+| 桌面应用 | `chrome`、`iterm`（仅 macOS）、`chatgpt`（含 Codex） |
 | 本地服务安装 | `gitea`、`discourse`、`zulip`、`mysql`、`nginx`、`crs` |
 | Agent 工具链 | `cc-connect`、`claude`、`codex`、`cursor-agent`、`opencode`、`hermes`、`lark-cli` |
 
-桌面应用使用系统包管理器的原生目录；ChatArch 自管安装项默认目录收敛到 `~/.chatarch/...`，例如 `~/.chatarch/chrome-for-testing`、`~/.chatarch/chromedriver`、`~/.chatarch/playwright`、`~/.chatarch/chattea`、`~/.chatarch/discourse`、`~/.chatarch/zulip`、`~/.chatarch/chatdata`、`~/.chatarch/nginx` 和 `~/.chatarch/crs/local`。`cursor-agent` 额外注册 ChatEnv `CursorAgent` profile，`discourse`/`zulip` 注册管理员凭据 profile，并支持 `-e/--env` 从 env 文件或 profile 快速配置；显式选择 profile 时不会混入进程环境中的其他账号凭据。CLI 树由 ChatStyle 的注册表渲染。更完整的能力边界见 `docs/capability-map.md`。
+桌面应用使用系统原生应用目录；ChatArch 自管安装项默认目录收敛到 `~/.chatarch/...`，例如 `~/.chatarch/chrome-for-testing`、`~/.chatarch/chromedriver`、`~/.chatarch/playwright`、`~/.chatarch/chattea`、`~/.chatarch/discourse`、`~/.chatarch/zulip`、`~/.chatarch/chatdata`、`~/.chatarch/nginx` 和 `~/.chatarch/crs/local`。`cursor-agent` 额外注册 ChatEnv `CursorAgent` profile，`discourse`/`zulip` 注册管理员凭据 profile，并支持 `-e/--env` 从 env 文件或 profile 快速配置；显式选择 profile 时不会混入进程环境中的其他账号凭据。CLI 树由 ChatStyle 的注册表渲染。更完整的能力边界见 `docs/capability-map.md`。
 
 ## 开发
 
