@@ -14,6 +14,8 @@ chatup
 |-- nodejs      # Install nvm and the default LTS Node.js
 |-- docker      # Check Docker and show sudo guidance when needed
 |-- zsh         # Configure zsh / oh-my-zsh / plugins / aliases
+|-- chrome              # Install regular Google Chrome for the current OS
+|-- iterm               # Install iTerm2 (macOS only)
 |-- chrome-for-testing # Manage Google Chrome for Testing browsers
 |-- chromedriver       # Manage ChromeDriver WebDriver servers
 |-- playwright         # Manage Playwright packages and Chromium browsers
@@ -88,6 +90,8 @@ Local-service commands use user-level layouts by default:
 | `chatup crs` | `~/.chatarch/crs/local` | Local CRS + Redis + smoke check with restricted secret-file permissions. |
 
 ## Desktop App
+
+`chatup chrome` installs regular Google Chrome for the current OS. `chatup iterm` installs iTerm2 on macOS. Both support `--dry-run` and reuse verified existing installations; macOS does not require Homebrew. See the [install contract](commands.md#chrome-iterm).
 
 `chatup chatgpt` installs the official new ChatGPT desktop app including Codex through Homebrew on macOS or the exact Microsoft Store product on Windows. `--dry-run` has no side effects; installation is checked through the package manager. Native app/cache paths are owned by the package manager and OpenAI, not ChatArch. No launch, login, Codex CLI config changes or automatic Linux preview installation. See the [desktop install contract](commands.md#chatgpt-desktop).
 

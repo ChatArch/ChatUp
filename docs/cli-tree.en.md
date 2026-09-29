@@ -32,6 +32,8 @@ chatup
 ├── lark-cli            # Configure official lark-cli with ChatEnv
 ├── hermes              # Install Hermes Agent and optional WebUI
 ├── workspace           # Initialize a ChatArch workspace
+├── chrome              # Install regular Google Chrome for the current OS
+├── iterm               # Install iTerm2 (macOS only)
 ├── chrome-for-testing  # Manage Google Chrome for Testing browsers
 ├── chromedriver        # Manage ChromeDriver WebDriver servers
 └── playwright          # Manage Playwright packages and Chromium browsers
@@ -51,6 +53,15 @@ chatup uv
 ```
 
 Missing rc files are not created; Windows skips this step. `--no-activate` leaves startup configuration unchanged. See [Quick Start](quickstart.md).
+
+## Chrome and iTerm2
+
+```text
+chatup chrome [--dry-run] [--sudo] [-y|--yes] [--log-level LEVEL]
+chatup iterm [--dry-run] [--log-level LEVEL]
+```
+
+Chrome installs the regular system browser; iTerm2 is macOS-only. See the [install contract](commands.md#chrome-iterm).
 
 ## ChatGPT Desktop App
 

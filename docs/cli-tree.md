@@ -32,6 +32,8 @@ chatup
 ├── lark-cli            # 配置官方 lark-cli 与 ChatEnv
 ├── hermes              # 安装 Hermes Agent 与可选 WebUI
 ├── workspace           # 初始化 ChatArch workspace
+├── chrome              # 按当前系统安装普通 Google Chrome
+├── iterm               # 安装 iTerm2（仅限 macOS）
 ├── chrome-for-testing  # 管理 Google Chrome for Testing 浏览器
 ├── chromedriver        # 管理 ChromeDriver WebDriver server
 └── playwright          # 管理 Playwright package 与 Chromium browser
@@ -51,6 +53,15 @@ chatup uv
 ```
 
 不创建缺失的 rc 文件；Windows 跳过此项。`--no-activate` 保持现有启动配置不变。详见[快速开始](quickstart.md)。
+
+## Chrome 与 iTerm2
+
+```text
+chatup chrome [--dry-run] [--sudo] [-y|--yes] [--log-level LEVEL]
+chatup iterm [--dry-run] [--log-level LEVEL]
+```
+
+Chrome 安装普通系统浏览器；iTerm2 仅限 macOS。详见[安装约定](commands.md#chrome-iterm)。
 
 ## ChatGPT 桌面应用
 

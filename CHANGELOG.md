@@ -7,6 +7,14 @@
 ### 修复
 - `chatup zsh` 将官方源安装快捷名称由 `pypi` 改为 `pypip`；保留原命令及镜像 URL，`tspip` 不变。
 
+## 0.2.17
+
+### Added
+- Add `chatup chrome` to install regular Google Chrome for the detected OS: the official universal DMG on macOS, exact `Google.Chrome` through WinGet on Windows, and the official x86_64 DEB/RPM through apt/dnf/yum/zypper on Linux.
+- Add `chatup iterm` to install iTerm2 from its official stable ZIP on macOS; reject other operating systems explicitly.
+- macOS installation requires no Homebrew, verifies bundle identity/version and publisher signatures, and uses `/Applications` or user Applications with staged installation. Existing apps are verified and reused without upgrades or profile changes.
+- Add side-effect-free `--dry-run`, explicit Linux `--sudo`, package-manager `--yes`, installation logs, and post-install verification. Keep Chrome for Testing, ChromeDriver and Playwright independent.
+
 ## 0.2.16
 
 ### 修复

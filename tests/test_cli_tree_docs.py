@@ -80,5 +80,6 @@ def test_cli_tree_is_in_mkdocs_nav_and_backend_contracts_are_complete():
         text = (ROOT / "docs" / name).read_text(encoding="utf-8")
         missing = sorted(item for item in required if item not in text)
         assert not missing, f"{name} is missing backend contract terms: {missing}"
-        assert "\nchatup chrome\n" not in text
+        assert "chatup chrome" in text
+        assert "chatup iterm" in text
         assert "from chatup.chrome import" not in text
