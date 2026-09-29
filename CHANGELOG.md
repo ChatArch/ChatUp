@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.2.19
+
+### Added
+- Add `chatup macos` with a ChatStyle checkbox menu for Snipaste, iTerm2 and Google Chrome, all selected by default. Support repeated `--app`, `-i`/`-I`, empty selection and side-effect-free `--dry-run`.
+- Install Snipaste on macOS from its official DMG, verifying its bundle identity and Developer ID signature through the existing staged desktop installer. Reuse existing Chrome and iTerm2 installations.
+- Include ChatStyle's TUI dependencies so default installations provide the checkbox menu. Non-interactive runs install explicit choices or the three defaults; unsupported systems fail before installation.
+
+### Fixed
+- Keep simulated desktop app bundles in a non-indexed directory and clean them after tests, preventing duplicate application entries on macOS development machines.
+
 ## 0.2.18
 
 ### 修复

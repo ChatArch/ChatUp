@@ -16,6 +16,7 @@ chatup
 |-- zsh         # 配置 zsh / oh-my-zsh / 插件 / alias
 |-- chrome              # 按当前系统安装普通 Google Chrome
 |-- iterm               # 安装 iTerm2（仅限 macOS）
+|-- macos               # 勾选安装 Snipaste、iTerm2、Chrome，默认全选
 |-- chrome-for-testing # 管理 Google Chrome for Testing 浏览器
 |-- chromedriver       # 管理 ChromeDriver WebDriver server
 |-- playwright         # 管理 Playwright package 与 Chromium browser
@@ -96,6 +97,8 @@ chatup crs                 # 准备本地 CRS、Redis、secret、admin SPA 和 s
 | `chatup crs` | `~/.chatarch/crs/local` | 本地 CRS + Redis + smoke check；secret 文件权限受限。 |
 
 ## 桌面应用
+
+`chatup macos` 提供 Snipaste、iTerm2、Chrome 三项勾选安装，默认全部选中，仅限 macOS。支持 `--app` 子集、`-I` 非交互和 `--dry-run` 预览；使用官方安装包并验证签名，无需 Homebrew。详见[macOS 安装入口](commands.md#macos)。
 
 `chatup chrome` 按系统安装普通 Google Chrome；`chatup iterm` 在 macOS 安装 iTerm2。两个命令支持 `--dry-run`，验证并复用已有安装，macOS 无需 Homebrew。详见[安装约定](commands.md#chrome-iterm)。
 

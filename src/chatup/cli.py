@@ -7,6 +7,7 @@ from chatup import __version__
 from chatup.commands.chrome_for_testing import cli as chrome_for_testing_cli
 from chatup.commands.chromedriver import cli as chromedriver_cli
 from chatup.commands.desktop import chrome_cli, iterm_cli
+from chatup.commands.macos import macos_cli
 from chatup.commands.playwright import cli as playwright_cli
 from chatup.setup.cli import register_setup_commands
 
@@ -35,6 +36,7 @@ main.add_command(chromedriver_cli)
 main.add_command(playwright_cli)
 main.add_command(chrome_cli)
 main.add_command(iterm_cli)
+main.add_command(macos_cli)
 
 
 if __name__ == "__main__":

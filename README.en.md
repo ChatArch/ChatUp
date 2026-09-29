@@ -43,6 +43,17 @@ chatup nginx proxy-pass ./gitea-local.conf --set SERVER_NAME=gitea.local.example
 chatup crs --install-dir ~/.chatarch/crs/local --port 12392 --redis-port 6379
 ```
 
+## macOS Apps
+
+```bash
+chatup macos                       # Choose apps; Snipaste, iTerm2 and Chrome are all selected
+chatup macos --app snipaste         # Install only Snipaste
+chatup macos -I                    # Install all three without prompting
+chatup macos --dry-run             # Preview the installation plan
+```
+
+macOS only. In a terminal, use Space to toggle apps and Enter to install; deselecting all apps exits without installation. Repeat `--app snipaste|iterm|chrome` to select several apps. Official downloads require no Homebrew, and verified existing apps are reused. See the [macOS install command](https://arch.gh.wzhecnu.cn/ChatUp/en/commands/#macos).
+
 ## Chrome and iTerm2
 
 ```bash
@@ -72,7 +83,7 @@ Installs the official new ChatGPT desktop app including Codex. Requires Homebrew
 | --- | --- |
 | Base runtime | `doctor`, `uv`, `nodejs`, `docker`, `zsh`, `chrome-for-testing`, `chromedriver`, `playwright`, `frp` |
 | Workspace scaffold | `workspace` |
-| Desktop apps | `chrome`, `iterm` (macOS only), `chatgpt` (includes Codex) |
+| Desktop apps | `macos` (Snipaste/iTerm2/Chrome selection), `chrome`, `iterm` (macOS only), `chatgpt` (includes Codex) |
 | Local service installers | `gitea`, `mysql`, `nginx`, `crs` |
 | Agent toolchains | `cc-connect`, `claude`, `codex`, `cursor-agent`, `opencode`, `hermes`, `lark-cli` |
 

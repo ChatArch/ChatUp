@@ -34,6 +34,7 @@ chatup
 ├── workspace           # 初始化 ChatArch workspace
 ├── chrome              # 按当前系统安装普通 Google Chrome
 ├── iterm               # 安装 iTerm2（仅限 macOS）
+├── macos               # 勾选安装 Snipaste、iTerm2、Chrome，默认全选
 ├── chrome-for-testing  # 管理 Google Chrome for Testing 浏览器
 ├── chromedriver        # 管理 ChromeDriver WebDriver server
 └── playwright          # 管理 Playwright package 与 Chromium browser
@@ -53,6 +54,14 @@ chatup uv
 ```
 
 不创建缺失的 rc 文件；Windows 跳过此项。`--no-activate` 保持现有启动配置不变。详见[快速开始](quickstart.md)。
+
+## macOS 常用应用
+
+```text
+chatup macos [--app snipaste|iterm|chrome]... [--dry-run] [--log-level LEVEL] [-i|-I]
+```
+
+仅限 macOS，默认勾选 Snipaste、iTerm2、Chrome。空格切换、回车安装；可重复 `--app` 选择子集，`-I` 不询问，`--dry-run` 只预览。详见[macOS 安装约定](commands.md#macos)。
 
 ## Chrome 与 iTerm2
 
