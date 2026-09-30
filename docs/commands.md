@@ -15,6 +15,7 @@ chatup
 |-- docker      # 检查 Docker 环境，并提示 sudo 配置
 |-- zsh         # 配置 zsh / oh-my-zsh / 插件 / alias
 |-- chrome              # 按当前系统安装普通 Google Chrome
+|-- snipaste            # 在 macOS 或 Windows 安装 Snipaste
 |-- iterm               # 安装 iTerm2（仅限 macOS）
 |-- macos               # 勾选 macOS 应用，Apple Silicon 可选 Blender
 |-- remotion            # 初始化带锁定依赖的本地视频项目
@@ -146,35 +147,38 @@ npm run render -- --browser-executable='/Applications/Google Chrome.app/Contents
 
 真实安装与 MP4 渲染已在 Apple Silicon macOS、Node 24.21.0、npm 11.19.0 验证；其他系统使用相同的 Node/npm 项目流程，原生安装与渲染尚未逐个平台实测。
 
-## Chrome 与 iTerm2 {#chrome-iterm}
+## Chrome、Snipaste 与 iTerm2 {#chrome-iterm}
 
-`chatup chrome` 安装普通 Google Chrome；`chatup iterm` 安装 iTerm2，且仅限 macOS。
+`chatup chrome` 安装普通 Google Chrome；`chatup snipaste` 在 macOS 或 Windows 安装 Snipaste；`chatup iterm` 安装 iTerm2，且仅限 macOS。
 
-| 系统 | Chrome 安装路径 | iTerm2 |
-| --- | --- | --- |
-| macOS Intel / Apple Silicon | Google 官方 universal stable DMG，无需 Homebrew | iTerm2 官方 stable ZIP |
-| Windows | WinGet 精确选择 `Google.Chrome`，silent 安装 | 不支持，返回错误 |
-| Linux x86_64 | 官方 stable DEB（apt-get）或 RPM（dnf/yum/zypper） | 不支持，返回错误 |
-| Linux ARM / 其他系统 | 明确返回不支持错误 | 不支持 |
+| 系统 | Chrome 安装路径 | Snipaste | iTerm2 |
+| --- | --- | --- | --- |
+| macOS Intel / Apple Silicon | Google 官方 universal stable DMG，无需 Homebrew | Snipaste 官方 DMG | iTerm2 官方 stable ZIP |
+| Windows | WinGet 精确选择 `Google.Chrome.EXE`，当前用户 silent 安装 | WinGet 精确选择 `liule.Snipaste`，silent 安装 | 不支持，返回错误 |
+| Linux x86_64 | 官方 stable DEB（apt-get）或 RPM（dnf/yum/zypper） | 不支持，返回错误 | 不支持，返回错误 |
+| Linux ARM / 其他系统 | 明确返回不支持错误 | 不支持，返回错误 | 不支持 |
 
 ```bash
 chatup chrome
+chatup snipaste
 chatup iterm
 chatup chrome --dry-run
+chatup snipaste --dry-run
 chatup iterm --dry-run
 chatup chrome --sudo --yes   # Linux 允许 sudo 并自动确认包安装
 chatup chrome --yes          # Windows 明确接受来源和包协议
+chatup snipaste --yes        # Windows 明确接受来源和包协议
 ```
 
-两个命令支持 `--log-level DEBUG|INFO|WARNING|ERROR`；没有必填参数，不会触发补参交互。`--dry-run` 只检查本机平台/路径并打印计划，不联网、不执行安装程序、不写目录。
+三个命令支持 `--log-level DEBUG|INFO|WARNING|ERROR`；没有必填参数，不会触发补参交互。`--dry-run` 只检查本机平台/路径并打印计划，不联网、不执行安装程序、不写目录。
 
 macOS 优先复用 `/Applications` 或 `~/Applications` 中已有的应用，否则安装到可写的 `/Applications`，不可写时回退到 `~/Applications`。下载后校验 bundle ID、版本、可执行文件、最低 macOS 版本和官方 Developer ID 签名，再暂存复制并原子移入目标位置。已有异常应用会报错，不覆盖；不会自动升级、启动、登录或更改默认浏览器/终端。安装缓存暂存于 `~/.chatarch/cache/desktop`（遵循 `CHATARCH_HOME`），完成后清理并卸载 DMG。
 
-Linux 需要对应系统包管理器；普通用户必须显式提供 `--sudo`，否则安装前返回操作提示，root 可直接安装。包管理器负责依赖和系统要求，安装后回读 `google-chrome --version`。Windows 需要 [WinGet](https://aka.ms/getwinget)，安装前后按精确包 ID 回读，不自动升级已有 Chrome。
+Linux 需要对应系统包管理器；普通用户必须显式提供 `--sudo`，否则安装前返回操作提示，root 可直接安装。包管理器负责依赖和系统要求，安装后回读 `google-chrome --version`。Windows 安装需要 [WinGet](https://aka.ms/getwinget)，安装前后按精确包 ID 回读 `Google.Chrome.EXE` 或 `liule.Snipaste`，不自动升级已有应用。Chrome 使用带版本号的官方 EXE，保留 WinGet 哈希校验，避免浮动 MSI 下载地址与清单不同步；安装后还会验证 `chrome.exe` 的有效 Google LLC 签名、产品身份及版本。标准用户或系统目录中已有的有效 Chrome 可直接复用，无需重新安装；无效程序或仅有登记记录而缺少程序时返回错误。
 
 这些桌面安装入口不写 CFT/ChromeDriver/Playwright metadata、浏览器 profile 或 Cookie。自动化制品继续使用各自的独立 backend。
 
-来源：[Google Chrome](https://www.google.com/chrome/)、[iTerm2 下载](https://iterm2.com/downloads.html)。
+来源：[Google Chrome](https://www.google.com/chrome/)、[Snipaste](https://www.snipaste.com/)、[iTerm2 下载](https://iterm2.com/downloads.html)。
 
 ## ChatGPT 桌面应用 {#chatgpt-desktop}
 

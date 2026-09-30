@@ -79,7 +79,7 @@ def safe_extract_zip(
                             f"Symlink escapes {label} archive root: {member.filename}"
                         )
                     target.parent.mkdir(parents=True, exist_ok=True)
-                    target.symlink_to(link_value)
+                    target.symlink_to(link_value, target_is_directory=resolved_link.is_dir())
                     continue
                 if member.is_dir() or stat.S_ISDIR(mode):
                     target.mkdir(parents=True, exist_ok=True)

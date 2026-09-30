@@ -10,7 +10,7 @@
 
 - **工作区**
 
-    用 `chatup workspace default ~/Playground` 初始化 ChatArch 协作目录。
+    用 `chatup workspace ~/Playground` 初始化 ChatArch 协作目录。
 
 - **本地服务**
 
@@ -98,7 +98,7 @@ chatup chromedriver install --match-cft-version 145.0.7632.6 -I
 ## 初始化工作区
 
 ```bash
-chatup workspace default ~/Playground
+chatup workspace ~/Playground
 ```
 
 该命令会创建 ChatArch workspace 的基础结构，包括：

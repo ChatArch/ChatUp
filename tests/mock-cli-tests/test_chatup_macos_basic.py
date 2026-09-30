@@ -168,9 +168,9 @@ def test_real_dry_run_does_not_execute_or_download(monkeypatch):
     assert result.output.count("Dry run:") == 4
 
 
-@pytest.mark.parametrize("system", ["Linux", "Windows"])
+@pytest.mark.parametrize("system", ["Linux"])
 def test_snipaste_does_not_fall_through_to_chrome_installer(monkeypatch, system):
     desktop = importlib.import_module("chatup.setup.desktop")
     monkeypatch.setattr(desktop.platform, "system", lambda: system)
-    with pytest.raises(RuntimeError, match="Snipaste.*macOS only"):
+    with pytest.raises(RuntimeError, match="Snipaste.*macOS and Windows only"):
         desktop.plan_desktop_install("snipaste")

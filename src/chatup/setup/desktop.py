@@ -1,8 +1,10 @@
-"""Native installers for Google Chrome and supported macOS desktop apps."""
+"""Native installers for Chrome, Snipaste and supported macOS desktop apps."""
 from __future__ import annotations
 
 import logging
 import hashlib
+import base64
+import json
 import os
 from pathlib import Path
 import platform
@@ -22,6 +24,8 @@ logger = logging.getLogger(__name__)
 MAC_APPS = {
     "chrome": {
         "app": "Google Chrome",
+        "winget_id": "Google.Chrome.EXE",
+        "winget_scope": "user",
         "bundle": "Google Chrome.app",
         "bundle_id": "com.google.Chrome",
         "team_id": "EQHXZ8M8AV",
@@ -38,6 +42,7 @@ MAC_APPS = {
     },
     "snipaste": {
         "app": "Snipaste",
+        "winget_id": "liule.Snipaste",
         "bundle": "Snipaste.app",
         "bundle_id": "com.Snipaste",
         "team_id": "NGTL73P583",
@@ -73,15 +78,15 @@ def _is_root() -> bool:
     return hasattr(os, "geteuid") and os.geteuid() == 0
 
 
-def plan_desktop_install(
-    app: str, *, sudo: bool = False, yes: bool = False,
-) -> dict[str, Any]:
+def plan_desktop_install(app: str, *, sudo: bool = False, yes: bool = False) -> dict[str, Any]:
     """Describe the current platform's installation without writes or processes."""
     spec = MAC_APPS[app]
     system = platform.system()
     plan = {"app": spec["app"], "platform": system}
-    if app != "chrome" and system != "Darwin":
+    if system != "Darwin" and app in {"iterm", "blender"}:
         raise RuntimeError(f"{spec['app']} is supported on macOS only; current platform: {system}.")
+    if system not in {"Darwin", "Windows"} and app == "snipaste":
+        raise RuntimeError(f"{spec['app']} is supported on macOS and Windows only; current platform: {system}.")
     if system == "Darwin":
         if platform.machine().lower() not in {"arm64", "aarch64", "x86_64", "amd64"}:
             raise RuntimeError(f"Unsupported macOS architecture: {platform.machine()}.")
@@ -92,13 +97,24 @@ def plan_desktop_install(
         directory = directories[0] if os.access(directories[0], os.W_OK) else directories[1]
         return {**plan, **spec, "method": "macos", "path": str(existing or directory / spec["bundle"])}
     if system == "Windows":
-        selector = ["--id", "Google.Chrome", "--exact", "--source", "winget", "--disable-interactivity"]
+        package_id = spec.get("winget_id")
+        if not package_id:
+            raise RuntimeError(f"{spec['app']} is supported on macOS only; current platform: {system}.")
+        selector = ["--id", package_id, "--exact", "--source", "winget", "--disable-interactivity"]
         command = ["winget", "install", *selector, "--silent", "--no-upgrade"]
+        if spec.get("winget_scope"):
+            command += ["--scope", spec["winget_scope"]]
         verify = ["winget", "list", *selector]
         if yes:
             command += ["--accept-package-agreements", "--accept-source-agreements"]
             verify += ["--accept-source-agreements"]
-        return {**plan, "method": "winget", "command": command, "verify_command": verify}
+        return {
+            **plan,
+            "method": "winget",
+            "winget_id": package_id,
+            "command": command,
+            "verify_command": verify,
+        }
     if system == "Linux":
         if platform.machine().lower() not in {"x86_64", "amd64"}:
             raise RuntimeError("Google Chrome for Linux requires x86_64; Google does not provide a Linux ARM package.")
@@ -274,22 +290,77 @@ def _install_linux(plan: dict[str, Any], *, sudo: bool) -> dict[str, Any]:
     return {**plan, **installed, "status": "installed", "verified": True}
 
 
+def _google_signed_file(path: Path) -> dict[str, str]:
+    powershell = shutil.which("powershell.exe") or shutil.which("pwsh.exe")
+    if not powershell:
+        raise RuntimeError("PowerShell is required to verify Google's Authenticode signature.")
+    # Encode the script and quote its sole path literal, including apostrophes.
+    literal = str(path).replace("'", "''")
+    script = (
+        "$ErrorActionPreference = 'Stop'; "
+        "$ProgressPreference = 'SilentlyContinue'; "
+        "$env:PSModulePath = Join-Path $PSHOME 'Modules'; "
+        "[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new(); "
+        f"$file = Get-Item -LiteralPath '{literal}'; "
+        "$sig = Get-AuthenticodeSignature -LiteralPath $file.FullName; "
+        "$publisher = if ($sig.SignerCertificate) { "
+        "$sig.SignerCertificate.GetNameInfo([System.Security.Cryptography.X509Certificates.X509NameType]::SimpleName, $false) "
+        "} else { '' }; "
+        "@{status=[string]$sig.Status; publisher=$publisher; "
+        "product=$file.VersionInfo.ProductName; version=$file.VersionInfo.ProductVersion; "
+        "original=$file.VersionInfo.OriginalFilename} | ConvertTo-Json -Compress"
+    )
+    encoded = base64.b64encode(script.encode("utf-16-le")).decode("ascii")
+    result = _run([powershell, "-NoProfile", "-NonInteractive", "-OutputFormat", "Text",
+                   "-EncodedCommand", encoded], timeout=120)
+    details = json.loads(result.stdout.lstrip("\ufeff"))
+    if not isinstance(details, dict) or details.get("status") != "Valid" or details.get("publisher") != "Google LLC":
+        raise RuntimeError(f"Google Authenticode signature verification failed: {path}.")
+    version = details.get("version", "")
+    if (details.get("product") != "Google Chrome"
+            or str(details.get("original", "")).lower() != "chrome.exe"
+            or not isinstance(version, str) or not re.fullmatch(r"\d+(?:\.\d+){3}", version)):
+        raise RuntimeError(f"Cannot verify installed Google Chrome identity/version: {path}.")
+    return {"binary": str(path), "path": str(path), "version": version}
+
+
+def _windows_chrome() -> dict[str, str] | None:
+    for variable in ("LOCALAPPDATA", "PROGRAMW6432", "PROGRAMFILES", "PROGRAMFILES(X86)"):
+        root = os.environ.get(variable)
+        if root:
+            binary = Path(root) / "Google/Chrome/Application/chrome.exe"
+            if binary.exists():
+                return _google_signed_file(binary)
+    return None
+
+
 def _install_windows(plan: dict[str, Any]) -> dict[str, Any]:
+    is_chrome = plan["winget_id"] == "Google.Chrome.EXE"
+    existing = _windows_chrome() if is_chrome else None
+    if existing:
+        return {**plan, **existing, "status": "already_installed", "verified": True}
     executable = shutil.which("winget")
     if not executable:
-        raise RuntimeError("WinGet is required to install Google Chrome: https://aka.ms/getwinget")
+        raise RuntimeError(f"WinGet is required to install {plan['app']}: https://aka.ms/getwinget")
 
     def installed():
         result = _run([executable, *plan["verify_command"][1:]], timeout=120, check=False)
-        return result.returncode == 0 and re.search(r"\bGoogle\.Chrome\b", result.stdout) is not None
+        return result.returncode == 0 and re.search(
+            rf"(?<![\w.-]){re.escape(plan['winget_id'])}(?![\w.-])", result.stdout,
+        ) is not None
 
     if installed():
+        if is_chrome:
+            raise RuntimeError("Google Chrome package record exists, but signed chrome.exe was not found.")
         return {**plan, "status": "already_installed", "verified": True}
-    logger.info("Installing Google Chrome with WinGet; use --yes to accept source/package agreements")
+    logger.info("Installing %s with WinGet; use --yes to accept source/package agreements", plan["app"])
     _run([executable, *plan["command"][1:]], capture=False)
     if not installed():
-        raise RuntimeError("Google Chrome installation verification failed: no matching WinGet package record.")
-    return {**plan, "status": "installed", "verified": True}
+        raise RuntimeError(f"{plan['app']} installation verification failed: no matching WinGet package record.")
+    details = _windows_chrome() if is_chrome else {}
+    if is_chrome and not details:
+        raise RuntimeError("Google Chrome installation verification failed: signed chrome.exe not found.")
+    return {**plan, **details, "status": "installed", "verified": True}
 
 
 def setup_desktop_app(

@@ -15,6 +15,7 @@ chatup
 |-- docker      # 检查 Docker 环境，并提示 sudo 配置
 |-- zsh         # 配置 zsh / oh-my-zsh / 插件 / alias
 |-- chrome              # 按当前系统安装普通 Google Chrome
+|-- snipaste            # 在 macOS 或 Windows 安装 Snipaste
 |-- iterm               # 安装 iTerm2（仅限 macOS）
 |-- macos               # 勾选 macOS 应用，Apple Silicon 可选 Blender
 |-- remotion            # 初始化带锁定依赖的本地视频项目
@@ -103,7 +104,7 @@ chatup crs                 # 准备本地 CRS、Redis、secret、admin SPA 和 s
 
 `chatup remotion PROJECT_DIR` 创建带锁定依赖和可渲染示例的视频项目，要求已有 Node/npm，保护已有目录并检测本机浏览器。它使用项目目录，可配合 macOS 的 Chrome/Blender 安装入口。详见[Remotion 约定](commands.md#remotion)。
 
-`chatup chrome` 按系统安装普通 Google Chrome；`chatup iterm` 在 macOS 安装 iTerm2。两个命令支持 `--dry-run`，验证并复用已有安装，macOS 无需 Homebrew。详见[安装约定](commands.md#chrome-iterm)。
+`chatup chrome` 按系统安装普通 Google Chrome；`chatup snipaste` 在 macOS 或 Windows 安装 Snipaste；`chatup iterm` 在 macOS 安装 iTerm2。三个命令支持 `--dry-run`，验证并复用已有安装，macOS 无需 Homebrew。Windows 通过 WinGet 的精确包 ID 验证。详见[安装约定](commands.md#chrome-iterm)。
 
 `chatup chatgpt` 通过 macOS Homebrew 或 Windows 官方 Microsoft Store 精确 ID 安装含 Codex 的新版 ChatGPT 桌面应用。`--dry-run` 无副作用，安装后回读包管理器记录。应用与缓存使用包管理器/OpenAI 的原生目录，不属于 ChatArch 自管状态。不启动应用、不登录、不改 Codex CLI 配置，也不自动安装 Linux preview。详见[桌面安装约定](commands.md#chatgpt-desktop)。
 
@@ -123,7 +124,7 @@ chatup lark-cli            # 配置官方 lark-cli，并复用 ChatEnv 飞书配
 ## 工作区
 
 ```text
-chatup workspace default ~/Playground  # 初始化 ChatArch workspace
+chatup workspace ~/Playground  # 初始化 ChatArch workspace
 ```
 
 `workspace` 只创建和同步目录/规范，不替代项目本身的 repo 初始化、任务 PRD、progress 记录和 review 流程。工作区规范见 [工作区脚手架](workspace.md)。

@@ -33,6 +33,7 @@ chatup
 ├── hermes              # Install Hermes Agent and optional WebUI
 ├── workspace           # Initialize a ChatArch workspace
 ├── chrome              # Install regular Google Chrome for the current OS
+├── snipaste            # Install Snipaste on macOS or Windows
 ├── iterm               # Install iTerm2 (macOS only)
 ├── macos               # Select supported macOS apps, including Blender on Apple Silicon
 ├── remotion            # Initialize a locked local video project
@@ -72,14 +73,15 @@ chatup remotion [PROJECT_DIR] [--browser-executable PATH] [--dry-run] [--log-lev
 
 Create a local video project with locked dependencies. Missing directories prompt in a terminal, and existing unrelated paths are protected. See the [Remotion contract](commands.md#remotion) for runtime requirements and browser behavior.
 
-## Chrome and iTerm2
+## Chrome, Snipaste, and iTerm2
 
 ```text
 chatup chrome [--dry-run] [--sudo] [-y|--yes] [--log-level LEVEL]
+chatup snipaste [--dry-run] [-y|--yes] [--log-level LEVEL]
 chatup iterm [--dry-run] [--log-level LEVEL]
 ```
 
-Chrome installs the regular system browser; iTerm2 is macOS-only. See the [install contract](commands.md#chrome-iterm).
+Chrome installs the regular system browser; Snipaste supports macOS and Windows; iTerm2 is macOS-only. See the [install contract](commands.md#chrome-iterm).
 
 ## ChatGPT Desktop App
 

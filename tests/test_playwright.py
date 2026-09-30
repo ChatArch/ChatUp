@@ -88,7 +88,7 @@ def test_install_requires_exact_version_supported_browser_and_node(tmp_path):
         )
 
 
-def test_install_rejects_parent_symlink_escape(tmp_path):
+def test_install_rejects_parent_symlink_escape(tmp_path, require_symlink_privilege):
     home = tmp_path / "playwright"
     outside = tmp_path / "outside"
     outside.mkdir()
