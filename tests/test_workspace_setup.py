@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+from types import SimpleNamespace
 
 import click
 import pytest
@@ -180,11 +181,12 @@ def test_workspace_resolves_windows_git_standard_location(tmp_path, monkeypatch)
     git.write_text("fake git", encoding="utf-8")
 
     monkeypatch.setattr(options.shutil, "which", lambda name: None)
-    monkeypatch.setattr(options.os, "name", "nt")
+    monkeypatch.setattr(options, "os", SimpleNamespace(name="nt", environ=os.environ))
     monkeypatch.setenv("LOCALAPPDATA", str(tmp_path))
     monkeypatch.delenv("ProgramFiles", raising=False)
     monkeypatch.delenv("ProgramFiles(x86)", raising=False)
 
+    assert type(Path()) is type(tmp_path)
     assert options._resolve_git_command() == str(git)
 
 
@@ -223,9 +225,10 @@ def test_workspace_directory_link_falls_back_to_windows_junction(tmp_path, monke
         target_path.mkdir()
 
     monkeypatch.setattr(Path, "symlink_to", fail_symlink_to)
-    monkeypatch.setattr(options.os, "name", "nt")
+    monkeypatch.setattr(options, "os", SimpleNamespace(name="nt", environ=os.environ))
     monkeypatch.setattr(options, "_create_windows_junction", fake_junction)
 
+    assert type(Path()) is type(tmp_path)
     options._ensure_symlink(source, target)
 
     assert created == [(source.resolve(), target)]
