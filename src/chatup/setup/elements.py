@@ -26,6 +26,7 @@ from chatup.setup.discourse import (
     setup_discourse,
 )
 from chatup.setup.frp import setup_frp
+from chatup.setup.glance import DEFAULT_GLANCE_VERSION, setup_glance
 from chatup.setup.gitea import (
     DEFAULT_BASE_URL as DEFAULT_GITEA_BASE_URL,
     DEFAULT_DATABASE_BACKEND as DEFAULT_GITEA_DATABASE_BACKEND,
@@ -228,6 +229,15 @@ def gitea_setup(
         force=force,
         interactive=interactive,
         log_level=log_level,
+    )
+
+
+def glance_setup(version, runtime_home, dry_run, interactive):
+    return setup_glance(
+        version=version,
+        runtime_home=runtime_home,
+        dry_run=dry_run,
+        interactive=interactive,
     )
 
 
@@ -612,6 +622,37 @@ SETUP_COMMAND_ELEMENTS = (
         ),
     ),
 
+    SetupCommandElement(
+        name="glance",
+        help="Install the verified maintained ChatArch Glance runtime without starting it.",
+        callback=glance_setup,
+        options=(
+            SetupOptionElement(
+                param_decls=("--version",),
+                kwargs={
+                    "default": DEFAULT_GLANCE_VERSION,
+                    "show_default": True,
+                    "help": "Maintained release: latest or exact chatarch-vMAJOR.MINOR.PATCH.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--runtime-home",),
+                kwargs={
+                    "default": None,
+                    "type": click.Path(path_type=Path),
+                    "help": "Runtime root; defaults to the active ChatArch home/glance.",
+                },
+            ),
+            SetupOptionElement(
+                param_decls=("--dry-run",),
+                kwargs={"is_flag": True, "help": "Show paths without network access or writes."},
+            ),
+            SetupOptionElement(
+                param_decls=("--interactive/--no-interactive", "-i/-I"),
+                kwargs={"default": None, "help": INTERACTIVE_OPTION_HELP},
+            ),
+        ),
+    ),
     SetupCommandElement(
         name="gitea",
         help="Install ChatArch Gitea and optionally write a local app.ini/user service.",

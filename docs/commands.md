@@ -24,6 +24,7 @@ chatup
 |-- playwright         # 管理 Playwright package 与 Chromium browser
 |-- frp         # 安装 FRP Client/Server
 |-- gitea       # 安装 ChatTea-compatible Gitea runtime/config/service
+|-- glance      # 安装已校验的 ChatArch Glance loopback runtime（不启动）
 |-- discourse   # 准备 Discourse docker 配置和 ChatEnv 管理的管理员凭据
 |-- zulip       # 准备 Zulip Docker Compose 配置和 ChatEnv 管理的管理员凭据
 |-- mysql       # 安装 ChatData-compatible MySQL runtime/instance/service
@@ -50,7 +51,7 @@ chatup
 
 - **本地服务**
 
-    `gitea`、`discourse`、`zulip`、`mysql`、`twikoo`、`nginx`、`crs` 负责 ChatArch 常用本地服务，默认落在 `~/.chatarch/...`，其中 Discourse/Zulip 管理员凭据从 ChatEnv 读取。
+    `gitea`、`glance`、`discourse`、`zulip`、`mysql`、`twikoo`、`nginx`、`crs` 负责 ChatArch 常用本地服务，默认落在 `~/.chatarch/...`，其中 Discourse/Zulip 管理员凭据从 ChatEnv 读取。
 
 - **Agent 工具链**
 
@@ -265,6 +266,7 @@ chatup cursor-agent -e work --credential-store file-wrapper -I
 | 命令 | 当前能力 |
 |---|---|
 | `chatup gitea` | 从 `ChatArch/gitea` Release assets 安装 ChatArch Gitea；默认跟随 latest，可选生成 ChatTea-compatible `app.ini` 和 user-level systemd service。 |
+| `chatup glance` | 安装并初始化已校验的 `ChatArch/glance` Linux amd64 本地运行时；不启动服务或写入凭据。 |
 | `chatup discourse` | 准备 `~/.chatarch/discourse` 下的 Discourse Docker/app.yml 布局，并从 ChatEnv 读取 `DISCOURSE_ADMIN_USERNAME`、`DISCOURSE_ADMIN_EMAIL`、`DISCOURSE_ADMIN_PASSWORD` 写入受限权限的 `secrets/admin.env`。 |
 | `chatup zulip` | 准备 `~/.chatarch/zulip` 下的 Zulip Docker Compose、bind-mount 数据目录和 secret files，并从 ChatEnv 读取 `ZULIP_ADMIN_USERNAME`、`ZULIP_ADMIN_EMAIL`/`ZULIP_ADMIN_MAIL`、`ZULIP_ADMIN_PASSWORD`。 |
 | `chatup mysql` | 安装并准备 ChatData-compatible user-level MySQL runtime、实例目录、`my.cnf` 和可选 user-level systemd service。 |
@@ -304,6 +306,16 @@ chatup playwright path 1.61.1 -I
 完整子命令、ChatStyle 行为和 Python contract 见 [CLI 树](cli-tree.md)。
 
 ## Gitea 命令约定
+
+`chatup glance` 裸命令就是安装入口：默认解析 `ChatArch/glance` 最新稳定维护版，也可用 `--version chatarch-vMAJOR.MINOR.PATCH` 严格固定版本。当前发布矩阵仅含 Linux amd64；安装前会拒绝其他平台。安装器只下载对应归档、`SHA256SUMS`、`BUILDINFO.txt`，验证归档与 BUILDINFO 摘要、tag、source SHA、平台和二进制原始版本，再由 ChatGlance portable API 安全解包并初始化 loopback 配置。
+
+```bash
+chatup glance
+chatup glance --version chatarch-v0.2.1 --runtime-home ~/.chatarch/glance -I
+chatup glance --dry-run
+```
+
+结果会打印 binary、config 和精确原生启动命令。安装器不自动启动/启用服务或建立公网入口，不生成认证 fixture/明文密码。重复执行只复用精确 provenance；保留 config、pages、notes、data、accounts 和 timers。已有版本不匹配或来源不可验证时拒绝替换，请显式使用原生 `chatglance runtime update`。
 
 `chatup gitea` 对齐 ChatTea 的本地 Gitea 布局：
 
