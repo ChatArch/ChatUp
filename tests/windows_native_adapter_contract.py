@@ -1,5 +1,7 @@
 """Windows-only, inert native adapter contract checks for hosted CI."""
 import os
+import json
+import ntpath
 from pathlib import Path
 import subprocess
 import tempfile
@@ -31,6 +33,8 @@ with tempfile.TemporaryDirectory(prefix='chatup-hermes-probe-') as directory:
         capture_output=True, text=True, timeout=45, env=env,
     )
     assert result.returncode == 0, result.stderr[-1000:]
-    assert str(root / 'hermes').casefold() in result.stdout.casefold()
+    report = json.loads(result.stdout)
+    assert ntpath.normcase(ntpath.normpath(report['hermes_home'])) == ntpath.normcase(ntpath.normpath(str(root / 'hermes')))
+    assert ntpath.normcase(ntpath.normpath(report['install_dir'])) == ntpath.normcase(ntpath.normpath(str(root / 'hermes' / 'hermes-agent')))
     assert not (root / 'hermes' / 'hermes-agent').exists()
 print('WINDOWS_NATIVE_ADAPTER_CONTRACT_OK')

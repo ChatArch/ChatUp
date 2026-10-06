@@ -22,6 +22,8 @@ def remotion(monkeypatch):
         ),
     )
     monkeypatch.setattr(module, "_find_browser", lambda value=None: None)
+    monkeypatch.setattr(module, "npm_command_for_runtime", lambda runtime, args: ["/tools/npm", *args])
+    monkeypatch.setattr(module, "node_runtime_env", lambda runtime: {})
     calls = []
 
     def run(command, *, cwd=None, **kwargs):
