@@ -55,3 +55,96 @@ jobs:
               subprocess.check_call([str(chatup_bin), *args], cwd=os.environ["RUNNER_TEMP"])
           PY
       - run: mkdocs build --strict
+
+  windows-node-codex-smoke:
+    name: Windows Node and Codex smoke
+    runs-on: windows-latest
+    timeout-minutes: 12
+    env:
+      PYTHONUTF8: "1"
+      PYTHONIOENCODING: utf-8
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e ".[dev]"
+      - name: Bootstrap managed Node and configure Codex in an isolated home
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
+          $smokeRoot = Join-Path $env:RUNNER_TEMP "chatup-windows-node-codex-smoke"
+          $env:HOME = Join-Path $smokeRoot "home"
+          $env:USERPROFILE = $env:HOME
+          $env:CHATARCH_HOME = Join-Path $smokeRoot "chatarch"
+          $env:CODEX_HOME = Join-Path $smokeRoot "codex"
+          New-Item -ItemType Directory -Force -Path $env:HOME, $env:CHATARCH_HOME, $env:CODEX_HOME | Out-Null
+
+          # Hosted Windows images include Node.js. Hide every discoverable node.exe
+          # directory so this smoke executes the managed portable-ZIP bootstrap path.
+          $nodeCandidateDirs = @(
+            Get-Command node -All -CommandType Application -ErrorAction SilentlyContinue |
+              ForEach-Object { [IO.Path]::GetDirectoryName($_.Path) } |
+              Select-Object -Unique
+          )
+          $pathItems = @($env:PATH -split [IO.Path]::PathSeparator)
+          $filteredPathItems = foreach ($pathItem in $pathItems) {
+            $isNodePath = $false
+            foreach ($nodeCandidateDir in $nodeCandidateDirs) {
+              if ([string]::Equals(
+                $pathItem.TrimEnd([IO.Path]::DirectorySeparatorChar),
+                $nodeCandidateDir.TrimEnd([IO.Path]::DirectorySeparatorChar),
+                [StringComparison]::OrdinalIgnoreCase
+              )) {
+                $isNodePath = $true
+                break
+              }
+            }
+            if (-not $isNodePath) {
+              $pathItem
+            }
+          }
+          $env:PATH = $filteredPathItems -join [IO.Path]::PathSeparator
+          if (Get-Command node -ErrorAction SilentlyContinue) {
+            throw "Preinstalled Node.js is still discoverable; refusing a non-isolated smoke."
+          }
+
+          chatup nodejs -I
+          $managedRuntimeMarker = Join-Path $env:CHATARCH_HOME "nodejs/current.json"
+          if (-not (Test-Path -LiteralPath $managedRuntimeMarker)) {
+            throw "Managed Node.js bootstrap did not create its isolated runtime marker."
+          }
+          $managedRuntime = Get-Content -LiteralPath $managedRuntimeMarker -Raw | ConvertFrom-Json
+          $managedNodeDir = Join-Path $env:CHATARCH_HOME ("nodejs/runtimes/" + $managedRuntime.runtime)
+          if (-not (Test-Path -LiteralPath (Join-Path $managedNodeDir "node.exe"))) {
+            throw "Managed Node executable is missing."
+          }
+          $env:PATH = "$managedNodeDir;$env:CHATARCH_HOME/nodejs/npm;$env:PATH"
+          chatup codex --api-key "ci-placeholder-not-a-secret" --base-url "https://api.openai.com/v1" --model "gpt-5.6-terra" -I
+
+          $codexCommand = Join-Path $env:CHATARCH_HOME "nodejs/npm/codex.cmd"
+          if (-not (Test-Path -LiteralPath $codexCommand)) {
+            throw "Codex npm launcher was not installed in the managed ChatArch npm prefix."
+          }
+          & $codexCommand --version
+
+          @'
+          import json
+          import os
+          from pathlib import Path
+          import tomllib
+
+          codex_home = Path(os.environ["CODEX_HOME"])
+          config = tomllib.loads((codex_home / "config.toml").read_text(encoding="utf-8"))
+          assert config["model_provider"] == "crs"
+          assert config["model"] == "gpt-5.6-terra"
+          assert config["forced_login_method"] == "api"
+          assert "preferred_auth_method" not in config
+          provider = config["model_providers"]["crs"]
+          assert provider["base_url"] == "https://api.openai.com/v1"
+          assert provider["wire_api"] == "responses"
+          assert provider["requires_openai_auth"] is True
+          assert json.loads((codex_home / "auth.json").read_text(encoding="utf-8"))["OPENAI_API_KEY"] == "ci-placeholder-not-a-secret"
+          '@ | python -

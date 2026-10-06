@@ -6,6 +6,7 @@ from pathlib import Path
 import re
 import tempfile
 import click
+import tomlkit
 from dotenv import dotenv_values
 
 from chatenv.configs import OpenAIConfig
@@ -32,7 +33,7 @@ from chatup.utils.platforming import chmod_private
 
 DEFAULT_MODEL = "gpt-5.6-terra"
 DEFAULT_BASE_URL = "https://api.openai.com/v1"
-DEFAULT_AUTH_METHOD = "apikey"
+DEFAULT_FORCED_LOGIN_METHOD = "api"
 _ENV_VAR_REF_RE = re.compile(r"\$(?:\{[^}]+\}|[A-Za-z_][A-Za-z0-9_]*)")
 logger = setup_logger("setup_codex")
 
@@ -54,9 +55,17 @@ def _mask_secret(value):
     return f"{value[:3]}{'*' * (len(value) - 7)}{value[-4:]}"
 
 
+def resolve_codex_home() -> Path:
+    """Return the native Codex configuration root without changing user defaults."""
+    configured_home = os.getenv("CODEX_HOME")
+    if configured_home and configured_home.strip():
+        return Path(configured_home).expanduser()
+    return Path.home() / ".codex"
+
+
 def _load_existing_codex_config(codex_dir):
     existing = {
-        "preferred_auth_method": None,
+        "forced_login_method": None,
         "openai_api_key": None,
         "model": None,
         "base_url": None,
@@ -96,7 +105,7 @@ def _load_existing_codex_config(codex_dir):
                 value = value[1:-1]
             values[(section, key)] = value
 
-        existing["preferred_auth_method"] = values.get((None, "preferred_auth_method"))
+        existing["forced_login_method"] = values.get((None, "forced_login_method"))
         existing["model"] = values.get((None, "model"))
         provider_name = values.get((None, "model_provider"))
         if provider_name:
@@ -185,32 +194,62 @@ def _upsert_toml_section(content: str, section: str | None, values: dict) -> tup
     return "\n".join(output).rstrip() + "\n", changed
 
 
+def _remove_root_toml_keys(content: str, keys: set[str]) -> tuple[str, list[str]]:
+    """Remove only obsolete root-level keys while retaining other TOML tables."""
+    output: list[str] = []
+    removed: list[str] = []
+    section: str | None = None
+    for raw_line in content.splitlines():
+        stripped = raw_line.strip()
+        if stripped.startswith("[") and stripped.endswith("]"):
+            section = stripped[1:-1].strip()
+        elif section is None and "=" in stripped and not stripped.startswith("#"):
+            key = stripped.split("=", 1)[0].strip()
+            if key in keys:
+                removed.append(key)
+                continue
+        output.append(raw_line)
+    return "\n".join(output).rstrip() + "\n", removed
+
+
 def _write_codex_config(config_path: Path, *, model: str, base_url: str) -> list[str]:
     content = config_path.read_text(encoding="utf-8") if config_path.exists() else ""
-    content, changed_root = _upsert_toml_section(
-        content,
-        None,
-        {
-            "model_provider": "crs",
-            "model": model,
-            "preferred_auth_method": DEFAULT_AUTH_METHOD,
-        },
-    )
-    content, changed_provider = _upsert_toml_section(
-        content,
-        "model_providers.crs",
-        {
-            "name": "crs",
-            "base_url": base_url,
-            "wire_api": "responses",
-            "requires_openai_auth": True,
-        },
-    )
-    config_path.parent.mkdir(parents=True, exist_ok=True)
-    config_path.write_text(content, encoding="utf-8")
-    chmod_private(config_path)
+    try:
+        document = tomlkit.parse(content)
+    except tomlkit.exceptions.ParseError:
+        raise click.ClickException("Existing Codex config.toml is invalid; it was not modified.") from None
+    changed = []
+    if "preferred_auth_method" in document:
+        del document["preferred_auth_method"]
+        changed.append("preferred_auth_method")
+    root_values = {
+        "model_provider": "crs",
+        "model": model,
+        "forced_login_method": DEFAULT_FORCED_LOGIN_METHOD,
+    }
+    for key, value in root_values.items():
+        if document.get(key) != value:
+            changed.append(key)
+        document[key] = value
+    providers = document.setdefault("model_providers", tomlkit.table())
+    if not isinstance(providers, (tomlkit.items.Table, tomlkit.items.InlineTable)):
+        raise click.ClickException("Codex model_providers must be a TOML table; config was not modified.")
+    provider = providers.setdefault("crs", tomlkit.table())
+    if not isinstance(provider, (tomlkit.items.Table, tomlkit.items.InlineTable)):
+        raise click.ClickException("Codex model_providers.crs must be a TOML table; config was not modified.")
+    values = {
+        "name": "crs",
+        "base_url": base_url,
+        "wire_api": "responses",
+        "requires_openai_auth": True,
+    }
+    for key, value in values.items():
+        if provider.get(key) != value:
+            changed.append("model_providers.crs." + key)
+        provider[key] = value
+    _write_private_text(config_path, tomlkit.dumps(document))
     logger.info(f"Patched config file: {config_path}")
-    return changed_root + changed_provider
+    return changed
 
 
 def _write_private_text(path: Path, content: str) -> None:
@@ -364,7 +403,7 @@ def setup_codex(
     log_level="INFO",
 ):
     _configure_logger(log_level)
-    codex_dir = Path.home() / ".codex"
+    codex_dir = resolve_codex_home()
     existing = _load_existing_codex_config(codex_dir)
     env_values, typed_env_values = split_config_sources(
         OpenAIConfig,

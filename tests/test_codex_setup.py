@@ -16,6 +16,7 @@ def _write_env(path, values):
 def _set_test_home(monkeypatch, home):
     monkeypatch.setenv("HOME", str(home))
     monkeypatch.setenv("USERPROFILE", str(home))
+    monkeypatch.delenv("CODEX_HOME", raising=False)
 
 
 def test_codex_env_profile_does_not_backfill_missing_key_from_active_or_process_env(
@@ -384,3 +385,70 @@ def test_codex_help_names_the_fallback_model():
     result = CliRunner().invoke(main, ["codex", "--help"])
     assert result.exit_code == 0
     assert "gpt-5.6-terra" in result.output
+
+
+def test_codex_help_names_native_code_home_override():
+    from click.testing import CliRunner
+    from chatup.cli import main
+
+    result = CliRunner().invoke(main, ["codex", "--help"])
+
+    assert result.exit_code == 0
+    assert "CODEX_HOME" in result.output
+
+
+def test_codex_honors_code_home_and_preserves_native_config_and_auth(tmp_path, monkeypatch):
+    import chatup.setup.codex as codex_setup
+    from chatup.utils import platforming
+
+    home = tmp_path / "home"
+    codex_home = tmp_path / "Codex 配置 &;!"
+    config_path = codex_home / "config.toml"
+    auth_path = codex_home / "auth.json"
+    config_path.parent.mkdir(parents=True)
+    config_path.write_text(
+        '# keep this user setting\napproval_policy = "untrusted"\n'
+        'preferred_auth_method = "apikey"\n'
+        'forced_login_method = "chatgpt"\n\n'
+        "[features]\nweb_search_request = true\n",
+        encoding="utf-8",
+    )
+    auth_path.write_text(
+        json.dumps(
+            {
+                "tokens": {"account_id": "existing-test-account"},
+                "OPENAI_API_KEY": "old-test-key",
+            }
+        ),
+        encoding="utf-8",
+    )
+    _set_test_home(monkeypatch, home)
+    monkeypatch.setenv("CODEX_HOME", str(codex_home))
+    monkeypatch.setattr(platforming, "WINDOWS", True)
+    monkeypatch.setattr(codex_setup, "ensure_nodejs_requirement", lambda **kwargs: None)
+    monkeypatch.setattr(
+        codex_setup, "should_install_global_npm_package", lambda *args, **kwargs: False
+    )
+
+    codex_setup.setup_codex(
+        api_key="new-test-key",
+        base_url="https://example.invalid/openai/v1",
+        model="test-model",
+        interactive=False,
+    )
+
+    config_text = config_path.read_text(encoding="utf-8")
+    root_text = config_text.split("[", 1)[0]
+    assert 'approval_policy = "untrusted"' in config_text
+    assert "[features]" in config_text
+    assert 'model_provider = "crs"' in root_text
+    assert 'model = "test-model"' in root_text
+    assert 'forced_login_method = "api"' in root_text
+    assert "preferred_auth_method" not in root_text
+    assert "[model_providers.crs]" in config_text
+    assert "requires_openai_auth = true" in config_text
+    assert "[desktop." not in config_text
+    auth_data = json.loads(auth_path.read_text(encoding="utf-8"))
+    assert auth_data["tokens"] == {"account_id": "existing-test-account"}
+    assert auth_data["OPENAI_API_KEY"] == "new-test-key"
+    assert not (home / ".codex" / "config.toml").exists()

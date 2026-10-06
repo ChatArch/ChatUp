@@ -11,7 +11,7 @@ chatup
 |-- doctor      # 检查 ChatUp 是否可调用
 |-- uv          # 安装 uv，并创建默认 ChatArch Python 运行环境
 |-- workspace   # 初始化 ChatArch workspace scaffold
-|-- nodejs      # 安装 nvm 和默认 LTS Node.js
+|-- nodejs      # 安装默认 LTS Node.js（POSIX 用 nvm，Windows 用 ChatArch 便携 ZIP）
 |-- docker      # 检查 Docker 环境，并提示 sudo 配置
 |-- zsh         # 配置 zsh / oh-my-zsh / 插件 / alias
 |-- chrome              # 按当前系统安装普通 Google Chrome
@@ -32,7 +32,7 @@ chatup
 |-- cc-connect  # 安装 CC Connect CLI 和运行依赖
 |-- claude      # 配置 Claude Code CLI 和配置文件
 |-- chatgpt      # 安装新版 ChatGPT 桌面应用（含 Codex）
-|-- codex       # 配置 Codex CLI 和配置文件
+|-- codex       # 配置 Codex CLI 和配置文件（设置时使用 CODEX_HOME）
 |-- opencode    # 配置 OpenCode CLI 和配置文件
 |-- hermes      # 安装 Hermes Agent 和可选 WebUI
 `-- lark-cli    # 配置官方 lark-cli，并复用 ChatEnv 飞书配置
@@ -65,7 +65,7 @@ chatup
 ```text
 chatup doctor              # 检查 CLI 当前是否可调用
 chatup uv                  # 安装/复用 uv，创建 ~/.chatarch/venv
-chatup nodejs              # 安装 nvm 和默认 LTS Node.js
+chatup nodejs              # 安装默认 LTS Node.js（POSIX 用 nvm，Windows 用 ChatArch 便携 ZIP）
 chatup docker              # 检查 Docker daemon 和当前用户权限
 chatup zsh                 # 配置 zsh / oh-my-zsh / 插件 / alias
 chatup chrome-for-testing  # 管理 versioned Google Chrome for Testing 浏览器
@@ -74,7 +74,7 @@ chatup playwright          # 管理 Playwright package 与 Chromium browser
 chatup frp                 # 安装 FRP Client/Server
 ```
 
-这些命令只承诺把 ChatArch 常用基础依赖准备好；它们不是通用系统包管理器，也不替代发行版的软件源策略。`chatup chrome-for-testing` 提供机器可读浏览器 descriptor，供 ChatPost 等扩展/CDP 消费方复用；`chatup chromedriver` 为 WebDriver 消费方独立提供 driver descriptor。`chatup playwright` 则固定 Playwright package、browser revision/version 和 executable path。Profile、账号和 Cookie 始终由消费方管理。
+这些命令只承诺把 ChatArch 常用基础依赖准备好；它们不是通用系统包管理器，也不替代发行版的软件源策略。Windows 上，`chatup nodejs` 优先回读当前 PATH 中合格的 Node/npm；否则会把经 Node.js 官方 SHA-256 清单校验的便携 LTS ZIP 安装到 `$CHATARCH_HOME/nodejs`，并通过检测到的 `node.exe` 与 `npm-cli.js` 的 argv 列表运行 npm。由该受管 runtime 全局安装的 npm 包放在 `$CHATARCH_HOME/nodejs/npm`，不会写入系统 npm prefix 或系统 PATH。`chatup chrome-for-testing` 提供机器可读浏览器 descriptor，供 ChatPost 等扩展/CDP 消费方复用；`chatup chromedriver` 为 WebDriver 消费方独立提供 driver descriptor。`chatup playwright` 则固定 Playwright package、browser revision/version 和 executable path。Profile、账号和 Cookie 始终由消费方管理。
 
 ## 本地服务安装
 
@@ -112,7 +112,7 @@ chatup crs                 # 准备本地 CRS、Redis、secret、admin SPA 和 s
 
 ```text
 chatup claude              # 配置 Claude Code CLI 和配置文件
-chatup codex               # 配置 Codex CLI 和配置文件
+chatup codex               # 配置 Codex CLI 和配置文件（设置时使用 CODEX_HOME）
 chatup opencode            # 配置 OpenCode CLI 和配置文件
 chatup hermes              # 安装 Hermes Agent 和可选 WebUI
 chatup cc-connect          # 安装 CC Connect CLI 和运行依赖

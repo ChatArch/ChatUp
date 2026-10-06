@@ -11,7 +11,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from chatup.setup.nodejs import MIN_NODEJS_MAJOR, _detect_nodejs_runtime
+from chatup.setup.nodejs import (
+    MIN_NODEJS_MAJOR,
+    _detect_nodejs_runtime,
+    node_runtime_env,
+    npm_command_for_runtime,
+)
 
 from ._managed_artifact import (
     ManagedArtifactError,
@@ -133,9 +138,7 @@ def _resolve_node_runtime(runtime_resolver: RuntimeResolver) -> dict[str, Any]:
 
 
 def _command_env(runtime: dict[str, Any], browsers_dir: Path) -> dict[str, str]:
-    env = dict(os.environ)
-    node_bin = Path(str(runtime["node_bin"]))
-    env["PATH"] = str(node_bin.parent) + os.pathsep + env.get("PATH", "")
+    env = node_runtime_env(runtime)
     env["PLAYWRIGHT_BROWSERS_PATH"] = str(browsers_dir)
     env["PLAYWRIGHT_SKIP_BROWSER_GC"] = "1"
     return env
@@ -168,16 +171,18 @@ def _install_with_npm(
     env = _command_env(runtime, browsers_dir)
 
     npm_result = runner(
-        [
-            str(runtime["npm_bin"]),
-            "install",
-            "--prefix",
-            str(package_dir),
-            "--ignore-scripts",
-            "--no-audit",
-            "--no-fund",
-            f"playwright@{version}",
-        ],
+        npm_command_for_runtime(
+            runtime,
+            [
+                "install",
+                "--prefix",
+                str(package_dir),
+                "--ignore-scripts",
+                "--no-audit",
+                "--no-fund",
+                f"playwright@{version}",
+            ],
+        ),
         cwd=staging_dir,
         env=env,
         timeout=600,

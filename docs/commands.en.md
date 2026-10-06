@@ -11,7 +11,7 @@ chatup
 |-- doctor      # Check that ChatUp is callable
 |-- uv          # Install uv and create the default ChatArch Python runtime
 |-- workspace   # Initialize the ChatArch workspace scaffold
-|-- nodejs      # Install nvm and the default LTS Node.js
+|-- nodejs      # Install default LTS Node.js (nvm on POSIX; ChatArch portable ZIP on Windows)
 |-- docker      # Check Docker and show sudo guidance when needed
 |-- zsh         # Configure zsh / oh-my-zsh / plugins / aliases
 |-- chrome              # Install regular Google Chrome for the current OS
@@ -33,7 +33,7 @@ chatup
 |-- cc-connect  # Install CC Connect CLI and runtime dependencies
 |-- claude      # Configure Claude Code CLI and config files
 |-- chatgpt      # Install the new ChatGPT desktop app (includes Codex)
-|-- codex       # Configure Codex CLI and config files
+|-- codex       # Configure Codex CLI and config files (uses CODEX_HOME when set)
 |-- cursor-agent # Configure Cursor Agent CLI auth and config files
 |-- opencode    # Configure OpenCode CLI and config files
 |-- hermes      # Install Hermes Agent and optional WebUI
@@ -65,7 +65,7 @@ chatup
 ## Windows Compatibility
 
 - `chatup uv` uses the official PowerShell installer on Windows and prints the `Scripts/Activate.ps1` activation hint.
-- `chatup nodejs` reuses `node`/`npm` already on PATH on Windows instead of writing nvm shell init; when missing, it points users to the official installer, winget, or nvm-windows.
+- `chatup nodejs` first reads `node`/`npm` from the current Windows PATH. If they are missing or too old, it downloads the official Node.js LTS portable ZIP, verifies it against the official `SHASUMS256.txt` SHA-256, and safely extracts it under `$CHATARCH_HOME/nodejs`. It does not write nvm shell init or alter system Node/PATH; npm children use the detected `node.exe` and `npm-cli.js` argv list, preserving paths with spaces, Unicode, and shell metacharacters. Global npm packages installed with the managed runtime stay in `$CHATARCH_HOME/nodejs/npm`, which is added only to the child PATH.
 - `chatup docker` checks Docker Desktop's `docker`/`docker compose` on Windows and skips Unix group/systemd checks.
 - `chatup mysql` selects the MySQL Windows ZIP asset, `.exe` binary names, and TCP client config; `gitea`/`mysql`/`twikoo`/`nginx` `--service` flows still require user-level systemd and fail clearly on Windows.
 - `chatup cursor-agent --credential-store file-wrapper` writes `.cmd` wrappers on Windows; `chatup frp` supports Windows ZIP release assets; `zsh` and `crs` remain POSIX/Linux-only setup flows.
@@ -76,7 +76,7 @@ chatup
 |---|---|
 | `chatup doctor` | Check that ChatUp is callable. |
 | `chatup uv` | Install `uv` and create the ChatArch Python runtime; `--activate / --no-activate` controls existing Bash/Zsh startup updates (enabled by default). See [Quick Start](quickstart.md). |
-| `chatup nodejs` | Install nvm and the default LTS Node.js. |
+| `chatup nodejs` | Install default LTS Node.js with nvm on POSIX; on Windows reuse a suitable PATH runtime or bootstrap an official SHA-256-verified portable LTS ZIP under ChatArch home. |
 | `chatup docker` | Check the Docker environment and show sudo guidance when needed. |
 | `chatup zsh` | Configure zsh, oh-my-zsh, plugins, theme, and shell aliases. |
 | `chatup chrome-for-testing` | Independently manage Google Chrome for Testing browsers and JSON/Python descriptors. |
@@ -89,7 +89,7 @@ chatup
 | Command | Current capability |
 |---|---|
 | `chatup claude` | Configure Claude Code CLI and config files. |
-| `chatup codex` | Configure Codex CLI and config files. |
+| `chatup codex` | Configure Codex CLI and config files, using `CODEX_HOME` when it is set. |
 | `chatup cursor-agent` | Install/verify Cursor Agent CLI and safely copy `auth.json`, `cli-config.json`, and `agent-cli-state.json`. |
 | `chatup opencode` | Configure OpenCode CLI and config files. |
 | `chatup hermes` | Install Hermes Agent and optional Hermes WebUI; fall back to `gpt-5.6-terra` only when no model is configured. Explicit models, profiles, existing config and environment values retain precedence. |
@@ -216,7 +216,7 @@ Sources: [OpenAI downloads](https://chatgpt.com/download/), [official Windows in
 
 ## Codex Command Contract
 
-`chatup codex` configures the OpenAI Codex CLI (`~/.codex/config.toml` and `~/.codex/auth.json`):
+`chatup codex` configures the OpenAI Codex CLI (by default `~/.codex/config.toml` and `~/.codex/auth.json`; use the native `CODEX_HOME` override when it is set):
 
 The fallback model is `gpt-5.6-terra` (GPT-5.6 Terra), used only when no model is configured. An explicit `--model`, the selected OpenAI profile, and (when no profile is selected) existing Codex config, process environment and the active profile retain their existing precedence. User-configured models are not forcibly replaced by the fallback.
 
@@ -224,6 +224,7 @@ The fallback model is `gpt-5.6-terra` (GPT-5.6 Terra), used only when no model i
 - When `-e PROFILE` selects a ChatEnv profile, ChatUp reads only that explicit profile. It does not backfill missing secrets from the active profile, an existing Codex config, or process environment variables. Profile files are loaded without interpolation; unresolved `${...}` references fail instead of falling back to the process environment.
 - ChatEnv profile names cannot contain path separators, `.` or `..`; pass an existing file path when file-based config is intended.
 - If the selected profile lacks `OPENAI_API_KEY`, non-interactive setup fails instead of writing a different account's key.
+- Model, provider, and API login mode are written as root-level `model`, `model_provider`, and `forced_login_method = "api"` fields in `config.toml`; provider details live in `[model_providers.crs]` (including `requires_openai_auth = true`). The obsolete root-level `preferred_auth_method` is replaced. Only the root-level `OPENAI_API_KEY` in `auth.json` is updated. Other existing config tables and auth JSON fields are retained; ChatUp neither migrates nor prints login credentials.
 - Codex CLI 0.144+ requires `wire_api = "responses"`; `chatup codex` writes the CRS/OpenAI-compatible provider with the responses wire API.
 - Verify a model channel through Codex itself, for example `chatup codex -e apple -I` followed by `codex exec ...`; direct curl success is not enough for Codex routing.
 

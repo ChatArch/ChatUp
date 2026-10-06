@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Added
+- Add a bounded Windows-native GitHub Actions smoke job for the official Node.js LTS ZIP bootstrap and Codex npm/configuration path, using isolated HOME, USERPROFILE, CHATARCH_HOME, and CODEX_HOME values plus a non-secret placeholder.
+
+### Fixed
+- Make `chatup nodejs` bootstrap an official SHA-256-verified portable Node.js LTS ZIP under ChatArch home on Windows when PATH has no suitable runtime. Extraction is bounded and rejects unsafe archive paths; repeated setup reuses the managed runtime.
+- Run Windows npm operations through the detected `node.exe` and `npm-cli.js` with argv lists and a runtime-prepended child PATH, including the Playwright installer, instead of executing npm `.cmd` launchers directly. Packages installed globally through a ChatArch-managed runtime use the contained `$CHATARCH_HOME/nodejs/npm` prefix.
+- Make `chatup codex` honor `CODEX_HOME` and preserve unrelated native Codex config/auth fields while updating supported root-level `model`, `model_provider`, and `forced_login_method = "api"` settings.
+
 ## 0.2.21
 
 ### Added

@@ -14,6 +14,7 @@ dependencies = [
     "chatstyle[tui]>=0.2.0,<0.3.0",
     "chatenv>=0.2.11,<0.3.0",
     "python-dotenv>=1.0,<2.0",
+    "tomlkit>=0.13,<1.0",
     "colorama",
 ]
 authors = [{name = "rexwzh", email = "1073853456@qq.com"}]

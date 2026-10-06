@@ -11,7 +11,7 @@ chatup
 |-- doctor      # Check that ChatUp is callable
 |-- uv          # Install uv and create the default ChatArch Python runtime
 |-- workspace   # Initialize the ChatArch workspace scaffold
-|-- nodejs      # Install nvm and the default LTS Node.js
+|-- nodejs      # Install default LTS Node.js (nvm on POSIX; ChatArch portable ZIP on Windows)
 |-- docker      # Check Docker and show sudo guidance when needed
 |-- zsh         # Configure zsh / oh-my-zsh / plugins / aliases
 |-- chrome              # Install regular Google Chrome for the current OS
@@ -30,7 +30,7 @@ chatup
 |-- cc-connect  # Install CC Connect CLI and runtime dependencies
 |-- claude      # Configure Claude Code CLI and config files
 |-- chatgpt     # Install the new ChatGPT desktop app (includes Codex)
-|-- codex       # Configure Codex CLI and config files
+|-- codex       # Configure Codex CLI and config files (uses CODEX_HOME when set)
 |-- opencode    # Configure OpenCode CLI and config files
 |-- hermes      # Install Hermes Agent and optional WebUI
 `-- lark-cli    # Configure official lark-cli with ChatEnv Feishu config
@@ -63,7 +63,7 @@ chatup
 ```text
 chatup doctor              # Check that the CLI is callable
 chatup uv                  # Install/reuse uv and create ~/.chatarch/venv
-chatup nodejs              # Install nvm and the default LTS Node.js
+chatup nodejs              # Install default LTS Node.js (nvm on POSIX; ChatArch portable ZIP on Windows)
 chatup docker              # Check Docker daemon and current-user permissions
 chatup zsh                 # Configure zsh / oh-my-zsh / plugins / aliases
 chatup chrome-for-testing  # Manage versioned Google Chrome for Testing browsers
@@ -72,7 +72,7 @@ chatup playwright          # Manage Playwright packages and Chromium browsers
 chatup frp                 # Install FRP Client/Server
 ```
 
-These commands only prepare the dependencies ChatArch commonly needs. They are not a general-purpose OS package-management layer. `chatup chrome-for-testing` exposes a machine-readable browser descriptor for extension/CDP consumers such as ChatPost; `chatup chromedriver` exposes an independent driver descriptor for WebDriver consumers. `chatup playwright` pins the Playwright package, browser revision/version, and executable path. Profiles, accounts, and cookies remain consumer-owned.
+These commands only prepare the dependencies ChatArch commonly needs. They are not a general-purpose OS package-management layer. On Windows, `chatup nodejs` first reads a suitable Node/npm runtime from the current PATH; otherwise it installs an official Node.js LTS portable ZIP verified against the official SHA-256 manifest under `$CHATARCH_HOME/nodejs`, and npm runs through the detected `node.exe` and `npm-cli.js` argv list. Global packages installed through that managed runtime use `$CHATARCH_HOME/nodejs/npm`, not a system npm prefix or system PATH. `chatup chrome-for-testing` exposes a machine-readable browser descriptor for extension/CDP consumers such as ChatPost; `chatup chromedriver` exposes an independent driver descriptor for WebDriver consumers. `chatup playwright` pins the Playwright package, browser revision/version, and executable path. Profiles, accounts, and cookies remain consumer-owned.
 
 ## Local Services
 
@@ -106,7 +106,7 @@ Local-service commands use user-level layouts by default:
 
 ```text
 chatup claude              # Configure Claude Code CLI and config files
-chatup codex               # Configure Codex CLI and config files
+chatup codex               # Configure Codex CLI and config files (uses CODEX_HOME when set)
 chatup opencode            # Configure OpenCode CLI and config files
 chatup hermes              # Install Hermes Agent and optional WebUI
 chatup cc-connect          # Install CC Connect CLI and runtime dependencies

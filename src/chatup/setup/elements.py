@@ -1230,7 +1230,7 @@ SETUP_COMMAND_ELEMENTS = (
     ),
     SetupCommandElement(
         name="nodejs",
-        help="Install nvm and Node.js (default LTS).",
+        help="Install default LTS Node.js (nvm on POSIX; ChatArch portable ZIP on Windows).",
         callback=nodejs_setup,
         options=(
             LOG_LEVEL_OPTION,
@@ -1299,7 +1299,7 @@ SETUP_COMMAND_ELEMENTS = (
     ),
     SetupCommandElement(
         name="codex",
-        help="Configure Codex CLI and config files.",
+        help="Configure Codex CLI and config files (uses CODEX_HOME when set).",
         callback=codex_setup,
         options=(
             LOG_LEVEL_OPTION,

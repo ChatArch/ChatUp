@@ -11,7 +11,7 @@ chatup
 |-- doctor      # 检查 ChatUp 是否可调用
 |-- uv          # 安装 uv，并创建默认 ChatArch Python 运行环境
 |-- workspace   # 初始化 ChatArch workspace scaffold
-|-- nodejs      # 安装 nvm 和默认 LTS Node.js
+|-- nodejs      # 安装默认 LTS Node.js（POSIX 使用 nvm，Windows 使用 ChatArch 便携 ZIP）
 |-- docker      # 检查 Docker 环境，并提示 sudo 配置
 |-- zsh         # 配置 zsh / oh-my-zsh / 插件 / alias
 |-- chrome              # 按当前系统安装普通 Google Chrome
@@ -33,7 +33,7 @@ chatup
 |-- cc-connect  # 安装 CC Connect CLI 和运行依赖
 |-- claude      # 配置 Claude Code CLI 和配置文件
 |-- chatgpt      # 安装新版 ChatGPT 桌面应用（含 Codex）
-|-- codex       # 配置 Codex CLI 和配置文件
+|-- codex       # 配置 Codex CLI 和配置文件（设置时使用 CODEX_HOME）
 |-- cursor-agent # 配置 Cursor Agent CLI 登录态和配置文件
 |-- opencode    # 配置 OpenCode CLI 和配置文件
 |-- hermes      # 安装 Hermes Agent 和可选 WebUI
@@ -65,7 +65,7 @@ chatup
 ## Windows 兼容性
 
 - `chatup uv` 在 Windows 使用官方 PowerShell installer，并输出 `Scripts/Activate.ps1` 激活提示。
-- `chatup nodejs` 在 Windows 复用 PATH 中已有的 `node`/`npm`，不会写入 nvm shell init；如缺失会提示通过官方安装器、winget 或 nvm-windows 安装。
+- `chatup nodejs` 先在 Windows 的当前 PATH 中回读 `node`/`npm`；缺失或版本不足时，会从 Node.js 官方 LTS release 下载便携 ZIP，并以官方 `SHASUMS256.txt` 的 SHA-256 校验后安全解压到 `$CHATARCH_HOME/nodejs`。它不写 nvm shell init、不改系统 Node/PATH；npm 子进程通过检测到的 `node.exe` 与 `npm-cli.js` 的 argv 列表执行，可保留空格、Unicode 和 shell 元字符路径。由受管 runtime 执行的 npm 全局安装固定在 `$CHATARCH_HOME/nodejs/npm`，并仅对该子进程加入 PATH。
 - `chatup docker` 在 Windows 检查 Docker Desktop 提供的 `docker`/`docker compose`，跳过 Unix group 和 systemd 检查。
 - `chatup mysql` 会选择 MySQL Windows ZIP asset、`.exe` 二进制名和 TCP client config；`gitea`/`mysql`/`twikoo`/`nginx` 的 `--service` 仍依赖 user-level systemd，在 Windows 会给出明确错误。
 - `chatup cursor-agent --credential-store file-wrapper` 在 Windows 写 `.cmd` wrapper；`chatup frp` 支持 Windows ZIP release asset；`zsh` 和 `crs` 仍属于 POSIX/Linux-only setup。
@@ -76,7 +76,7 @@ chatup
 |---|---|
 | `chatup doctor` | 检查 ChatUp 是否可调用。 |
 | `chatup uv` | 安装 `uv` 并创建 ChatArch Python 运行环境；`--activate / --no-activate` 控制已有 Bash/Zsh 启动配置更新，默认开启。见[快速开始](quickstart.md)。 |
-| `chatup nodejs` | 安装 nvm 和默认 LTS Node.js。 |
+| `chatup nodejs` | POSIX 使用 nvm 安装默认 LTS Node.js；Windows 复用合格 PATH runtime，或在 ChatArch home 内 bootstrap 经官方 SHA-256 校验的便携 LTS ZIP。 |
 | `chatup docker` | 检查 Docker 环境，并在需要时给出 sudo 相关建议。 |
 | `chatup zsh` | 配置 zsh、oh-my-zsh、插件、主题和 shell alias。 |
 | `chatup chrome-for-testing` | 独立管理 Google Chrome for Testing 浏览器及其 JSON/Python descriptor。 |
@@ -89,7 +89,7 @@ chatup
 | 命令 | 当前能力 |
 |---|---|
 | `chatup claude` | 配置 Claude Code CLI 和配置文件。 |
-| `chatup codex` | 配置 Codex CLI 和配置文件。 |
+| `chatup codex` | 配置 Codex CLI 和配置文件；设置时使用 `CODEX_HOME`。 |
 | `chatup cursor-agent` | 安装/验证 Cursor Agent CLI，并安全复制 `auth.json`、`cli-config.json` 和 `agent-cli-state.json`。 |
 | `chatup opencode` | 配置 OpenCode CLI 和配置文件。 |
 | `chatup hermes` | 安装 Hermes Agent 和可选 Hermes WebUI；未配置模型时兜底为 `gpt-5.6-terra`，显式模型、profile、已有配置和环境值仍优先。 |
@@ -216,7 +216,7 @@ result = setup_chatgpt(dry_run=True)
 
 ## Codex 命令约定
 
-`chatup codex` 配置 OpenAI Codex CLI（`~/.codex/config.toml` 与 `~/.codex/auth.json`）：
+`chatup codex` 配置 OpenAI Codex CLI（默认 `~/.codex/config.toml` 与 `~/.codex/auth.json`；设置 `CODEX_HOME` 时使用该原生配置目录）：
 
 默认模型为 `gpt-5.6-terra`（GPT-5.6 Terra），仅在没有可用的模型配置时兜底。显式 `--model`、所选 OpenAI profile，以及未显式选择 profile 时的已有 Codex 配置、进程环境和 active profile 仍按原优先级生效；不会把用户已配置的模型强制覆盖成默认值。
 
@@ -224,6 +224,7 @@ result = setup_chatgpt(dry_run=True)
 - 当 `-e PROFILE` 选择 ChatEnv profile 时，ChatUp 只读取这个显式 profile，不会从 active profile、既有 Codex 配置或进程环境变量回填缺失的 secret；profile 文件按无插值方式读取，包含 `${...}` 这类未解析变量会失败而不会回填进程环境。
 - ChatEnv profile 名不能包含路径分隔符、`.` 或 `..`；如果要传文件路径，该路径必须真实存在。
 - 如果显式 profile 缺少 `OPENAI_API_KEY`，非交互 setup 会失败，不会把另一个账号的 key 写进 Codex。
+- 模型、provider 与 API 登录方式写入 `config.toml` 的 root-level `model`、`model_provider`、`forced_login_method = "api"`，provider 细节写入 `[model_providers.crs]`（包括 `requires_openai_auth = true`）；旧的 root-level `preferred_auth_method` 会被替换。API key 只更新 `auth.json` 的 root-level `OPENAI_API_KEY`。既有的其他配置表和认证 JSON 字段会保留，不会迁移或打印登录凭据。
 - Codex CLI 0.144+ 要求 `wire_api = "responses"`；`chatup codex` 写出的 CRS/OpenAI-compatible provider 使用 responses wire API。
 - 模型渠道要通过 Codex 本身验证，例如先 `chatup codex -e apple -I`，再 `codex exec ...`；只 curl API 成功不等于 Codex 路由可用。
 
