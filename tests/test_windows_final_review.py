@@ -101,7 +101,7 @@ def test_ci_checks_launcher_identity_not_just_a_same_name_command(tool):
     from pathlib import Path
     workflow = (Path(__file__).resolve().parents[1] / '.github/workflows/ci.yml').read_text()
     job = workflow.split('windows-node-codex-smoke:', 1)[1]
-    assert f'(Get-Command {tool} -CommandType Application).Source' in job
+    assert f'Get-Command {tool} -CommandType Application | Select-Object -First 1' in job
 
 
 def test_ci_launcher_identity_compares_files_not_path_spellings():

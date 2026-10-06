@@ -141,7 +141,7 @@ jobs:
           if (-not (Test-Path -LiteralPath $codexCommand)) {
             throw "Codex npm launcher was not installed in the managed ChatArch npm prefix."
           }
-          $resolvedCodex = (Get-Command codex -CommandType Application).Source
+          $resolvedCodex = (Get-Command codex -CommandType Application | Select-Object -First 1).Source
           Write-Output "Resolved Codex: $resolvedCodex; expected managed launcher: $codexCommand"
           python -c "import os,sys; assert os.path.samefile(*sys.argv[1:3]), ('Different Codex installation', sys.argv[1:3])" "$resolvedCodex" "$codexCommand"
           codex --version
@@ -172,7 +172,7 @@ jobs:
             throw "OpenCode npm launcher was not installed in the managed ChatArch npm prefix."
           }
           RefreshEnvironmentPath
-          $resolvedOpenCode = (Get-Command opencode -CommandType Application).Source
+          $resolvedOpenCode = (Get-Command opencode -CommandType Application | Select-Object -First 1).Source
           Write-Output "Resolved OpenCode: $resolvedOpenCode; expected managed launcher: $opencodeCommand"
           python -c "import os,sys; assert os.path.samefile(*sys.argv[1:3]), ('Different OpenCode installation', sys.argv[1:3])" "$resolvedOpenCode" "$opencodeCommand"
           opencode --version
