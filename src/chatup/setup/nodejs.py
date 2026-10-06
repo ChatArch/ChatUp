@@ -4,6 +4,7 @@ from collections import deque
 import hashlib
 from importlib import resources
 import json
+import ntpath
 import os
 from pathlib import Path, PurePosixPath
 import platform
@@ -667,6 +668,62 @@ def node_runtime_env(runtime, env=None) -> dict[str, str]:
     return merged
 
 
+def _windows_path_entry_key(path: str) -> str:
+    return ntpath.normcase(ntpath.normpath(path))
+
+
+def ensure_windows_user_path(runtime) -> str | None:
+    """Persist the managed Node and npm launcher directories for this user only."""
+    if not is_windows() or runtime.get("source") != "chatarch":
+        return None
+
+    node_bin = runtime.get("node_bin")
+    if not node_bin:
+        raise click.ClickException("Managed Node.js runtime does not provide node.exe.")
+    entries = [str(Path(str(node_bin)).expanduser().resolve().parent), str(_windows_node_home() / "npm")]
+    if any(";" in entry for entry in entries):
+        raise click.ClickException(
+            "Managed Node.js directory contains the Windows PATH separator ';'. "
+            "Choose a ChatArch home/runtime path without semicolons."
+        )
+
+    import winreg
+
+    key = winreg.OpenKey(
+        winreg.HKEY_CURRENT_USER, "Environment", 0, winreg.KEY_READ | winreg.KEY_WRITE
+    )
+    try:
+        try:
+            existing, value_type = winreg.QueryValueEx(key, "Path")
+        except FileNotFoundError:
+            existing, value_type = "", winreg.REG_EXPAND_SZ
+        existing_items = [item for item in str(existing).split(";") if item]
+        entry_keys = {_windows_path_entry_key(entry) for entry in entries}
+        preserved = [
+            item for item in existing_items if _windows_path_entry_key(item) not in entry_keys
+        ]
+        updated = ";".join([*entries, *preserved])
+        winreg.SetValueEx(key, "Path", 0, value_type, updated)
+        readback, _ = winreg.QueryValueEx(key, "Path")
+    finally:
+        winreg.CloseKey(key)
+    readback_items = [item for item in str(readback).split(";") if item]
+    readback_keys = {_windows_path_entry_key(item) for item in readback_items}
+    if not all(_windows_path_entry_key(entry) in readback_keys for entry in entries):
+        raise click.ClickException("Could not persist managed Node.js paths in the current-user PATH.")
+    os.environ["PATH"] = str(readback)
+    return str(readback)
+
+
+def managed_npm_launcher(runtime, name: str) -> Path | None:
+    """Return a managed Windows global npm launcher without consulting stale PATH."""
+    if not is_windows() or runtime.get("source") != "chatarch":
+        return None
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", name):
+        raise click.ClickException(f"Unsupported npm launcher name: {name}")
+    return _windows_node_home() / "npm" / f"{name}.cmd"
+
+
 def run_npm_command(args, cwd=None, env=None):
     quoted_args = " ".join(shlex.quote(str(arg)) for arg in args)
     click.echo(f"Running: npm {quoted_args}")
@@ -836,6 +893,7 @@ def setup_nodejs(interactive=None, log_level="INFO"):
             click.echo(f"Node.js already installed: {runtime['node_version']}")
             click.echo(f"npm already installed: {runtime['npm_version']}")
             if runtime.get("source") == "chatarch":
+                ensure_windows_user_path(runtime)
                 click.echo("ChatUp reuses ChatArch-managed node/npm on Windows.")
             else:
                 click.echo("ChatUp reuses node/npm from PATH on Windows.")
@@ -848,6 +906,7 @@ def setup_nodejs(interactive=None, log_level="INFO"):
             raise click.ClickException(
                 f"Managed Node.js runtime does not satisfy Node.js >= {MIN_NODEJS_MAJOR}."
             )
+        ensure_windows_user_path(runtime)
         click.echo(f"ChatArch-managed Node.js ready: {runtime['node_version']}")
         click.echo(f"npm ready: {runtime['npm_version']}")
         click.echo("ChatUp will use this runtime for npm-backed setup commands in this process.")

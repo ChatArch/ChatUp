@@ -77,6 +77,100 @@ def test_uv_windows_installer_uses_powershell(monkeypatch):
     )
 
 
+def test_cursor_agent_windows_installer_uses_official_powershell_and_rediscovers_localappdata(monkeypatch, tmp_path):
+    import chatup.setup.cursor_agent as cursor_setup
+
+    local_app_data = tmp_path / "Local App Data"
+    installed = local_app_data / "cursor-agent" / "cursor-agent.cmd"
+    commands = []
+
+    monkeypatch.setattr(platforming, "WINDOWS", True)
+    monkeypatch.setattr(cursor_setup, "is_windows", lambda: True)
+    monkeypatch.setenv("LOCALAPPDATA", str(local_app_data))
+    monkeypatch.setenv("PATH", "")
+    monkeypatch.setattr(cursor_setup.shutil, "which", lambda _: None)
+
+    def fake_run(command, **kwargs):
+        commands.append((command, kwargs))
+        installed.parent.mkdir(parents=True, exist_ok=True)
+        installed.write_text("@echo off\r\n", encoding="utf-8")
+        return subprocess.CompletedProcess(command, 0, "", "")
+
+    monkeypatch.setattr(cursor_setup.subprocess, "run", fake_run)
+
+    assert cursor_setup._install_cursor_agent_if_needed() is True
+    assert cursor_setup._resolve_cursor_agent_binary() == str(installed)
+    assert commands == [
+        ([
+            "powershell", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
+            "-Command", "irm 'https://cursor.com/install?win32=true' | iex",
+        ], {"text": True, "capture_output": True, "timeout": 300}),
+    ]
+
+
+def test_hermes_windows_installer_reads_resolved_paths_before_noninteractive_install(monkeypatch, tmp_path):
+    from chatup.setup import hermes as hermes_setup
+
+    installer = tmp_path / "installer.ps1"
+    installer.write_text("# inert fixture", encoding="utf-8")
+    home = tmp_path / "ChatArch Home"
+    commands = []
+    monkeypatch.setattr(platforming, "WINDOWS", True)
+    monkeypatch.setattr(hermes_setup, "is_windows", lambda: True)
+
+    def fake_run(command, **kwargs):
+        commands.append((command, kwargs))
+        return subprocess.CompletedProcess(
+            command, 0,
+            json.dumps({"hermes_home": str(home), "install_dir": str(home / "hermes-agent")}),
+            "",
+        )
+
+    monkeypatch.setattr(hermes_setup.subprocess, "run", fake_run)
+    hermes_setup._run_installer(installer, home)
+
+    base = [
+        "powershell", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", str(installer),
+        "-NonInteractive", "-HermesHome", str(home), "-InstallDir", str(home / "hermes-agent"),
+    ]
+    assert commands == [
+        (base + ["-ShowResolvedPaths"], {"env": {**os.environ, "HERMES_HOME": str(home)}, "text": True, "capture_output": True}),
+        (base, {"env": {**os.environ, "HERMES_HOME": str(home)}, "text": True}),
+    ]
+
+
+def test_hermes_windows_downloads_fork_installer_when_no_cached_or_packaged_asset(monkeypatch, tmp_path):
+    from chatup.setup import hermes as hermes_setup
+
+    downloaded = tmp_path / "chatarch" / "cache" / "chatup" / "hermes" / "install.ps1"
+    monkeypatch.setattr(platforming, "WINDOWS", True)
+    monkeypatch.setattr(hermes_setup, "is_windows", lambda: True)
+    monkeypatch.setattr(hermes_setup, "_cache_installer_path", lambda: downloaded)
+    monkeypatch.setattr(hermes_setup, "_packaged_installer_path", lambda: tmp_path / "missing.ps1")
+    calls = []
+
+    def fake_download():
+        calls.append(True)
+        downloaded.parent.mkdir(parents=True)
+        downloaded.write_text("# fixture", encoding="utf-8")
+        return downloaded
+
+    monkeypatch.setattr(hermes_setup, "_download_installer", fake_download)
+    assert hermes_setup._resolve_installer(None, False) == downloaded
+    assert calls == [True]
+
+
+def test_frp_windows_arch_aliases_use_official_asset_names(monkeypatch):
+    import chatup.setup.frp as frp_setup
+
+    monkeypatch.setattr(frp_setup.platform, "machine", lambda: "AMD64")
+    assert frp_setup.get_system_arch() == "amd64"
+    monkeypatch.setattr(frp_setup.platform, "machine", lambda: "ARM64")
+    assert frp_setup.get_system_arch() == "arm64"
+
+
+
+
 def test_nodejs_windows_reuses_path_runtime(monkeypatch):
     import chatup.setup.nodejs as nodejs_setup
 
@@ -147,6 +241,7 @@ def test_nodejs_windows_bootstraps_chatarch_runtime_when_path_is_missing(monkeyp
         bootstrap,
         raising=False,
     )
+    monkeypatch.setattr(nodejs_setup, "ensure_windows_user_path", lambda runtime: None)
 
     result = CliRunner().invoke(main, ["nodejs", "-I"])
 
@@ -236,6 +331,7 @@ def test_nodejs_windows_extracts_verified_zip_under_chatarch_home(monkeypatch, t
         nodejs_setup, "_download_file", download, raising=False
     )
     monkeypatch.setattr(nodejs_setup, "_get_cmd_output", command_output)
+    monkeypatch.setattr(nodejs_setup, "ensure_windows_user_path", lambda runtime: None)
 
     first = CliRunner().invoke(main, ["nodejs", "-I"])
     second = CliRunner().invoke(main, ["nodejs", "-I"])
@@ -328,6 +424,101 @@ def test_nodejs_windows_rejects_bad_official_sha256(monkeypatch, tmp_path):
     assert result.exit_code != 0
     assert "SHA-256 mismatch" in result.output
     assert not (chatarch_home / "nodejs" / "runtimes" / archive_root).exists()
+
+
+def test_windows_setup_persists_managed_node_and_npm_paths_for_current_user(
+    monkeypatch, tmp_path
+):
+    import types
+    import chatup.setup.nodejs as nodejs_setup
+
+    runtime_dir = tmp_path / "node runtime"
+    runtime = nodejs_setup._build_runtime(
+        str(runtime_dir / "node.exe"), str(runtime_dir / "npm.cmd"), "v22.14.0", "10.9.2", "chatarch",
+        npm_cli=str(runtime_dir / "node_modules" / "npm" / "bin" / "npm-cli.js"),
+    )
+    values = {"Path": r"C:\\Users\\me\\bin;C:\\Other"}
+    fake_winreg = types.SimpleNamespace(
+        HKEY_CURRENT_USER=object(), KEY_READ=1, KEY_WRITE=2, REG_EXPAND_SZ=2,
+        OpenKey=lambda *args: object(),
+        QueryValueEx=lambda key, name: (values[name], 2),
+        SetValueEx=lambda key, name, reserved, value_type, value: values.__setitem__(name, value),
+        CloseKey=lambda key: None,
+    )
+    monkeypatch.setattr(platforming, "WINDOWS", True)
+    monkeypatch.setitem(__import__("sys").modules, "winreg", fake_winreg)
+    monkeypatch.setattr(nodejs_setup, "_windows_node_home", lambda: tmp_path)
+    monkeypatch.setenv("PATH", r"C:\\Users\\me\\bin;C:\\Other")
+
+    nodejs_setup.ensure_windows_user_path(runtime)
+    nodejs_setup.ensure_windows_user_path(runtime)
+
+    expected = [str(runtime_dir), str(tmp_path / "npm")]
+    assert values["Path"].split(";")[:2] == expected
+    assert values["Path"].split(";").count(str(runtime_dir)) == 1
+    assert values["Path"].split(";").count(str(tmp_path / "npm")) == 1
+    assert __import__("os").environ["PATH"].split(";")[:2] == expected
+
+
+def test_lark_cli_uses_managed_windows_launcher_after_npm_install(monkeypatch, tmp_path):
+    import chatup.setup.lark_cli as lark_cli
+
+    prefix = tmp_path / "nodejs" / "npm"
+    launcher = prefix / "lark-cli.cmd"
+    runtime = {"source": "chatarch", "node_bin": str(tmp_path / "node.exe")}
+    calls = []
+    monkeypatch.setattr(platforming, "WINDOWS", True)
+    monkeypatch.setattr(lark_cli, "_detect_nodejs_runtime", lambda: runtime)
+    monkeypatch.setattr(lark_cli, "managed_npm_launcher", lambda current, name: launcher)
+    monkeypatch.setattr(lark_cli.subprocess, "run", lambda command, **kwargs: calls.append((command, kwargs)) or subprocess.CompletedProcess(command, 0, "", ""))
+
+    result = lark_cli._run_lark_cli_command(["config", "init"])
+
+    assert result.returncode == 0
+    assert calls[0][0] == [str(launcher), "config", "init"]
+    assert calls[0][1].get("shell") is None
+
+
+def test_claude_honors_native_config_home_and_preserves_unrelated_values(monkeypatch, tmp_path):
+    import chatup.setup.claude as claude
+
+    claude_home = tmp_path / "native-claude"
+    claude_home.mkdir()
+    (claude_home / "settings.json").write_text('{"theme":"dark","env":{"KEEP":"yes"}}')
+    (claude_home / "config.json").write_text('{"other":"keep","primaryApiKey":"old"}')
+    monkeypatch.setenv("CLAUDE_CONFIG_DIR", str(claude_home))
+    import chatup.setup.nodejs as nodejs
+    monkeypatch.setattr(nodejs, "ensure_nodejs_requirement", lambda **kwargs: None)
+    monkeypatch.setattr(nodejs, "should_install_global_npm_package", lambda *args, **kwargs: False)
+
+    claude.setup_claude(auth_token="fixture-token", interactive=False)
+
+    settings = json.loads((claude_home / "settings.json").read_text())
+    config = json.loads((claude_home / "config.json").read_text())
+    assert settings["theme"] == "dark"
+    assert settings["env"]["KEEP"] == "yes"
+    assert settings["env"]["ANTHROPIC_AUTH_TOKEN"] == "fixture-token"
+    assert config["other"] == "keep"
+
+
+def test_remotion_uses_shared_windows_node_npm_cli(monkeypatch, tmp_path):
+    import chatup.setup.remotion as remotion
+
+    node = tmp_path / "node.exe"
+    npm_cli = tmp_path / "node_modules" / "npm" / "bin" / "npm-cli.js"
+    runtime = {"node_bin": str(node), "npm_bin": str(tmp_path / "npm.cmd"), "npm_cli": str(npm_cli), "source": "chatarch"}
+    calls = []
+    monkeypatch.setattr(platforming, "WINDOWS", True)
+    monkeypatch.setattr(remotion, "_detect_nodejs_runtime", lambda: runtime)
+    monkeypatch.setattr(remotion, "has_required_nodejs", lambda **kwargs: True)
+    monkeypatch.setattr(remotion, "_run", lambda command, **kwargs: calls.append((command, kwargs)) or ("v24.0.0" if command[0] == str(node) else "11.0.0"))
+
+    remotion._runtime()
+
+    assert calls[1][0] == [str(node), str(npm_cli), "--version"]
+    assert calls[1][1].get("shell") is None
+
+
 
 
 def test_windows_npm_uses_detected_node_and_npm_cli_as_argument_list(monkeypatch, tmp_path):

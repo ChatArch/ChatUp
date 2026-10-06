@@ -1,10 +1,18 @@
 import json
+import os
 from pathlib import Path
 
 from chatup.utils.platforming import chmod_private
 
 DEFAULT_BASE_URL = "https://api.anthropic.com/v1"
 DEFAULT_SMALL_FAST_MODEL = "claude-opus-4-6"
+
+
+def resolve_claude_home() -> Path:
+    override = os.getenv("CLAUDE_CONFIG_DIR")
+    if override:
+        return Path(override).expanduser().resolve()
+    return Path.home() / ".claude"
 
 
 def _mask_secret(value):
@@ -82,7 +90,7 @@ def setup_claude(
     from chatup.interaction import BACK_VALUE
 
     logger = setup_logger("setup_claude", log_level=str(log_level).upper())
-    claude_dir = Path.home() / ".claude"
+    claude_dir = resolve_claude_home()
     existing = _load_existing_claude_config(claude_dir)
     existing_auth = existing.get("auth_token")
     logger.info("Start claude setup")
@@ -214,22 +222,38 @@ def setup_claude(
 
     claude_dir.mkdir(parents=True, exist_ok=True)
 
-    settings_json = {
-        "env": {
+    settings_path = claude_dir / "settings.json"
+    try:
+        settings_json = json.loads(settings_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError, json.JSONDecodeError):
+        settings_json = {}
+    if not isinstance(settings_json, dict):
+        settings_json = {}
+    settings_env = settings_json.get("env")
+    if not isinstance(settings_env, dict):
+        settings_env = {}
+        settings_json["env"] = settings_env
+    settings_env.update(
+        {
             "ANTHROPIC_AUTH_TOKEN": auth_token,
             "ANTHROPIC_BASE_URL": base_url,
             "ANTHROPIC_SMALL_FAST_MODEL": small_fast_model,
         }
-    }
-    settings_path = claude_dir / "settings.json"
+    )
     settings_path.write_text(
         json.dumps(settings_json, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     chmod_private(settings_path)
     logger.info(f"Wrote settings file: {settings_path}")
 
-    config_json = {"primaryApiKey": primary_api_key}
     config_path = claude_dir / "config.json"
+    try:
+        config_json = json.loads(config_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError, json.JSONDecodeError):
+        config_json = {}
+    if not isinstance(config_json, dict):
+        config_json = {}
+    config_json["primaryApiKey"] = primary_api_key
     config_path.write_text(
         json.dumps(config_json, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )

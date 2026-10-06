@@ -25,6 +25,7 @@ from chatup.interaction import (
 from chatup.setup.nodejs import (
     _detect_nodejs_runtime,
     ensure_nodejs_requirement,
+    managed_npm_launcher,
     run_npm_command,
     should_install_global_npm_package,
 )
@@ -229,7 +230,8 @@ def _run_lark_cli_command(
             text=True,
         )
 
-    command = shutil.which("lark-cli") or "lark-cli"
+    launcher = managed_npm_launcher(runtime, "lark-cli")
+    command = str(launcher) if launcher is not None else (shutil.which("lark-cli") or "lark-cli")
     return subprocess.run(
         [command, *args],
         input=input_text,

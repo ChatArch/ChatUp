@@ -112,6 +112,11 @@ jobs:
           }
 
           chatup nodejs -I
+          python tests/windows_managed_node_effect.py
+          python tests/windows_native_adapter_contract.py
+          # A second invocation must reuse the runtime and not duplicate User PATH.
+          chatup nodejs -I
+          python tests/windows_managed_node_effect.py
           $managedRuntimeMarker = Join-Path $env:CHATARCH_HOME "nodejs/current.json"
           if (-not (Test-Path -LiteralPath $managedRuntimeMarker)) {
             throw "Managed Node.js bootstrap did not create its isolated runtime marker."
@@ -121,7 +126,8 @@ jobs:
           if (-not (Test-Path -LiteralPath (Join-Path $managedNodeDir "node.exe"))) {
             throw "Managed Node executable is missing."
           }
-          $env:PATH = "$managedNodeDir;$env:CHATARCH_HOME/nodejs/npm;$env:PATH"
+          $managedNpmPrefix = Join-Path $env:CHATARCH_HOME "nodejs/npm"
+          $env:PATH = "$managedNodeDir;$managedNpmPrefix;$env:PATH"
           chatup codex --api-key "ci-placeholder-not-a-secret" --base-url "https://api.openai.com/v1" --model "gpt-5.6-terra" -I
 
           $codexCommand = Join-Path $env:CHATARCH_HOME "nodejs/npm/codex.cmd"
