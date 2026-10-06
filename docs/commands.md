@@ -237,6 +237,23 @@ chatup codex -e ~/.chatarch/envs/OpenAI/.env -I
 chatup codex --api-key "$OPENAI_API_KEY" --base-url https://example.invalid/openai/v1 --model gpt-5.6-terra -I
 ```
 
+## Windows 原生安装与边界
+
+Windows 10/11 的独立 Python 环境准备请先使用 ChatUV bootstrap；`chatup` 本身需要 Python >=3.10。安装 ChatUp 后：
+
+```powershell
+chatup nodejs -I
+chatup codex -e work -I
+chatup opencode -e work -I
+chatup cursor-agent --install-only -I
+```
+
+`chatup nodejs` 检测到已有 Node >=20/npm 时复用；缺少时下载官方 LTS Windows ZIP，校验 SHA-256，安全解压至有效 `CHATARCH_HOME` 下，并把受管 Node 与 npm prefix 写入当前用户 PATH（不改系统 PATH）。该 PATH 在新终端生效，现有进程也会同步。通过共享的 `node.exe + npm-cli.js` 运行 npm，避免直接执行 `npm.cmd` 造成路径/参数错误；Codex、OpenCode、Claude、CC Connect、Lark CLI、Playwright 和 Remotion 使用此共享能力。
+
+Cursor Agent 使用其官方 Windows PowerShell 安装器，Hermes 使用 ChatArch fork 的 Windows `install.ps1`，先确认实际 home/install 目标，再非交互安装，不默认启动 gateway/WebUI。当前官方 Cursor 安装器会重建 `%LOCALAPPDATA%\\cursor-agent`；ChatUp 在该目录已存在时拒绝自动执行，避免删除既有用户数据，需先自行迁移并确认后重试。ChatUp 不读取或迁移现有认证资料。Windows 配置及 native 安装的验收限于 CI 矩阵、受管 Node/Codex/OpenCode smoke、Hermes 路径只读探针；不包含真实用户登录或模型请求。
+
+`iterm` 和 `macos` 为 macOS-only，`zsh` 为 POSIX-only，`crs` 当前为 POSIX 服务路径；`glance` 当前只有 Linux amd64 release asset。Gitea、MySQL、Twikoo 和 NGINX 的 Windows 二进制/配置能力与 systemd service/start 分开，后者不宣称原生 Windows 可用。Discourse/Zulip 的 Docker 配置不是 Docker Desktop 服务验收。细分范围见 capability map。
+
 ## Cursor Agent 命令约定
 
 `chatup cursor-agent` 面向 Cursor Agent CLI，而不是 Cursor IDE GUI：

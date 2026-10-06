@@ -237,6 +237,23 @@ chatup codex -e ~/.chatarch/envs/OpenAI/.env -I
 chatup codex --api-key "$OPENAI_API_KEY" --base-url https://example.invalid/openai/v1 --model gpt-5.6-terra -I
 ```
 
+## Native Windows setup and boundaries
+
+On Windows 10/11, prepare an independent Python environment with ChatUV bootstrap first; ChatUp itself requires Python >=3.10. After installing ChatUp:
+
+```powershell
+chatup nodejs -I
+chatup codex -e work -I
+chatup opencode -e work -I
+chatup cursor-agent --install-only -I
+```
+
+`chatup nodejs` reuses Node >=20/npm on PATH; otherwise it downloads an official LTS Windows ZIP, verifies SHA-256, safely extracts under effective `CHATARCH_HOME`, and updates the current user's PATH for the managed Node directory and npm prefix. It does not modify the system PATH. The new PATH is available to fresh terminals and the current process. Shared npm execution uses `node.exe + npm-cli.js` rather than directly launching `npm.cmd`; Codex, OpenCode, Claude, CC Connect, Lark CLI, Playwright, and Remotion reuse this foundation.
+
+Cursor Agent uses its official Windows PowerShell installer. Hermes uses the ChatArch fork's Windows `install.ps1`, first checking the resolved home/install targets and then installing noninteractively; no gateway or WebUI is started by default. The current official Cursor installer recreates `%LOCALAPPDATA%\\cursor-agent`. ChatUp refuses to launch it if that directory already exists, preventing deletion of existing user data; migrate and confirm it yourself before retrying. ChatUp does not read or migrate existing credentials. The native acceptance gates cover the hosted Windows test matrix, managed Node/Codex/OpenCode smoke, and a read-only Hermes path probe—not live user sign-in or model calls.
+
+`iterm` and `macos` are macOS-only; `zsh` is POSIX-only; `crs` is currently a POSIX service path; `glance` currently ships a Linux amd64 release asset only. Windows binary/configuration support for Gitea, MySQL, Twikoo, and NGINX does not imply support for their systemd service/start operations. Discourse/Zulip Docker configuration is not Docker Desktop service acceptance. See the capability map for the per-command boundary.
+
 ## Cursor Agent Command Contract
 
 `chatup cursor-agent` targets the Cursor Agent CLI, not the Cursor IDE GUI:

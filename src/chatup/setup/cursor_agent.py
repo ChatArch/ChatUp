@@ -322,6 +322,15 @@ def _install_cursor_agent_if_needed(*, install_url: str = DEFAULT_INSTALL_URL) -
     if is_windows():
         if install_url != DEFAULT_INSTALL_URL:
             raise click.ClickException("Windows Cursor Agent installs use the official Cursor installer URL only.")
+        local_app_data = os.environ.get("LOCALAPPDATA")
+        if not local_app_data:
+            raise click.ClickException("LOCALAPPDATA is required for the Windows Cursor Agent installer.")
+        target = Path(local_app_data) / "cursor-agent"
+        if target.exists() or target.is_symlink():
+            raise click.ClickException(
+                f"The official Cursor installer deletes the existing directory {target}; "
+                "refusing to run automatically. Preserve or migrate it manually first."
+            )
         script = subprocess.run(
             [
                 "powershell",

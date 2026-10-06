@@ -22,7 +22,7 @@ def test_ci_has_bounded_windows_node_codex_smoke():
 
     assert "windows-node-codex-smoke:" in workflow
     assert "runs-on: windows-latest" in workflow
-    assert "timeout-minutes: 12" in workflow
+    assert "timeout-minutes: 18" in workflow
     assert "CHATARCH_HOME" in workflow
     assert "CODEX_HOME" in workflow
     assert "chatup nodejs -I" in workflow
@@ -42,6 +42,14 @@ def test_windows_native_smoke_aborts_on_every_nonzero_native_command():
     ).read_text(encoding="utf-8")
     native_job = workflow.split("windows-node-codex-smoke:", 1)[1]
     assert "$PSNativeCommandUseErrorActionPreference = $true" in native_job
+
+
+def test_ci_smokes_windows_managed_opencode_launcher_and_config():
+    workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" / "ci.yml").read_text()
+    job = workflow.split("windows-node-codex-smoke:", 1)[1]
+    assert "chatup opencode --api-key" in job
+    assert 'Join-Path $env:CHATARCH_HOME "nodejs/npm/opencode.cmd"' in job
+    assert 'config["model"] == "opencode/gpt-5.6-terra"' in job
 
 
 def test_uv_windows_installer_uses_powershell(monkeypatch):

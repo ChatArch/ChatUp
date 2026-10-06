@@ -57,9 +57,9 @@ jobs:
       - run: mkdocs build --strict
 
   windows-node-codex-smoke:
-    name: Windows Node and Codex smoke
+    name: Windows Node, Codex and OpenCode smoke
     runs-on: windows-latest
-    timeout-minutes: 12
+    timeout-minutes: 18
     env:
       PYTHONUTF8: "1"
       PYTHONIOENCODING: utf-8
@@ -153,4 +153,21 @@ jobs:
           assert provider["wire_api"] == "responses"
           assert provider["requires_openai_auth"] is True
           assert json.loads((codex_home / "auth.json").read_text(encoding="utf-8"))["OPENAI_API_KEY"] == "ci-placeholder-not-a-secret"
+          '@ | python -
+          $env:OPENCODE_HOME = Join-Path $smokeRoot "opencode"
+          New-Item -ItemType Directory -Force -Path $env:OPENCODE_HOME | Out-Null
+          chatup opencode --api-key "ci-placeholder-not-a-secret" --base-url "https://api.openai.com/v1" --model "gpt-5.6-terra" -I
+          $opencodeCommand = Join-Path $env:CHATARCH_HOME "nodejs/npm/opencode.cmd"
+          if (-not (Test-Path -LiteralPath $opencodeCommand)) {
+            throw "OpenCode npm launcher was not installed in the managed ChatArch npm prefix."
+          }
+          & $opencodeCommand --version
+          @'
+          import json
+          import os
+          from pathlib import Path
+          config = json.loads((Path(os.environ["OPENCODE_HOME"]) / "opencode.json").read_text(encoding="utf-8"))
+          assert config["model"] == "opencode/gpt-5.6-terra"
+          assert config["provider"]["opencode"]["options"]["baseURL"] == "https://api.openai.com/v1"
+          assert config["provider"]["opencode"]["options"]["apiKey"] == "ci-placeholder-not-a-secret"
           '@ | python -
