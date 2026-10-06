@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.2.22
+
+### Added
+- Add bare `chatup glance` setup for the latest stable maintained `ChatArch/glance` release, with strict tag selection, custom runtime homes and side-effect-free dry runs.
+- Verify the exact Linux amd64 archive, `SHA256SUMS`, `BUILDINFO.txt`, source revision and observed binary version, then reuse ChatGlance's portable initialization and safe binary installer.
+
+### Safety
+- Preserve existing config/data and only reuse an exact provenance match. Refuse replacement and direct explicit upgrades to `chatglance runtime update`; never start a server, enable a service, create a public endpoint or write credentials.
+
 ## 0.2.21
 
 ### Added

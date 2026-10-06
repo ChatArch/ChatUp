@@ -37,6 +37,8 @@ chatup workspace ~/Playground
 
 ```bash
 chatup gitea --force
+chatup glance --dry-run
+chatup glance
 chatup discourse -e discourse-prod --hostname discourse.public.wzhecnu.cn
 chatup zulip -e zulip-prod --external-host zulip.public.wzhecnu.cn --port 3095
 chatup mysql
@@ -100,7 +102,9 @@ chatup chatgpt --yes  # Windows 首次安装时接受 Store 协议
 | 工作区脚手架 | `workspace` |
 | 桌面应用 | `macos`（Snipaste/iTerm2/Chrome/Blender 多选）、`chrome`、`snipaste`（macOS/Windows）、`iterm`（仅 macOS）、`chatgpt`（含 Codex） |
 | 视频项目 | `remotion` |
-| 本地服务安装 | `gitea`、`discourse`、`zulip`、`mysql`、`nginx`、`crs` |
+| 本地服务安装 | `gitea`、`glance`、`discourse`、`zulip`、`mysql`、`nginx`、`crs` |
+
+`chatup glance` 裸命令安装 `ChatArch/glance` 最新稳定维护版到有效 ChatArch home 下的 `glance`。当前仅支持 Linux amd64；严格验证归档、`SHA256SUMS`、`BUILDINFO.txt`、source SHA 和原始二进制版本，复用 ChatGlance portable API 初始化 loopback 配置。它不启动服务、不建立公网入口、不写密码；重复运行保留配置和数据，版本变更请使用 `chatglance runtime update`。
 | Agent 工具链 | `cc-connect`、`claude`、`codex`、`cursor-agent`、`opencode`、`hermes`、`lark-cli` |
 
 桌面应用使用系统原生应用目录；ChatArch 自管安装项默认目录收敛到 `~/.chatarch/...`，例如 `~/.chatarch/chrome-for-testing`、`~/.chatarch/chromedriver`、`~/.chatarch/playwright`、`~/.chatarch/chattea`、`~/.chatarch/discourse`、`~/.chatarch/zulip`、`~/.chatarch/chatdata`、`~/.chatarch/nginx` 和 `~/.chatarch/crs/local`。`cursor-agent` 额外注册 ChatEnv `CursorAgent` profile，`discourse`/`zulip` 注册管理员凭据 profile，并支持 `-e/--env` 从 env 文件或 profile 快速配置；显式选择 profile 时不会混入进程环境中的其他账号凭据。CLI 树由 ChatStyle 的注册表渲染。更完整的能力边界见 `docs/capability-map.md`。

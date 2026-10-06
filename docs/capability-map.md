@@ -24,6 +24,7 @@ chatup
 |-- playwright         # 管理 Playwright package 与 Chromium browser
 |-- frp         # 安装 FRP Client/Server
 |-- gitea       # 安装 ChatTea-compatible Gitea runtime/config/service
+|-- glance      # 安装已校验的 ChatArch Glance loopback runtime
 |-- discourse   # 准备 Discourse docker 配置和 ChatEnv 管理的管理员凭据
 |-- zulip       # 准备 Zulip Docker Compose 配置和 ChatEnv 管理的管理员凭据
 |-- mysql       # 安装 ChatData-compatible MySQL runtime/instance/service
@@ -48,7 +49,7 @@ chatup
 
 - **本地服务安装**
 
-    `gitea`、`discourse`、`zulip`、`mysql`、`nginx`、`crs` 负责 ChatArch 常用本地服务的 user-level/ChatArch-contained 安装和初始化，默认路径收敛到 `~/.chatarch/...`。Discourse/Zulip 的管理员凭据由 ChatEnv profile 或 env 文件提供。
+    `gitea`、`glance`、`discourse`、`zulip`、`mysql`、`nginx`、`crs` 负责 ChatArch 常用本地服务的 user-level/ChatArch-contained 安装和初始化，默认路径收敛到 `~/.chatarch/...`。Discourse/Zulip 的管理员凭据由 ChatEnv profile 或 env 文件提供。
 
 - **Agent 工具链**
 
@@ -80,6 +81,7 @@ chatup frp                 # 安装 FRP Client/Server
 
 ```text
 chatup gitea               # 对齐 ChatTea 的 Gitea binary/work path/config/service
+chatup glance              # 校验并初始化 loopback Glance runtime，不启动服务
 chatup discourse           # 准备 Discourse app.yml、shared 数据目录和 ChatEnv 管理的 admin.env
 chatup zulip               # 准备 Zulip Compose、bind-mount 数据目录和 ChatEnv 管理的 admin.env
 chatup mysql               # 对齐 ChatData 的 MySQL runtime/instance/service
@@ -92,6 +94,7 @@ chatup crs                 # 准备本地 CRS、Redis、secret、admin SPA 和 s
 | 命令 | 默认目录 | 运行边界 |
 | --- | --- | --- |
 | `chatup gitea` | `~/.chatarch/chattea` | Gitea 默认监听 `127.0.0.1:3000`，公网入口交给 NGINX/public-entry。 |
+| `chatup glance` | `~/.chatarch/glance` | 仅安装已校验的维护版并保留运行数据；启动、升级和公网入口均为显式运维操作。 |
 | `chatup discourse` | `~/.chatarch/discourse` | 生成 Discourse Docker app.yml 和 admin env；默认不改系统 NGINX，不打印密码。 |
 | `chatup zulip` | `~/.chatarch/zulip` | 生成 Zulip Compose/bind mounts/secrets；默认不启动，`--start` 才执行 Compose。 |
 | `chatup mysql` | `~/.chatarch/chatdata` | MySQL 默认监听 `127.0.0.1:3307`，可创建 user-level service。 |
