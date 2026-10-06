@@ -523,6 +523,15 @@ def _detect_nodejs_runtime():
     managed_runtime = _detect_nodejs_runtime_from_managed_windows_home()
     nvm_runtime = _detect_nodejs_runtime_from_nvm()
     best = path_runtime
+    if (
+        is_windows()
+        and managed_runtime.get("node_bin")
+        and path_runtime.get("node_bin")
+        and os.path.normcase(str(Path(managed_runtime["node_bin"]).resolve()))
+        == os.path.normcase(str(Path(path_runtime["node_bin"]).resolve()))
+    ):
+        # PATH exposure must not strip the identity/prefix of our own runtime.
+        best = managed_runtime
     for runtime in (managed_runtime, nvm_runtime):
         if _runtime_score(runtime) > _runtime_score(best):
             best = runtime
@@ -632,6 +641,11 @@ def node_runtime_env(runtime, env=None) -> dict[str, str]:
     if not node_bin:
         return merged
     node_dir = str(Path(str(node_bin)).expanduser().resolve().parent)
+    if is_windows() and ";" in node_dir:
+        raise click.ClickException(
+            "Node.js runtime directory contains the Windows PATH separator ';'. "
+            "Choose a ChatArch home/runtime path without semicolons."
+        )
     managed_npm_prefix = None
     if is_windows() and runtime.get("source") == "chatarch":
         managed_npm_prefix = str(_windows_node_home() / "npm")

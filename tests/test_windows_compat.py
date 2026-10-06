@@ -210,7 +210,7 @@ def test_nodejs_windows_extracts_verified_zip_under_chatarch_home(monkeypatch, t
         "sha256": hashlib.sha256(archive.read_bytes()).hexdigest(),
     }
     downloads = []
-    chatarch_home = tmp_path / "ChatArch 空格 &;!"
+    chatarch_home = tmp_path / "ChatArch 空格 &!"
 
     def download(url, destination):
         downloads.append(url)
@@ -333,7 +333,7 @@ def test_nodejs_windows_rejects_bad_official_sha256(monkeypatch, tmp_path):
 def test_windows_npm_uses_detected_node_and_npm_cli_as_argument_list(monkeypatch, tmp_path):
     import chatup.setup.nodejs as nodejs_setup
 
-    runtime_dir = tmp_path / "Node 空格 &;!"
+    runtime_dir = tmp_path / "Node 空格 &!"
     runtime_dir.mkdir()
     node_bin = runtime_dir / "node.exe"
     npm_cmd = runtime_dir / "npm.cmd"
@@ -388,7 +388,7 @@ def test_windows_managed_node_runtime_keeps_global_npm_prefix_under_chatarch(
 ):
     import chatup.setup.nodejs as nodejs_setup
 
-    chatarch_home = tmp_path / "ChatArch 空格 &;!"
+    chatarch_home = tmp_path / "ChatArch 空格 &!"
     runtime_dir = chatarch_home / "nodejs" / "runtimes" / "node-v22.14.0-win-x64"
     runtime_dir.mkdir(parents=True)
     node_bin = runtime_dir / "node.exe"
@@ -418,7 +418,7 @@ def test_windows_managed_node_runtime_keeps_global_npm_prefix_under_chatarch(
 def test_playwright_windows_uses_shared_node_npm_invocation(monkeypatch, tmp_path):
     from chatup.runtime import playwright
 
-    runtime_dir = tmp_path / "Node 空格 &;!"
+    runtime_dir = tmp_path / "Node 空格 &!"
     runtime_dir.mkdir()
     node_bin = runtime_dir / "node.exe"
     npm_cmd = runtime_dir / "npm.cmd"

@@ -45,6 +45,25 @@ def test_native_ci_launcher_has_the_managed_node_on_parent_path():
     assert '$env:PATH = "$managedNodeDir' in job
 
 
+def test_same_managed_node_discovered_on_path_keeps_the_managed_prefix(monkeypatch):
+    path = nodejs._build_runtime('managed/node.exe', 'managed/npm.cmd', 'v24.1.0', '11.0', 'path', npm_cli='managed/npm-cli.js')
+    managed = dict(path, source='chatarch')
+    monkeypatch.setattr(platforming, 'WINDOWS', True)
+    monkeypatch.setattr(nodejs, '_detect_nodejs_runtime_from_path', lambda: path)
+    monkeypatch.setattr(nodejs, '_detect_nodejs_runtime_from_managed_windows_home', lambda: managed)
+    monkeypatch.setattr(nodejs, '_detect_nodejs_runtime_from_nvm', lambda: nodejs._build_runtime('', '', '', '', 'nvm'))
+    assert nodejs._detect_nodejs_runtime()['source'] == 'chatarch'
+
+
+def test_windows_runtime_path_with_path_separator_is_rejected(monkeypatch):
+    import pytest
+    import click
+    monkeypatch.setattr(platforming, 'WINDOWS', True)
+    runtime = nodejs._build_runtime('semicolon;root/node.exe', 'semicolon;root/npm.cmd', 'v24.1.0', '11', 'chatarch', npm_cli='semicolon;root/npm-cli.js')
+    with pytest.raises(click.ClickException, match='PATH separator'):
+        nodejs.node_runtime_env(runtime)
+
+
 def test_old_path_node_does_not_win_over_new_managed_runtime(monkeypatch):
     old = nodejs._build_runtime('old/node.exe', 'old/npm.cmd', 'v18.20.0', '10.0', 'path', npm_cli='old/npm-cli.js')
     new = nodejs._build_runtime('new/node.exe', 'new/npm.cmd', 'v24.1.0', '11.0', 'chatarch', npm_cli='new/npm-cli.js')
