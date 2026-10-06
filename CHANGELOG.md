@@ -10,6 +10,15 @@
 - Run Windows npm operations through the detected `node.exe` and `npm-cli.js` with argv lists and a runtime-prepended child PATH, including the Playwright installer, instead of executing npm `.cmd` launchers directly. Packages installed globally through a ChatArch-managed runtime use the contained `$CHATARCH_HOME/nodejs/npm` prefix.
 - Make `chatup codex` honor `CODEX_HOME` and preserve unrelated native Codex config/auth fields while updating supported root-level `model`, `model_provider`, and `forced_login_method = "api"` settings.
 
+## 0.2.22
+
+### Added
+- Add bare `chatup glance` setup for the latest stable maintained `ChatArch/glance` release, with strict tag selection, custom runtime homes and side-effect-free dry runs.
+- Verify the exact Linux amd64 archive, `SHA256SUMS`, `BUILDINFO.txt`, source revision and observed binary version, then reuse ChatGlance's portable initialization and safe binary installer.
+
+### Safety
+- Preserve existing config/data and only reuse an exact provenance match. Refuse replacement and direct explicit upgrades to `chatglance runtime update`; never start a server, enable a service, create a public endpoint or write credentials.
+
 ## 0.2.21
 
 ### Added

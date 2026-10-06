@@ -14,6 +14,7 @@ chatup
 ├── zsh                 # Configure zsh, plugins, and aliases
 ├── cc-connect          # Install ChatArch CC Connect
 ├── gitea               # Install ChatTea-compatible Gitea
+├── glance              # Install the verified local ChatArch Glance runtime (do not start)
 ├── discourse           # Prepare Discourse config and ChatEnv-managed admin credentials
 ├── zulip               # Prepare Zulip Compose and ChatEnv-managed admin credentials
 ├── mysql               # Install ChatData-compatible MySQL
@@ -43,6 +44,14 @@ chatup
 ```
 
 Run `chatup --tree` to read back the registered tree with parameter signatures and command purposes. `chatup --tree-brief` keeps the same nodes and descriptions while omitting signatures. See [Command Reference](commands.md) for complete options.
+
+## Local Glance Runtime
+
+```text
+chatup glance [--version latest|chatarch-vMAJOR.MINOR.PATCH] [--runtime-home PATH] [--dry-run] [-i|-I]
+```
+
+The bare command performs setup. It supports only Linux amd64 in the current published matrix, downloads the exact `ChatArch/glance` archive, `SHA256SUMS` and `BUILDINFO.txt`, verifies them, and reuses the ChatGlance portable APIs. The default root is `glance` under the effective ChatArch home. Existing configuration and data are preserved and no server is started. Use `chatglance runtime update` for an explicit installed-version change.
 
 ## Python Runtime
 

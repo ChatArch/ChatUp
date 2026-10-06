@@ -37,6 +37,8 @@ Common install commands:
 
 ```bash
 chatup gitea --force
+chatup glance --dry-run
+chatup glance
 chatup mysql
 chatup nginx
 chatup nginx proxy-pass ./gitea-local.conf --set SERVER_NAME=gitea.local.example.invalid --set PROXY_PASS=http://127.0.0.1:3000
@@ -98,7 +100,9 @@ Installs the official new ChatGPT desktop app including Codex. Requires Homebrew
 | Workspace scaffold | `workspace` |
 | Desktop apps | `macos` (Snipaste/iTerm2/Chrome/Blender selection), `chrome`, `snipaste` (macOS/Windows), `iterm` (macOS only), `chatgpt` (includes Codex) |
 | Video projects | `remotion` |
-| Local service installers | `gitea`, `mysql`, `nginx`, `crs` |
+| Local service installers | `gitea`, `glance`, `mysql`, `nginx`, `crs` |
+
+Bare `chatup glance` installs the latest stable maintained `ChatArch/glance` release under `glance` in the effective ChatArch home. The current matrix is Linux amd64 only. It verifies the archive, `SHA256SUMS`, `BUILDINFO.txt`, source SHA and raw binary version, then reuses ChatGlance portable APIs for loopback initialization. It never starts a service, creates a public endpoint or writes passwords; repeated runs preserve configuration/data, and version changes belong to `chatglance runtime update`.
 | Agent toolchains | `cc-connect`, `claude`, `codex`, `cursor-agent`, `opencode`, `hermes`, `lark-cli` |
 
 Desktop apps use native application paths; ChatArch-managed install targets stay under `~/.chatarch/...`, for example `~/.chatarch/chrome-for-testing`, `~/.chatarch/chromedriver`, `~/.chatarch/playwright`, `~/.chatarch/chattea`, `~/.chatarch/discourse`, `~/.chatarch/zulip`, `~/.chatarch/chatdata`, `~/.chatarch/nginx`, and `~/.chatarch/crs/local`. `cursor-agent`, `discourse`, and `zulip` register typed ChatEnv profiles; an explicitly selected profile is isolated from credentials in the process environment. ChatStyle renders the CLI tree from the registered command surface. See `docs/capability-map.en.md` for the full capability boundary.

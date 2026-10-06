@@ -24,6 +24,7 @@ chatup
 |-- playwright         # Manage Playwright packages and Chromium browsers
 |-- frp         # Install FRP Client/Server
 |-- gitea       # Install ChatTea-compatible Gitea runtime/config/service
+|-- glance      # Install a verified loopback ChatArch Glance runtime (do not start)
 |-- discourse   # Prepare Discourse config and ChatEnv-managed admin credentials
 |-- zulip       # Prepare Zulip Compose and ChatEnv-managed admin credentials
 |-- mysql       # Install ChatData-compatible MySQL runtime/instance/service
@@ -50,7 +51,7 @@ chatup
 
 - **Local Services**
 
-    `gitea`, `discourse`, `zulip`, `mysql`, `twikoo`, `nginx`, and `crs` prepare common ChatArch local services under `~/.chatarch/...` by default. Discourse/Zulip admin credentials come from ChatEnv profiles or env files.
+    `gitea`, `glance`, `discourse`, `zulip`, `mysql`, `twikoo`, `nginx`, and `crs` prepare common ChatArch local services under `~/.chatarch/...` by default. Discourse/Zulip admin credentials come from ChatEnv profiles or env files.
 
 - **Agent Toolchains**
 
@@ -266,6 +267,7 @@ chatup cursor-agent -e work --credential-store file-wrapper -I
 | Command | Current capability |
 |---|---|
 | `chatup gitea` | Install ChatArch Gitea from `ChatArch/gitea` release assets; defaults to latest and can generate a ChatTea-compatible `app.ini` plus user-level systemd service. |
+| `chatup glance` | Install and initialize the verified `ChatArch/glance` Linux amd64 local runtime without starting it or writing credentials. |
 | `chatup discourse` | Prepare `~/.chatarch/discourse` Discourse Docker/app.yml layout and write ChatEnv-managed `DISCOURSE_ADMIN_USERNAME`, `DISCOURSE_ADMIN_EMAIL`, and `DISCOURSE_ADMIN_PASSWORD` to a restricted `secrets/admin.env`. |
 | `chatup zulip` | Prepare `~/.chatarch/zulip` Zulip Docker Compose, bind-mounted data directories, secret files, and ChatEnv-managed `ZULIP_ADMIN_USERNAME`, `ZULIP_ADMIN_EMAIL`/`ZULIP_ADMIN_MAIL`, and `ZULIP_ADMIN_PASSWORD`. |
 | `chatup mysql` | Install and prepare a ChatData-compatible user-level MySQL runtime, instance layout, `my.cnf`, and optional user-level systemd service. |
@@ -305,6 +307,16 @@ chatup playwright path 1.61.1 -I
 See [CLI Tree](cli-tree.md) for the full subcommand tree, ChatStyle behavior, and Python contract.
 
 ## Gitea Command Contract
+
+Bare `chatup glance` is the installer. It resolves the latest stable maintained `ChatArch/glance` release by default, or accepts a strict `--version chatarch-vMAJOR.MINOR.PATCH`. The current release matrix is Linux amd64 only and unsupported platforms fail before writes. It downloads only the matching archive, `SHA256SUMS`, and `BUILDINFO.txt`; verifies archive and BUILDINFO hashes, tag, source SHA, platform and raw binary version; then delegates safe extraction and loopback resource initialization to ChatGlance portable APIs.
+
+```bash
+chatup glance
+chatup glance --version chatarch-v0.2.1 --runtime-home ~/.chatarch/glance -I
+chatup glance --dry-run
+```
+
+Output includes binary/config paths and the exact native start command. Setup does not start or enable a service, create a public endpoint, or add auth fixtures/plaintext passwords. Repeated setup only reuses exact provenance and preserves config, pages, notes, data, accounts and timers. If the installed release differs or provenance cannot be verified, setup refuses replacement and directs the operator to native `chatglance runtime update`.
 
 `chatup gitea` aligns with ChatTea's local Gitea layout:
 

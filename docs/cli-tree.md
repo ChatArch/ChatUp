@@ -14,6 +14,7 @@ chatup
 ├── zsh                 # 配置 zsh、插件和 alias
 ├── cc-connect          # 安装 ChatArch CC Connect
 ├── gitea               # 安装 ChatTea-compatible Gitea
+├── glance              # 安装已校验的 ChatArch Glance 本地运行时（不启动）
 ├── discourse           # 准备 Discourse 配置和 ChatEnv 管理的管理员凭据
 ├── zulip               # 准备 Zulip Compose 和 ChatEnv 管理的管理员凭据
 ├── mysql               # 安装 ChatData-compatible MySQL
@@ -43,6 +44,14 @@ chatup
 ```
 
 运行 `chatup --tree` 可回读带参数签名和命令目的的真实注册树；`chatup --tree-brief` 保留相同节点和说明，但省略参数签名。完整参数见 [命令参考](commands.md)。
+
+## Glance 本地运行时
+
+```text
+chatup glance [--version latest|chatarch-vMAJOR.MINOR.PATCH] [--runtime-home PATH] [--dry-run] [-i|-I]
+```
+
+裸命令执行真实安装：仅支持当前发布矩阵中的 Linux amd64，下载 `ChatArch/glance` 的精确归档、`SHA256SUMS` 和 `BUILDINFO.txt`，完整校验后复用 ChatGlance portable API。默认目录为有效 ChatArch home 下的 `glance`；保留已有配置和数据，不启动服务。升级或更换已安装版本必须显式使用 `chatglance runtime update`。
 
 ## Python 运行环境
 

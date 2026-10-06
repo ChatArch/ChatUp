@@ -24,6 +24,7 @@ chatup
 |-- playwright         # Manage Playwright packages and Chromium browsers
 |-- frp         # Install FRP Client/Server
 |-- gitea       # Install ChatTea-compatible Gitea runtime/config/service
+|-- glance      # Install a verified loopback ChatArch Glance runtime
 |-- mysql       # Install ChatData-compatible MySQL runtime/instance/service
 |-- nginx       # Prepare user-level NGINX runtime and entry templates
 |-- crs         # Install local Claude Relay Service + Redis + smoke check
@@ -46,7 +47,7 @@ chatup
 
 - **Local Services**
 
-    `gitea`, `mysql`, `nginx`, and `crs` prepare common ChatArch local services with user-level defaults under `~/.chatarch/...`.
+    `gitea`, `glance`, `mysql`, `nginx`, and `crs` prepare common ChatArch local services with user-level defaults under `~/.chatarch/...`.
 
 - **Agent Toolchains**
 
@@ -78,6 +79,7 @@ These commands only prepare the dependencies ChatArch commonly needs. They are n
 
 ```text
 chatup gitea               # Align with ChatTea binary/work path/config/service
+chatup glance              # Verify and initialize a loopback runtime without starting it
 chatup mysql               # Align with ChatData runtime/instance/service
 chatup nginx               # Prepare ~/.chatarch/nginx runtime/config/log/run/temp
 chatup crs                 # Prepare local CRS, Redis, secrets, admin SPA, and smoke check
@@ -88,6 +90,7 @@ Local-service commands use user-level layouts by default:
 | Command | Default directory | Runtime boundary |
 | --- | --- | --- |
 | `chatup gitea` | `~/.chatarch/chattea` | Gitea binds to `127.0.0.1:3000` by default; public entry belongs to NGINX/public-entry. |
+| `chatup glance` | `~/.chatarch/glance` | Installs only verified maintained artifacts and preserves runtime data; start, update and public entry remain explicit operations. |
 | `chatup mysql` | `~/.chatarch/chatdata` | MySQL binds to `127.0.0.1:3307` by default and can create a user-level service. |
 | `chatup nginx` | `~/.chatarch/nginx` | Does not write `/etc/nginx` or reload system services; can render entry templates. |
 | `chatup crs` | `~/.chatarch/crs/local` | Local CRS + Redis + smoke check with restricted secret-file permissions. |
