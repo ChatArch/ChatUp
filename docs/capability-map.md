@@ -75,7 +75,7 @@ chatup playwright          # 管理 Playwright package 与 Chromium browser
 chatup frp                 # 安装 FRP Client/Server
 ```
 
-这些命令只承诺把 ChatArch 常用基础依赖准备好；它们不是通用系统包管理器，也不替代发行版的软件源策略。Windows 上，`chatup nodejs` 优先回读当前 PATH 中合格的 Node/npm；否则会把经 Node.js 官方 SHA-256 清单校验的便携 LTS ZIP 安装到 `$CHATARCH_HOME/nodejs`，并通过检测到的 `node.exe` 与 `npm-cli.js` 的 argv 列表运行 npm。由该受管 runtime 全局安装的 npm 包放在 `$CHATARCH_HOME/nodejs/npm`，不会写入系统 npm prefix。运行 `chatup nodejs` 还会把受管 Node 和 npm prefix 去重保存到当前用户 PATH，读回注册环境并同步当前进程；不会修改系统 PATH。新开终端后可直接使用相应命令；若已有合格 Node 则复用，不强制替换。`chatup chrome-for-testing` 提供机器可读浏览器 descriptor，供 ChatPost 等扩展/CDP 消费方复用；`chatup chromedriver` 为 WebDriver 消费方独立提供 driver descriptor。`chatup playwright` 则固定 Playwright package、browser revision/version 和 executable path。Profile、账号和 Cookie 始终由消费方管理。
+这些命令只承诺把 ChatArch 常用基础依赖准备好；它们不是通用系统包管理器，也不替代发行版的软件源策略。Windows 上，`chatup nodejs` 优先回读当前 PATH 中合格的 Node/npm；否则会把经 Node.js 官方 SHA-256 清单校验的便携 LTS ZIP 安装到 `$CHATARCH_HOME/nodejs`，并通过检测到的 `node.exe` 与 `npm-cli.js` 的 argv 列表运行 npm。由该受管 runtime 全局安装的 npm 包放在 `$CHATARCH_HOME/nodejs/npm`，不会写入系统 npm prefix。运行 `chatup nodejs` 或直接安装 Codex/OpenCode 等 npm 工具时，还会把受管 Node 和 npm prefix 去重保存到当前用户 PATH，读回注册环境，并在当前进程保留既有 Python/系统路径的同时前置受管目录；不会修改系统 PATH。新开终端后可直接使用相应命令；若已有合格 Node 则复用，不强制替换。`chatup chrome-for-testing` 提供机器可读浏览器 descriptor，供 ChatPost 等扩展/CDP 消费方复用；`chatup chromedriver` 为 WebDriver 消费方独立提供 driver descriptor。`chatup playwright` 则固定 Playwright package、browser revision/version 和 executable path。Profile、账号和 Cookie 始终由消费方管理。
 
 ## 本地服务安装
 

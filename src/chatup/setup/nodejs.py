@@ -508,6 +508,13 @@ def _bootstrap_windows_node_lts(*, min_major: int) -> dict:
 
 
 def _runtime_score(runtime):
+    # A newer node without runnable npm must not hide a complete runtime.
+    if (
+        not runtime.get("node_bin")
+        or not runtime.get("npm_bin")
+        or (is_windows() and not runtime.get("npm_cli"))
+    ):
+        return 0
     score = 0
     if runtime.get("node_bin"):
         score += 1
@@ -582,6 +589,8 @@ def ensure_nodejs_requirement(
     runtime = _detect_nodejs_runtime()
     logger.info(f"Checking Node.js runtime requirement (>= {min_major})")
     if has_required_nodejs(min_major=min_major, runtime=runtime):
+        if is_windows() and runtime.get("source") == "chatarch":
+            ensure_windows_user_path(runtime)
         return runtime
 
     message = _nodejs_requirement_message(runtime, min_major=min_major)
@@ -590,6 +599,7 @@ def ensure_nodejs_requirement(
     if is_windows():
         runtime = _bootstrap_windows_node_lts(min_major=min_major)
         if has_required_nodejs(min_major=min_major, runtime=runtime):
+            ensure_windows_user_path(runtime)
             return runtime
         raise click.ClickException(
             f"Managed Node.js runtime does not satisfy Node.js >= {min_major}."
@@ -711,7 +721,9 @@ def ensure_windows_user_path(runtime) -> str | None:
     readback_keys = {_windows_path_entry_key(item) for item in readback_items}
     if not all(_windows_path_entry_key(entry) in readback_keys for entry in entries):
         raise click.ClickException("Could not persist managed Node.js paths in the current-user PATH.")
-    os.environ["PATH"] = str(readback)
+    # HKCU contains only user entries, not the system/Python entries of this
+    # process. Prepend our directories without dropping that inherited PATH.
+    os.environ["PATH"] = node_runtime_env(runtime)["PATH"]
     return str(readback)
 
 

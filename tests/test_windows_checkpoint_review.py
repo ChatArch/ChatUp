@@ -42,7 +42,8 @@ def test_native_ci_launcher_has_the_managed_node_on_parent_path():
     workflow = (Path(__file__).resolve().parents[1] / '.github/workflows/ci.yml').read_text()
     job = workflow.split('windows-node-codex-smoke:', 1)[1]
     assert '$managedNodeDir' in job
-    assert '$env:PATH = "$managedNodeDir' in job
+    assert 'RefreshEnvironmentPath' in job
+    assert '$env:PATH = "$userPath;$machinePath;' in job
 
 
 def test_same_managed_node_discovered_on_path_keeps_the_managed_prefix(monkeypatch):

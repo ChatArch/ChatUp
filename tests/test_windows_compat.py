@@ -283,6 +283,7 @@ def test_windows_node_requirement_bootstraps_for_npm_consumers(monkeypatch):
     monkeypatch.setattr(nodejs_setup, "_bootstrap_windows_node_lts", bootstrap)
 
     runtime = None
+    monkeypatch.setattr(nodejs_setup, "ensure_windows_user_path", lambda runtime: None)
     try:
         runtime = nodejs_setup.ensure_nodejs_requirement(
             interactive=False,
@@ -465,7 +466,7 @@ def test_windows_setup_persists_managed_node_and_npm_paths_for_current_user(
     assert values["Path"].split(";")[:2] == expected
     assert values["Path"].split(";").count(str(runtime_dir)) == 1
     assert values["Path"].split(";").count(str(tmp_path / "npm")) == 1
-    assert __import__("os").environ["PATH"].split(";")[:2] == expected
+    assert __import__("os").environ["PATH"].split(__import__("os").pathsep)[:2] == expected
 
 
 def test_lark_cli_uses_managed_windows_launcher_after_npm_install(monkeypatch, tmp_path):

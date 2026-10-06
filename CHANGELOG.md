@@ -8,6 +8,7 @@
 - Add a bounded Windows-native GitHub Actions smoke job for the official Node.js LTS ZIP bootstrap and Codex/OpenCode npm/configuration paths, using isolated HOME, USERPROFILE, CHATARCH_HOME, CODEX_HOME, and OPENCODE_HOME values plus a non-secret placeholder.
 
 ### Fixed
+- Persist managed Windows PATH during direct npm-tool setup, retain inherited process paths, and prefer complete npm runtimes over newer incomplete Node installations. Exercise direct Codex bootstrap and fresh-environment launcher discovery in Windows CI.
 - Let `chatup nodejs` persist its managed runtime and npm launcher directories to current-user Windows PATH with readback and idempotent updates.
 - Reuse the shared shell-free Node/npm runtime in Remotion and discover Lark CLI's managed Windows launcher after installation.
 - Preserve unrelated Claude settings and honor `CLAUDE_CONFIG_DIR`; align FRP Windows architecture names, fail installation errors nonzero and refuse overwriting existing binaries/configurations.

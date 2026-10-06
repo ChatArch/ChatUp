@@ -248,7 +248,7 @@ chatup opencode -e work -I
 chatup cursor-agent --install-only -I
 ```
 
-`chatup nodejs` 检测到已有 Node >=20/npm 时复用；缺少时下载官方 LTS Windows ZIP，校验 SHA-256，安全解压至有效 `CHATARCH_HOME` 下，并把受管 Node 与 npm prefix 写入当前用户 PATH（不改系统 PATH）。该 PATH 在新终端生效，现有进程也会同步。通过共享的 `node.exe + npm-cli.js` 运行 npm，避免直接执行 `npm.cmd` 造成路径/参数错误；Codex、OpenCode、Claude、CC Connect、Lark CLI、Playwright 和 Remotion 使用此共享能力。
+`chatup nodejs` 检测到已有 Node >=20/npm 时复用；缺少时下载官方 LTS Windows ZIP，校验 SHA-256，安全解压至有效 `CHATARCH_HOME` 下，并把受管 Node 与 npm prefix 写入当前用户 PATH（不改系统 PATH）。直接运行 Codex/OpenCode 等 npm 工具安装命令也会完成用户 PATH 写入，不必先执行 `chatup nodejs`。现有进程仅前置受管目录，保留 Python 和系统 PATH。运行时选择先排除无法调用 npm 的候选，再比较版本；新终端可读取持久化的用户 PATH。通过共享的 `node.exe + npm-cli.js` 运行 npm，避免直接执行 `npm.cmd` 造成路径/参数错误；Codex、OpenCode、Claude、CC Connect、Lark CLI、Playwright 和 Remotion 使用此共享能力。
 
 Cursor Agent 使用其官方 Windows PowerShell 安装器，Hermes 使用 ChatArch fork 的 Windows `install.ps1`，先确认实际 home/install 目标，再非交互安装，不默认启动 gateway/WebUI。当前官方 Cursor 安装器会重建 `%LOCALAPPDATA%\\cursor-agent`；ChatUp 在该目录已存在时拒绝自动执行，避免删除既有用户数据，需先自行迁移并确认后重试。ChatUp 不读取或迁移现有认证资料。Windows 配置及 native 安装的验收限于 CI 矩阵、受管 Node/Codex/OpenCode smoke、Hermes 路径只读探针；不包含真实用户登录或模型请求。
 

@@ -70,7 +70,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: python -m pip install -e ".[dev]"
-      - name: Bootstrap managed Node and configure Codex in an isolated home
+      - name: Bootstrap through Codex and verify fresh-terminal launchers
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
@@ -111,7 +111,8 @@ jobs:
             throw "Preinstalled Node.js is still discoverable; refusing a non-isolated smoke."
           }
 
-          chatup nodejs -I
+          # Direct tool setup must bootstrap Node and persist user PATH itself.
+          chatup codex --api-key "ci-placeholder-not-a-secret" --base-url "https://api.openai.com/v1" --model "gpt-5.6-terra" -I
           python tests/windows_managed_node_effect.py
           python tests/windows_native_adapter_contract.py
           # A second invocation must reuse the runtime and not duplicate User PATH.
@@ -127,14 +128,19 @@ jobs:
             throw "Managed Node executable is missing."
           }
           $managedNpmPrefix = Join-Path $env:CHATARCH_HOME "nodejs/npm"
-          $env:PATH = "$managedNodeDir;$managedNpmPrefix;$env:PATH"
-          chatup codex --api-key "ci-placeholder-not-a-secret" --base-url "https://api.openai.com/v1" --model "gpt-5.6-terra" -I
+          $smokeBasePath = $env:PATH
+          function RefreshEnvironmentPath {
+            $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+            $machinePath = [Environment]::GetEnvironmentVariable("Path", "Machine")
+            $env:PATH = "$userPath;$machinePath;$smokeBasePath"
+          }
+          RefreshEnvironmentPath
 
           $codexCommand = Join-Path $env:CHATARCH_HOME "nodejs/npm/codex.cmd"
           if (-not (Test-Path -LiteralPath $codexCommand)) {
             throw "Codex npm launcher was not installed in the managed ChatArch npm prefix."
           }
-          & $codexCommand --version
+          codex --version
 
           @'
           import json
@@ -161,7 +167,8 @@ jobs:
           if (-not (Test-Path -LiteralPath $opencodeCommand)) {
             throw "OpenCode npm launcher was not installed in the managed ChatArch npm prefix."
           }
-          & $opencodeCommand --version
+          RefreshEnvironmentPath
+          opencode --version
           @'
           import json
           import os
