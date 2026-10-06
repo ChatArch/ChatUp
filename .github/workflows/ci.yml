@@ -107,6 +107,8 @@ jobs:
             }
           }
           $env:PATH = $filteredPathItems -join [IO.Path]::PathSeparator
+          # Capture only the pre-bootstrap job paths, never managed paths.
+          $smokeBasePath = $env:PATH
           if (Get-Command node -ErrorAction SilentlyContinue) {
             throw "Preinstalled Node.js is still discoverable; refusing a non-isolated smoke."
           }
@@ -128,7 +130,6 @@ jobs:
             throw "Managed Node executable is missing."
           }
           $managedNpmPrefix = Join-Path $env:CHATARCH_HOME "nodejs/npm"
-          $smokeBasePath = $env:PATH
           function RefreshEnvironmentPath {
             $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
             $machinePath = [Environment]::GetEnvironmentVariable("Path", "Machine")
@@ -139,6 +140,10 @@ jobs:
           $codexCommand = Join-Path $env:CHATARCH_HOME "nodejs/npm/codex.cmd"
           if (-not (Test-Path -LiteralPath $codexCommand)) {
             throw "Codex npm launcher was not installed in the managed ChatArch npm prefix."
+          }
+          $resolvedCodex = (Get-Command codex -CommandType Application).Source
+          if (-not [string]::Equals([IO.Path]::GetFullPath($resolvedCodex), [IO.Path]::GetFullPath($codexCommand), [StringComparison]::OrdinalIgnoreCase)) {
+            throw "Fresh PATH resolved a different Codex installation."
           }
           codex --version
 
@@ -168,6 +173,10 @@ jobs:
             throw "OpenCode npm launcher was not installed in the managed ChatArch npm prefix."
           }
           RefreshEnvironmentPath
+          $resolvedOpenCode = (Get-Command opencode -CommandType Application).Source
+          if (-not [string]::Equals([IO.Path]::GetFullPath($resolvedOpenCode), [IO.Path]::GetFullPath($opencodeCommand), [StringComparison]::OrdinalIgnoreCase)) {
+            throw "Fresh PATH resolved a different OpenCode installation."
+          }
           opencode --version
           @'
           import json
