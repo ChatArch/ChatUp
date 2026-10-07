@@ -11,7 +11,7 @@ chatup
 |-- doctor      # Check that ChatUp is callable
 |-- uv          # Install uv and create the default ChatArch Python runtime
 |-- workspace   # Initialize the ChatArch workspace scaffold
-|-- nodejs      # Install nvm and the default LTS Node.js
+|-- nodejs      # Install default LTS Node.js (nvm on POSIX; ChatArch portable ZIP on Windows)
 |-- docker      # Check Docker and show sudo guidance when needed
 |-- zsh         # Configure zsh / oh-my-zsh / plugins / aliases
 |-- chrome              # Install regular Google Chrome for the current OS
@@ -34,7 +34,7 @@ chatup
 |-- cc-connect  # Install CC Connect CLI and runtime dependencies
 |-- claude      # Configure Claude Code CLI and config files
 |-- chatgpt      # Install the new ChatGPT desktop app (includes Codex)
-|-- codex       # Configure Codex CLI and config files
+|-- codex       # Configure Codex CLI and config files (uses CODEX_HOME when set)
 |-- cursor-agent # Configure Cursor Agent CLI auth and config files
 |-- opencode    # Configure OpenCode CLI and config files
 |-- hermes      # Install Hermes Agent and optional WebUI
@@ -66,7 +66,7 @@ chatup
 ## Windows Compatibility
 
 - `chatup uv` uses the official PowerShell installer on Windows and prints the `Scripts/Activate.ps1` activation hint.
-- `chatup nodejs` reuses `node`/`npm` already on PATH on Windows instead of writing nvm shell init; when missing, it points users to the official installer, winget, or nvm-windows.
+- `chatup nodejs` first reads `node`/`npm` from the current Windows PATH. If they are missing or too old, it downloads the official Node.js LTS portable ZIP, verifies it against the official `SHASUMS256.txt` SHA-256, and safely extracts it under `$CHATARCH_HOME/nodejs`. It does not write nvm shell init or alter system Node/PATH; npm children use the detected `node.exe` and `npm-cli.js` argv list, preserving paths with spaces, Unicode, and shell metacharacters. Global npm packages installed with the managed runtime stay in `$CHATARCH_HOME/nodejs/npm`, which is added only to the child PATH.
 - `chatup docker` checks Docker Desktop's `docker`/`docker compose` on Windows and skips Unix group/systemd checks.
 - `chatup mysql` selects the MySQL Windows ZIP asset, `.exe` binary names, and TCP client config; `gitea`/`mysql`/`twikoo`/`nginx` `--service` flows still require user-level systemd and fail clearly on Windows.
 - `chatup cursor-agent --credential-store file-wrapper` writes `.cmd` wrappers on Windows; `chatup frp` supports Windows ZIP release assets; `zsh` and `crs` remain POSIX/Linux-only setup flows.
@@ -77,7 +77,7 @@ chatup
 |---|---|
 | `chatup doctor` | Check that ChatUp is callable. |
 | `chatup uv` | Install `uv` and create the ChatArch Python runtime; `--activate / --no-activate` controls existing Bash/Zsh startup updates (enabled by default). See [Quick Start](quickstart.md). |
-| `chatup nodejs` | Install nvm and the default LTS Node.js. |
+| `chatup nodejs` | Install default LTS Node.js with nvm on POSIX; on Windows reuse a suitable PATH runtime or bootstrap an official SHA-256-verified portable LTS ZIP under ChatArch home. |
 | `chatup docker` | Check the Docker environment and show sudo guidance when needed. |
 | `chatup zsh` | Configure zsh, oh-my-zsh, plugins, theme, and shell aliases. |
 | `chatup chrome-for-testing` | Independently manage Google Chrome for Testing browsers and JSON/Python descriptors. |
@@ -90,7 +90,7 @@ chatup
 | Command | Current capability |
 |---|---|
 | `chatup claude` | Configure Claude Code CLI and config files. |
-| `chatup codex` | Configure Codex CLI and config files. |
+| `chatup codex` | Configure Codex CLI and config files, using `CODEX_HOME` when it is set. |
 | `chatup cursor-agent` | Install/verify Cursor Agent CLI and safely copy `auth.json`, `cli-config.json`, and `agent-cli-state.json`. |
 | `chatup opencode` | Configure OpenCode CLI and config files. |
 | `chatup hermes` | Install Hermes Agent and optional Hermes WebUI; fall back to `gpt-5.6-terra` only when no model is configured. Explicit models, profiles, existing config and environment values retain precedence. |
@@ -217,7 +217,7 @@ Sources: [OpenAI downloads](https://chatgpt.com/download/), [official Windows in
 
 ## Codex Command Contract
 
-`chatup codex` configures the OpenAI Codex CLI (`~/.codex/config.toml` and `~/.codex/auth.json`):
+`chatup codex` configures the OpenAI Codex CLI (by default `~/.codex/config.toml` and `~/.codex/auth.json`; use the native `CODEX_HOME` override when it is set):
 
 The fallback model is `gpt-5.6-terra` (GPT-5.6 Terra), used only when no model is configured. An explicit `--model`, the selected OpenAI profile, and (when no profile is selected) existing Codex config, process environment and the active profile retain their existing precedence. User-configured models are not forcibly replaced by the fallback.
 
@@ -225,6 +225,7 @@ The fallback model is `gpt-5.6-terra` (GPT-5.6 Terra), used only when no model i
 - When `-e PROFILE` selects a ChatEnv profile, ChatUp reads only that explicit profile. It does not backfill missing secrets from the active profile, an existing Codex config, or process environment variables. Profile files are loaded without interpolation; unresolved `${...}` references fail instead of falling back to the process environment.
 - ChatEnv profile names cannot contain path separators, `.` or `..`; pass an existing file path when file-based config is intended.
 - If the selected profile lacks `OPENAI_API_KEY`, non-interactive setup fails instead of writing a different account's key.
+- Model, provider, and API login mode are written as root-level `model`, `model_provider`, and `forced_login_method = "api"` fields in `config.toml`; provider details live in `[model_providers.crs]` (including `requires_openai_auth = true`). The obsolete root-level `preferred_auth_method` is replaced. Only the root-level `OPENAI_API_KEY` in `auth.json` is updated. Other existing config tables and auth JSON fields are retained; ChatUp neither migrates nor prints login credentials.
 - Codex CLI 0.144+ requires `wire_api = "responses"`; `chatup codex` writes the CRS/OpenAI-compatible provider with the responses wire API.
 - Verify a model channel through Codex itself, for example `chatup codex -e apple -I` followed by `codex exec ...`; direct curl success is not enough for Codex routing.
 
@@ -235,6 +236,23 @@ chatup codex -e apple -I
 chatup codex -e ~/.chatarch/envs/OpenAI/.env -I
 chatup codex --api-key "$OPENAI_API_KEY" --base-url https://example.invalid/openai/v1 --model gpt-5.6-terra -I
 ```
+
+## Native Windows setup and boundaries
+
+On Windows 10/11, prepare an independent Python environment with ChatUV bootstrap first; ChatUp itself requires Python >=3.10. After installing ChatUp:
+
+```powershell
+chatup nodejs -I
+chatup codex -e work -I
+chatup opencode -e work -I
+chatup cursor-agent --install-only -I
+```
+
+`chatup nodejs` reuses Node >=20/npm on PATH; otherwise it downloads an official LTS Windows ZIP, verifies SHA-256, safely extracts under effective `CHATARCH_HOME`, and updates the current user's PATH for the managed Node directory and npm prefix. It does not modify the system PATH. Direct Codex/OpenCode and other npm-backed setup commands also persist those user PATH entries; a prior `chatup nodejs` is not required. The current process prepends managed directories while preserving Python and system PATH. Runtime selection excludes candidates without runnable npm before comparing versions. Fresh terminals can read the persisted user PATH. Shared npm execution uses `node.exe + npm-cli.js` rather than directly launching `npm.cmd`; Codex, OpenCode, Claude, CC Connect, Lark CLI, Playwright, and Remotion reuse this foundation.
+
+Cursor Agent uses its official Windows PowerShell installer. Hermes uses the ChatArch fork's Windows `install.ps1`, first checking the resolved home/install targets and then installing noninteractively; no gateway or WebUI is started by default. The current official Cursor installer recreates `%LOCALAPPDATA%\\cursor-agent`. ChatUp refuses to launch it if that directory already exists, preventing deletion of existing user data; migrate and confirm it yourself before retrying. ChatUp does not read or migrate existing credentials. The native acceptance gates cover the hosted Windows test matrix, managed Node/Codex/OpenCode smoke, and a read-only Hermes path probe—not live user sign-in or model calls.
+
+`iterm` and `macos` are macOS-only; `zsh` is POSIX-only; `crs` is currently a POSIX service path; `glance` currently ships a Linux amd64 release asset only. Windows binary/configuration support for Gitea, MySQL, Twikoo, and NGINX does not imply support for their systemd service/start operations. Discourse/Zulip Docker configuration is not Docker Desktop service acceptance. See the capability map for the per-command boundary.
 
 ## Cursor Agent Command Contract
 

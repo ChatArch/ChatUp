@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+## 0.2.23
+
+### Added
+- Add Windows-hosted native Node/Codex/OpenCode setup checks, including managed runtime/npm prefix, current-user PATH readback and an isolated Hermes installer path probe.
+- Make Cursor Agent use its official native Windows installer and ChatArch Hermes use the fork's PowerShell installer with explicit home/path readback.
+- Add a bounded Windows-native GitHub Actions smoke job for the official Node.js LTS ZIP bootstrap and Codex/OpenCode npm/configuration paths, using isolated HOME, USERPROFILE, CHATARCH_HOME, CODEX_HOME, and OPENCODE_HOME values plus a non-secret placeholder.
+
+### Fixed
+- Persist managed Windows PATH during direct npm-tool setup, retain inherited process paths, and prefer complete npm runtimes over newer incomplete Node installations. Exercise direct Codex bootstrap and fresh-environment launcher discovery in Windows CI.
+- Let `chatup nodejs` persist its managed runtime and npm launcher directories to current-user Windows PATH with readback and idempotent updates.
+- Reuse the shared shell-free Node/npm runtime in Remotion and discover Lark CLI's managed Windows launcher after installation.
+- Preserve unrelated Claude settings and honor `CLAUDE_CONFIG_DIR`; align FRP Windows architecture names, fail installation errors nonzero and refuse overwriting existing binaries/configurations.
+- Guard native installer failures against untrusted diagnostic output, and verify the Hermes requested paths before installation.
+- Make `chatup nodejs` bootstrap an official SHA-256-verified portable Node.js LTS ZIP under ChatArch home on Windows when PATH has no suitable runtime. Extraction is bounded and rejects unsafe archive paths; repeated setup reuses the managed runtime.
+- Run Windows npm operations through the detected `node.exe` and `npm-cli.js` with argv lists and a runtime-prepended child PATH, including the Playwright installer, instead of executing npm `.cmd` launchers directly. Packages installed globally through a ChatArch-managed runtime use the contained `$CHATARCH_HOME/nodejs/npm` prefix.
+- Make `chatup codex` honor `CODEX_HOME` and preserve unrelated native Codex config/auth fields while updating supported root-level `model`, `model_provider`, and `forced_login_method = "api"` settings.
+
 ## 0.2.22
 
 ### Added

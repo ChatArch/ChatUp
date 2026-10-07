@@ -17,6 +17,7 @@ from chatup.utils.custom_logger import setup_logger
 from chatup.utils.platforming import chmod_executable, chmod_private, is_windows, user_bin_candidates
 
 DEFAULT_INSTALL_URL = "https://cursor.com/install"
+WINDOWS_INSTALL_COMMAND = "irm 'https://cursor.com/install?win32=true' | iex"
 CREDENTIAL_STORE_CHOICES = ("native", "file-wrapper")
 CURSOR_ACCESS_TOKEN_KEY = "CURSOR_ACCESS_TOKEN"
 CURSOR_REFRESH_TOKEN_KEY = "CURSOR_REFRESH_TOKEN"
@@ -167,12 +168,20 @@ def _resolve_command_or_user_bin(name: str) -> Path | None:
         candidates.append(Path(found).expanduser())
     candidates.extend(user_bin_candidates(name))
     if is_windows():
+        local_app_data = os.environ.get("LOCALAPPDATA")
         candidates.extend(
             [
                 Path.home() / ".local" / "bin" / f"{name}.cmd",
                 Path.home() / ".local" / "bin" / f"{name}.bat",
             ]
         )
+        if local_app_data:
+            candidates.extend(
+                [
+                    Path(local_app_data) / "cursor-agent" / f"{name}.cmd",
+                    Path(local_app_data) / "cursor-agent" / f"{name}.exe",
+                ]
+            )
     for candidate in candidates:
         if candidate.exists() and (is_windows() or os.access(candidate, os.X_OK)):
             return candidate
@@ -311,9 +320,40 @@ def _install_cursor_agent_if_needed(*, install_url: str = DEFAULT_INSTALL_URL) -
     if _resolve_cursor_agent_binary():
         return False
     if is_windows():
-        raise click.ClickException(
-            "Cursor Agent was not found on PATH. Install Cursor Agent for Windows first, then rerun ChatUp."
+        if install_url != DEFAULT_INSTALL_URL:
+            raise click.ClickException("Windows Cursor Agent installs use the official Cursor installer URL only.")
+        local_app_data = os.environ.get("LOCALAPPDATA")
+        if not local_app_data:
+            raise click.ClickException("LOCALAPPDATA is required for the Windows Cursor Agent installer.")
+        target = Path(local_app_data) / "cursor-agent"
+        if target.exists() or target.is_symlink():
+            raise click.ClickException(
+                f"The official Cursor installer deletes the existing directory {target}; "
+                "refusing to run automatically. Preserve or migrate it manually first."
+            )
+        script = subprocess.run(
+            [
+                "powershell",
+                "-NoProfile",
+                "-NonInteractive",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-Command",
+                WINDOWS_INSTALL_COMMAND,
+            ],
+            text=True,
+            capture_output=True,
+            timeout=300,
         )
+        if script.returncode != 0:
+            raise click.ClickException(
+                f"Cursor Agent Windows installer failed (exit {script.returncode}); see the official installer logs."
+            )
+        if not _resolve_cursor_agent_binary():
+            raise click.ClickException(
+                "Cursor Agent Windows installer finished but cursor-agent was not found in PATH or %LOCALAPPDATA%\\cursor-agent."
+            )
+        return True
     script = subprocess.run(
         ["bash", "-lc", f"curl -fsSL {install_url!r} | bash"],
         text=True,

@@ -24,10 +24,10 @@ chatup
 ├── claude              # Install/configure Claude Code
 ├── docker              # Check Docker and permissions
 ├── frp                 # Install FRP Client/Server
-├── nodejs              # Install nvm and default LTS Node.js
+├── nodejs              # Install default LTS Node.js (nvm on POSIX; ChatArch portable ZIP on Windows)
 ├── uv                  # Install uv and ~/.chatarch/venv
 ├── chatgpt             # Install the new ChatGPT desktop app (includes Codex)
-├── codex               # Install/configure Codex CLI
+├── codex               # Configure Codex CLI and config files (uses CODEX_HOME when set)
 ├── cursor-agent        # Install/configure Cursor Agent CLI
 ├── opencode            # Install/configure OpenCode
 ├── lark-cli            # Configure official lark-cli with ChatEnv

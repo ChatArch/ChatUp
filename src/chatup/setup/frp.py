@@ -32,10 +32,10 @@ def _configure_logger(log_level="INFO"):
 
 
 def get_system_arch():
-    arch = platform.machine()
-    if arch == "x86_64":
+    arch = platform.machine().lower()
+    if arch in {"x86_64", "amd64"}:
         return "amd64"
-    elif arch == "aarch64":
+    elif arch in {"aarch64", "arm64"}:
         return "arm64"
     elif arch == "armv7l":
         return "arm"
@@ -139,6 +139,8 @@ def setup_frp(interactive=None, log_level="INFO"):
     work_dir.mkdir(parents=True, exist_ok=True)
 
     final_bin_path = work_dir / binary_name
+    if final_bin_path.exists() or final_bin_path.is_symlink():
+        raise click.ClickException(f"Refusing to overwrite existing FRP binary: {final_bin_path}")
 
     if install_method == "Download":
         version = ask_text("Enter FRP Version:", default=FRP_VERSION_DEFAULT)
@@ -161,8 +163,7 @@ def setup_frp(interactive=None, log_level="INFO"):
                 shutil.copy2(extracted_bin, final_bin_path)
             except Exception as e:
                 logger.error(f"Error downloading or extracting FRP: {e}")
-                print(f"Error downloading/extracting: {e}")
-                return
+                raise click.ClickException(f"Error downloading/extracting FRP: {e}") from e
 
     else:  # Local File
         local_path = ask_path("Enter path to local FRP archive (tar.gz or zip):")
@@ -171,8 +172,7 @@ def setup_frp(interactive=None, log_level="INFO"):
 
         if not os.path.exists(local_path):
             logger.error(f"Local FRP archive not found: {local_path}")
-            print("File not found.")
-            return
+            raise click.ClickException(f"FRP archive not found: {local_path}")
 
         with tempfile.TemporaryDirectory() as tmpdir:
             try:
@@ -180,8 +180,7 @@ def setup_frp(interactive=None, log_level="INFO"):
                 shutil.copy2(extracted_bin, final_bin_path)
             except Exception as e:
                 logger.error(f"Error extracting FRP from local archive: {e}")
-                print(f"Error extracting: {e}")
-                return
+                raise click.ClickException(f"Error extracting FRP: {e}") from e
 
     logger.info(f"FRP binary installed at: {final_bin_path}")
     print(f"FRP binary installed at: {final_bin_path}")
@@ -255,6 +254,8 @@ auth.token = "{token}"
 """
 
     config_path = work_dir / config_name
+    if config_path.exists() or config_path.is_symlink():
+        raise click.ClickException(f"Refusing to overwrite existing FRP configuration: {config_path}")
     with open(config_path, "w") as f:
         f.write(config_content)
 

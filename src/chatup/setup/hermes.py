@@ -16,12 +16,15 @@ from chatenv.source_chain import split_config_sources
 from chatup.const import CHATARCH_ENV_DIR
 from chatup.interaction import abort_if_force_without_tty, resolve_interactive_mode, resolve_value
 from chatup.utils.custom_logger import setup_logger
-from chatup.utils.platforming import chmod_private, is_windows, require_non_windows
+from chatup.utils.platforming import chmod_private, is_windows
 
 logger = setup_logger("setup_hermes")
 
 CHATARCH_HERMES_INSTALLER_URL = (
     "https://raw.githubusercontent.com/ChatArch/hermes-agent/main/scripts/install.sh"
+)
+CHATARCH_HERMES_WINDOWS_INSTALLER_URL = (
+    "https://raw.githubusercontent.com/ChatArch/hermes-agent/main/scripts/install.ps1"
 )
 DEFAULT_MODEL = "gpt-5.6-terra"
 DEFAULT_BASE_URL = "https://api.openai.com/v1"
@@ -59,19 +62,22 @@ def _sha256(path: Path) -> str:
 
 
 def _cache_installer_path() -> Path:
-    return Path.home() / ".cache" / "chatup" / "hermes" / "install.sh"
+    home = Path(os.environ.get("CHATARCH_HOME", str(Path.home() / ".chatarch"))).expanduser()
+    return home / "cache" / "chatup" / "hermes" / ("install.ps1" if is_windows() else "install.sh")
 
 
 def _packaged_installer_path() -> Path:
-    return Path(__file__).resolve().parent / "assets" / "hermes" / "install.sh"
+    name = "install.ps1" if is_windows() else "install.sh"
+    return Path(__file__).resolve().parent / "assets" / "hermes" / name
 
 
 def _download_installer() -> Path:
     target = _cache_installer_path()
     target.parent.mkdir(parents=True, exist_ok=True)
     tmp = target.with_suffix(".tmp")
+    url = CHATARCH_HERMES_WINDOWS_INSTALLER_URL if is_windows() else CHATARCH_HERMES_INSTALLER_URL
     logger.info("Downloading ChatArch Hermes installer")
-    with urllib.request.urlopen(CHATARCH_HERMES_INSTALLER_URL, timeout=60) as response:
+    with urllib.request.urlopen(url, timeout=60) as response:
         tmp.write_bytes(response.read())
     chmod_private(tmp)
     tmp.replace(target)
@@ -95,6 +101,11 @@ def _resolve_installer(installer: str | None, update_installer: bool) -> Path:
     packaged = _packaged_installer_path()
     if packaged.is_file():
         return packaged
+
+    if is_windows():
+        # The fork's PowerShell installer is the native Windows bootstrap;
+        # cache it under CHATARCH_HOME rather than falling back to Bash/WSL.
+        return _download_installer()
 
     raise click.ClickException(
         "Hermes installer is unavailable. Pass --installer PATH or run with --update-installer."
@@ -329,10 +340,36 @@ def _hermes_installed(hermes_home: Path) -> bool:
 
 
 def _run_installer(installer_path: Path, hermes_home: Path) -> None:
-    require_non_windows("Hermes shell installer")
     env = os.environ.copy()
     env["HERMES_HOME"] = str(hermes_home)
-    command = ["bash", str(installer_path)]
+    if is_windows():
+        if installer_path.suffix.lower() != ".ps1":
+            raise click.ClickException("Windows Hermes installer must be a PowerShell .ps1 script.")
+        command = [
+            "powershell", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", str(installer_path),
+            "-NonInteractive", "-HermesHome", str(hermes_home), "-InstallDir", str(hermes_home / "hermes-agent"),
+        ]
+        readback = subprocess.run(command + ["-ShowResolvedPaths"], env=env, text=True, capture_output=True)
+        if readback.returncode != 0:
+            raise click.ClickException(f"Hermes Windows installer path readback failed (exit {readback.returncode}).")
+        try:
+            import json as _json
+            resolved = _json.loads(readback.stdout)
+            home_resolved = resolved.get("hermes_home")
+            install_resolved = resolved.get("install_dir")
+            if not isinstance(home_resolved, str) or not isinstance(install_resolved, str):
+                raise ValueError("missing installer path fields")
+            # Drive-letter case and slash direction may differ on Windows.
+            import ntpath
+            def same_path(a, b):
+                return ntpath.normcase(ntpath.normpath(str(a))) == ntpath.normcase(ntpath.normpath(str(b)))
+            if not same_path(home_resolved, hermes_home) or not same_path(install_resolved, hermes_home / "hermes-agent"):
+                raise ValueError("resolved Hermes paths differ from requested paths")
+        except (ValueError, TypeError):
+            raise click.ClickException("Hermes Windows installer path readback did not match the requested home/install directory.") from None
+        click.echo("Hermes installer resolved paths read back successfully.")
+    else:
+        command = ["bash", str(installer_path)]
     click.echo(f"Running Hermes installer: {_display_command(command)}")
     result = subprocess.run(command, env=env, text=True)
     if result.returncode != 0:

@@ -11,6 +11,12 @@ import shutil
 import subprocess
 import tempfile
 
+from chatup.setup.nodejs import (
+    _detect_nodejs_runtime,
+    has_required_nodejs,
+    node_runtime_env,
+    npm_command_for_runtime,
+)
 from chatup.utils.custom_logger import setup_logger
 
 REMOTION_VERSION = "4.0.530"
@@ -25,9 +31,9 @@ OWNERSHIP = {"schema": 1, "template": "remotion", "version": REMOTION_VERSION}
 logger = logging.getLogger(__name__)
 
 
-def _run(command: list[str], *, cwd: Path | None = None, timeout: int = 60) -> str:
+def _run(command: list[str], *, cwd: Path | None = None, timeout: int = 60, env=None) -> str:
     result = subprocess.run(command, cwd=cwd, capture_output=True, text=True,
-                            encoding="utf-8", errors="replace", timeout=timeout)
+                            encoding="utf-8", errors="replace", timeout=timeout, env=env)
     if result.returncode:
         detail = (result.stderr or result.stdout).strip()[-2000:]
         raise RuntimeError(f"{Path(command[0]).name} failed (exit {result.returncode}): {detail}")
@@ -78,20 +84,24 @@ def plan_remotion_setup(project_dir: str | Path, *, browser_executable=None) -> 
             "browser": _find_browser(browser_executable), "status": "planned"}
 
 
-def _runtime() -> tuple[str, str]:
-    node, npm = shutil.which("node"), shutil.which("npm")
-    if not node or not npm:
-        raise RuntimeError("Node.js >=18.12 and npm >=9 are required. Install them first with chatup nodejs.")
-    for name, executable, minimum in (("Node.js", node, (18, 12, 0)), ("npm", npm, (9, 0, 0))):
-        version = _run([executable, "--version"])
+def _runtime() -> tuple[str, dict]:
+    runtime = _detect_nodejs_runtime()
+    if not has_required_nodejs(min_major=20, runtime=runtime):
+        raise RuntimeError("Node.js >=20 and npm >=9 are required. Install them first with chatup nodejs.")
+    node = str(runtime["node_bin"])
+    for name, command, minimum in (
+        ("Node.js", [node, "--version"], (18, 12, 0)),
+        ("npm", npm_command_for_runtime(runtime, ["--version"]), (9, 0, 0)),
+    ):
+        version = _run(command, env=node_runtime_env(runtime))
         match = re.fullmatch(r"v?(\d+)\.(\d+)\.(\d+)", version)
         if not match or tuple(map(int, match.groups())) < minimum:
             required = ".".join(map(str, minimum))
             raise RuntimeError(f"{name} >={required} is required; found {version}.")
-    return node, npm
+    return node, runtime
 
 
-def _verify_project(target: Path, npm: str) -> None:
+def _verify_project(target: Path, runtime: dict) -> None:
     try:
         package = json.loads((target / "package.json").read_text(encoding="utf-8"))
         lock = json.loads((target / "package-lock.json").read_text(encoding="utf-8"))
@@ -99,7 +109,11 @@ def _verify_project(target: Path, npm: str) -> None:
             if (not isinstance(data, dict) or not isinstance(data.get("dependencies"), dict)
                     or any(data["dependencies"].get(name) != version for name, version in DEPENDENCIES.items())):
                 raise ValueError("the project's pinned dependencies have changed")
-        installed = json.loads(_run([npm, "ls", "--depth=0", "--json"], cwd=target))["dependencies"]
+        installed = json.loads(_run(
+            npm_command_for_runtime(runtime, ["ls", "--depth=0", "--json"]),
+            cwd=target,
+            env=node_runtime_env(runtime),
+        ))["dependencies"]
         if (not isinstance(installed, dict) or any(
                 not isinstance(installed.get(name), dict) or installed[name].get("version") != version
                 for name, version in DEPENDENCIES.items())):
@@ -118,9 +132,9 @@ def setup_remotion(project_dir: str | Path, *, dry_run: bool = False,
             return plan
         target = Path(plan["path"])
         logger.info("Checking Node.js and npm")
-        _, npm = _runtime()
+        _, runtime = _runtime()
         if plan["managed"]:
-            _verify_project(target, npm)
+            _verify_project(target, runtime)
             return {**plan, "status": "already_initialized"}
         target.parent.mkdir(parents=True, exist_ok=True)
         staging = Path(tempfile.mkdtemp(prefix=".chatup-remotion-", dir=target.parent))
@@ -128,9 +142,13 @@ def setup_remotion(project_dir: str | Path, *, dry_run: bool = False,
             template = Path(__file__).parent / "assets" / "remotion"
             shutil.copytree(template, staging, dirs_exist_ok=True)
             logger.info("Installing locked Remotion dependencies in %s", target)
-            _run([npm, "ci", "--ignore-scripts", "--include=optional", "--no-audit", "--no-fund"],
-                 cwd=staging, timeout=1800)
-            _verify_project(staging, npm)
+            _run(
+                npm_command_for_runtime(runtime, ["ci", "--ignore-scripts", "--include=optional", "--no-audit", "--no-fund"]),
+                cwd=staging,
+                timeout=1800,
+                env=node_runtime_env(runtime),
+            )
+            _verify_project(staging, runtime)
             (staging / MARKER).write_text(json.dumps(OWNERSHIP, indent=2) + "\n", encoding="utf-8")
             if target.exists() or target.is_symlink():
                 raise RuntimeError(f"Destination appeared during installation; refusing to overwrite {target}.")

@@ -24,10 +24,10 @@ chatup
 ├── claude              # 安装/配置 Claude Code
 ├── docker              # 检查 Docker 环境与权限
 ├── frp                 # 安装 FRP Client/Server
-├── nodejs              # 安装 nvm 与默认 LTS Node.js
+├── nodejs              # 安装默认 LTS Node.js（POSIX 使用 nvm，Windows 使用 ChatArch 便携 ZIP）
 ├── uv                  # 安装 uv 和 ~/.chatarch/venv
 ├── chatgpt              # 安装新版 ChatGPT 桌面应用（含 Codex）
-├── codex               # 安装/配置 Codex CLI
+├── codex               # 配置 Codex CLI 和配置文件（设置时使用 CODEX_HOME）
 ├── cursor-agent        # 安装/配置 Cursor Agent CLI
 ├── opencode            # 安装/配置 OpenCode
 ├── lark-cli            # 配置官方 lark-cli 与 ChatEnv

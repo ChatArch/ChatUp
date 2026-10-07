@@ -13,7 +13,17 @@ from chatup.cli import main
 def remotion(monkeypatch):
     module = importlib.import_module("chatup.setup.remotion")
     monkeypatch.setattr(module.shutil, "which", lambda name: f"/tools/{name}")
+    monkeypatch.setattr(
+        module,
+        "_runtime",
+        lambda: (
+            "/tools/node",
+            {"node_bin": "/tools/node", "npm_bin": "/tools/npm", "source": "path"},
+        ),
+    )
     monkeypatch.setattr(module, "_find_browser", lambda value=None: None)
+    monkeypatch.setattr(module, "npm_command_for_runtime", lambda runtime, args: ["/tools/npm", *args])
+    monkeypatch.setattr(module, "node_runtime_env", lambda runtime: {})
     calls = []
 
     def run(command, *, cwd=None, **kwargs):
@@ -77,7 +87,11 @@ def test_refuses_unmanaged_targets_without_writes(remotion, tmp_path, kind):
 
 def test_missing_runtime_fails_before_creating_target(remotion, monkeypatch, tmp_path):
     module, _ = remotion
-    monkeypatch.setattr(module.shutil, "which", lambda name: None)
+    monkeypatch.setattr(
+        module,
+        "_runtime",
+        lambda: (_ for _ in ()).throw(RuntimeError("Node.js >=20 and npm >=9 are required")),
+    )
     target = tmp_path / "missing-parent" / "video"
     with pytest.raises(RuntimeError, match="Node|npm"):
         module.setup_remotion(target)
@@ -96,7 +110,13 @@ def test_project_plan_normalizes_parent_segments(remotion, tmp_path):
 @pytest.mark.parametrize("node,npm", [("v18.11.0", "11.0.0"), ("v24.0.0", "8.0.0"), ("invalid", "11.0.0")])
 def test_rejects_incompatible_runtime_before_writes(remotion, monkeypatch, tmp_path, node, npm):
     module, _ = remotion
-    monkeypatch.setattr(module, "_run", lambda command, **kwargs: node if command[0].endswith("node") else npm)
+    monkeypatch.setattr(
+        module,
+        "_runtime",
+        lambda: (_ for _ in ()).throw(
+            RuntimeError(f"Node.js >=20 and npm >=9 are required; found {node}/{npm}.")
+        ),
+    )
     target = tmp_path / "video"
     with pytest.raises(RuntimeError, match="Node|npm"):
         module.setup_remotion(target)
