@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.2.23
+
 ### Added
 - Add Windows-hosted native Node/Codex/OpenCode setup checks, including managed runtime/npm prefix, current-user PATH readback and an isolated Hermes installer path probe.
 - Make Cursor Agent use its official native Windows installer and ChatArch Hermes use the fork's PowerShell installer with explicit home/path readback.
