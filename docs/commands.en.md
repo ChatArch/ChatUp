@@ -20,6 +20,7 @@ chatup
 |-- macos               # Select supported macOS apps, including Blender on Apple Silicon
 |-- remotion            # Initialize a locked local video project
 |-- chrome-for-testing # Manage Google Chrome for Testing browsers
+|-- computer-use       # Preview Linux X11 Computer Use; --sudo applies
 |-- chromedriver       # Manage ChromeDriver WebDriver servers
 |-- playwright         # Manage Playwright packages and Chromium browsers
 |-- frp         # Install FRP Client/Server
@@ -84,6 +85,11 @@ chatup
 | `chatup chromedriver` | Independently manage ChromeDriver WebDriver servers and match CFT/browser versions. |
 | `chatup playwright` | Install an exact Playwright package plus its managed Chromium and return a reusable descriptor. |
 | `chatup frp` | Install FRP Client/Server. |
+| `chatup computer-use` | Plan same-user Linux X11 Computer Use; apply only with `--sudo`. |
+
+## Linux Computer Use {#computer-use}
+
+`chatup computer-use` returns a JSON plan by default; `--sudo --dry-run` also stays read-only. Only `--sudo` installs the managed driver/needed OS packages and generates side entrypoints. Pass `--display` with `--xauthority` to attach to a selected same-user X11 desktop, or use `--state` to select its metadata. The effective ChatEnv/`CHATARCH_HOME` is the default. The current installer supports Debian/Ubuntu Linux x86_64 X11 only. See [Computer Use](computer-use.md) for lifecycle, security, and Agent routing limits.
 
 ## Agents and Toolchains
 

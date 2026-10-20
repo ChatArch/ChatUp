@@ -14,6 +14,7 @@ Site entry: https://arch.gh.wzhecnu.cn/ChatUp/en/
 | Read the complete top-level tree and independent CFT/ChromeDriver/Playwright contracts | [CLI Tree](cli-tree.md) |
 | Read command groups, option boundaries, and service defaults | [Command Reference](commands.md) |
 | Check which ChatArch setup flows have first-class commands | [CLI Capability Map](capability-map.md) |
+| Preview Linux X11 Computer Use and its execution-host boundary | [Linux Computer Use](computer-use.md) |
 | Understand the directories and project-record conventions created by `chatup workspace` | [Workspace Scaffold](workspace.md) |
 | Install ChatTea-compatible Gitea, ChatData-compatible MySQL, user-level NGINX, and CRS | [Command Reference: Local Services](commands.md#local-services) |
 | Confirm ChatArch default paths, safety boundaries, and interactive conventions | [CLI Capability Map: Out of Scope](capability-map.md#out-of-scope) |

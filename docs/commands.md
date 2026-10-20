@@ -20,6 +20,7 @@ chatup
 |-- macos               # 勾选 macOS 应用，Apple Silicon 可选 Blender
 |-- remotion            # 初始化带锁定依赖的本地视频项目
 |-- chrome-for-testing # 管理 Google Chrome for Testing 浏览器
+|-- computer-use       # 预览 Linux X11 Computer Use，--sudo 才应用
 |-- chromedriver       # 管理 ChromeDriver WebDriver server
 |-- playwright         # 管理 Playwright package 与 Chromium browser
 |-- frp         # 安装 FRP Client/Server
@@ -84,6 +85,11 @@ chatup
 | `chatup chromedriver` | 独立管理 ChromeDriver WebDriver server，可匹配 CFT 或指定浏览器版本。 |
 | `chatup playwright` | 安装精确 Playwright package 与其管理的 Chromium，并输出可复用 descriptor。 |
 | `chatup frp` | 安装 FRP Client/Server。 |
+| `chatup computer-use` | 规划同用户 Linux X11 Computer Use；仅 `--sudo` 应用。 |
+
+## Linux Computer Use {#computer-use}
+
+`chatup computer-use` 默认仅输出 JSON 计划，`--sudo --dry-run` 同样只读；`--sudo` 才安装受管 driver/必要系统包并生成侧入口。`--display` 和 `--xauthority` 同传可明确附着同用户 X11 桌面，或用 `--state` 选择其元数据；默认使用有效 ChatEnv/`CHATARCH_HOME`。目前只支持 Debian/Ubuntu Linux x86_64 X11。详细的生命周期、安全边界和 Agent 路由限制见 [Computer Use](computer-use.md)。
 
 ## Agent 与工具链
 

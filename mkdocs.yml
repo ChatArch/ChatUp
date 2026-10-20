@@ -36,6 +36,7 @@ plugins:
             CLI 树: CLI Tree
             命令参考: Command Reference
             能力地图: Capability Map
+            Linux Computer Use: Linux Computer Use
             工作区脚手架: Workspace Scaffold
 
 markdown_extensions:
@@ -67,4 +68,5 @@ nav:
   - CLI 树: cli-tree.md
   - 命令参考: commands.md
   - 能力地图: capability-map.md
+  - Linux Computer Use: computer-use.md
   - 工作区脚手架: workspace.md

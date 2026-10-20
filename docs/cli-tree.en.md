@@ -39,11 +39,20 @@ chatup
 ├── macos               # Select supported macOS apps, including Blender on Apple Silicon
 ├── remotion            # Initialize a locked local video project
 ├── chrome-for-testing  # Manage Google Chrome for Testing browsers
+├── computer-use        # Preview Linux X11 Computer Use; --sudo applies
 ├── chromedriver        # Manage ChromeDriver WebDriver servers
 └── playwright          # Manage Playwright packages and Chromium browsers
 ```
 
 Run `chatup --tree` to read back the registered tree with parameter signatures and command purposes. `chatup --tree-brief` keeps the same nodes and descriptions while omitting signatures. See [Command Reference](commands.md) for complete options.
+
+## Linux Computer Use
+
+```text
+chatup computer-use [--sudo] [--dry-run] [--display DISPLAY] [--xauthority XAUTHORITY] [--state STATE] [--home HOME]
+```
+
+The bare command plans read-only; `--sudo --dry-run` stays read-only, while `--sudo` applies. It selects a same-user X11 desktop and creates separate side entrypoints. See [Computer Use](computer-use.md).
 
 ## Local Glance Runtime
 

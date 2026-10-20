@@ -14,6 +14,7 @@ Choose documentation by scenario:
 | Read the complete top-level CLI tree and independent CFT/ChromeDriver/Playwright contracts | `docs/cli-tree.en.md` |
 | Read command groups, option boundaries, and service defaults | `docs/commands.en.md` |
 | Check which ChatArch setup flows have first-class commands | `docs/capability-map.en.md` |
+| Preview or configure a Linux X11 Computer Use execution host | `docs/computer-use.en.md` |
 | Understand the directories and project-record conventions created by `chatup workspace` | `docs/workspace.en.md` |
 | Install ChatTea-compatible Gitea, ChatData-compatible MySQL, user-level NGINX, and CRS | `docs/commands.en.md` |
 
@@ -32,6 +33,8 @@ chatup workspace ~/Playground
 ```
 
 `chatup uv` updates auto-activation in existing `~/.bashrc` and `~/.zshrc` by default. Use `chatup uv --no-activate` to leave startup configuration unchanged. Missing rc files are not created, and Windows skips this step.
+
+On a Debian/Ubuntu Linux x86_64 X11 execution host, `chatup computer-use` is a read-only preview; `chatup computer-use --sudo` explicitly applies. It can attach to a selected same-user desktop, reuse regular Chrome's default profile, and produce separate MCP/Chrome/terminal/status entrypoints. It does not edit Agent configuration or fix Hermes's per-topic SSH default screenshot route. See [Computer Use](docs/computer-use.en.md).
 
 Common install commands:
 
@@ -99,11 +102,12 @@ Installs the official new ChatGPT desktop app including Codex. Requires Homebrew
 | Base runtime | `doctor`, `uv`, `nodejs`, `docker`, `zsh`, `chrome-for-testing`, `chromedriver`, `playwright`, `frp` |
 | Workspace scaffold | `workspace` |
 | Desktop apps | `macos` (Snipaste/iTerm2/Chrome/Blender selection), `chrome`, `snipaste` (macOS/Windows), `iterm` (macOS only), `chatgpt` (includes Codex) |
+| Linux X11 Computer Use | `computer-use` (read-only preview by default; `--sudo` applies) |
 | Video projects | `remotion` |
 | Local service installers | `gitea`, `glance`, `mysql`, `nginx`, `crs` |
+| Agent toolchains | `cc-connect`, `claude`, `codex`, `cursor-agent`, `opencode`, `hermes`, `lark-cli` |
 
 Bare `chatup glance` installs the latest stable maintained `ChatArch/glance` release under `glance` in the effective ChatArch home. The current matrix is Linux amd64 only. It verifies the archive, `SHA256SUMS`, `BUILDINFO.txt`, source SHA and raw binary version, then reuses ChatGlance portable APIs for loopback initialization. It never starts a service, creates a public endpoint or writes passwords; repeated runs preserve configuration/data, and version changes belong to `chatglance runtime update`.
-| Agent toolchains | `cc-connect`, `claude`, `codex`, `cursor-agent`, `opencode`, `hermes`, `lark-cli` |
 
 Desktop apps use native application paths; ChatArch-managed install targets stay under `~/.chatarch/...`, for example `~/.chatarch/chrome-for-testing`, `~/.chatarch/chromedriver`, `~/.chatarch/playwright`, `~/.chatarch/chattea`, `~/.chatarch/discourse`, `~/.chatarch/zulip`, `~/.chatarch/chatdata`, `~/.chatarch/nginx`, and `~/.chatarch/crs/local`. `cursor-agent`, `discourse`, and `zulip` register typed ChatEnv profiles; an explicitly selected profile is isolated from credentials in the process environment. ChatStyle renders the CLI tree from the registered command surface. See `docs/capability-map.en.md` for the full capability boundary.
 

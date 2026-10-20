@@ -6,6 +6,7 @@ from chatstyle import add_tree_option
 from chatup import __version__
 from chatup.commands.chrome_for_testing import cli as chrome_for_testing_cli
 from chatup.commands.chromedriver import cli as chromedriver_cli
+from chatup.commands.computer_use import cli as computer_use_cli
 from chatup.commands.desktop import chrome_cli, iterm_cli, snipaste_cli
 from chatup.commands.macos import macos_cli
 from chatup.commands.playwright import cli as playwright_cli
@@ -33,6 +34,7 @@ def doctor() -> None:
 
 register_setup_commands(main)
 main.add_command(chrome_for_testing_cli)
+main.add_command(computer_use_cli)
 main.add_command(chromedriver_cli)
 main.add_command(playwright_cli)
 main.add_command(chrome_cli)

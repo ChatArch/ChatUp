@@ -14,6 +14,7 @@ ChatUp 是 ChatArch 的独立环境与工具安装 CLI。它承接原来 `chatto
 | 阅读完整顶层 CLI 树和独立 CFT/ChromeDriver/Playwright contract | `docs/cli-tree.md` |
 | 查看命令分组、参数边界和服务默认路径 | `docs/commands.md` |
 | 校对哪些 ChatArch setup 流程已经有一等命令 | `docs/capability-map.md` |
+| 预览或配置 Linux X11 Computer Use 执行端 | `docs/computer-use.md` |
 | 理解 `chatup workspace` 创建的目录和项目记录约定 | `docs/workspace.md` |
 | 安装 ChatTea-compatible Gitea、Discourse/Zulip 社区服务配置、ChatData-compatible MySQL、user-level NGINX 和 CRS | `docs/commands.md` |
 
@@ -32,6 +33,8 @@ chatup workspace ~/Playground
 ```
 
 `chatup uv` 默认更新已有 `~/.bashrc`、`~/.zshrc` 的自动激活块；使用 `chatup uv --no-activate` 可保持启动配置不变。不会创建缺失的 rc 文件，Windows 跳过此项。
+
+Linux Debian/Ubuntu x86_64 X11 执行端可运行 `chatup computer-use` 只读预览；明确使用 `chatup computer-use --sudo` 才应用。支持显式选择同用户桌面并复用普通 Chrome 默认 profile，生成独立 MCP/Chrome/terminal/status 入口。它不修改 Agent 配置，也不修复 Hermes 按话题 SSH 绑定的默认截图路由。详见 [Computer Use](docs/computer-use.md)。
 
 常见安装命令：
 
@@ -101,11 +104,12 @@ chatup chatgpt --yes  # Windows 首次安装时接受 Store 协议
 | 基础运行环境 | `doctor`、`uv`、`nodejs`、`docker`、`zsh`、`chrome-for-testing`、`chromedriver`、`playwright`、`frp` |
 | 工作区脚手架 | `workspace` |
 | 桌面应用 | `macos`（Snipaste/iTerm2/Chrome/Blender 多选）、`chrome`、`snipaste`（macOS/Windows）、`iterm`（仅 macOS）、`chatgpt`（含 Codex） |
+| Linux X11 Computer Use | `computer-use`（默认只读预览，`--sudo` 应用） |
 | 视频项目 | `remotion` |
 | 本地服务安装 | `gitea`、`glance`、`discourse`、`zulip`、`mysql`、`nginx`、`crs` |
+| Agent 工具链 | `cc-connect`、`claude`、`codex`、`cursor-agent`、`opencode`、`hermes`、`lark-cli` |
 
 `chatup glance` 裸命令安装 `ChatArch/glance` 最新稳定维护版到有效 ChatArch home 下的 `glance`。当前仅支持 Linux amd64；严格验证归档、`SHA256SUMS`、`BUILDINFO.txt`、source SHA 和原始二进制版本，复用 ChatGlance portable API 初始化 loopback 配置。它不启动服务、不建立公网入口、不写密码；重复运行保留配置和数据，版本变更请使用 `chatglance runtime update`。
-| Agent 工具链 | `cc-connect`、`claude`、`codex`、`cursor-agent`、`opencode`、`hermes`、`lark-cli` |
 
 桌面应用使用系统原生应用目录；ChatArch 自管安装项默认目录收敛到 `~/.chatarch/...`，例如 `~/.chatarch/chrome-for-testing`、`~/.chatarch/chromedriver`、`~/.chatarch/playwright`、`~/.chatarch/chattea`、`~/.chatarch/discourse`、`~/.chatarch/zulip`、`~/.chatarch/chatdata`、`~/.chatarch/nginx` 和 `~/.chatarch/crs/local`。`cursor-agent` 额外注册 ChatEnv `CursorAgent` profile，`discourse`/`zulip` 注册管理员凭据 profile，并支持 `-e/--env` 从 env 文件或 profile 快速配置；显式选择 profile 时不会混入进程环境中的其他账号凭据。CLI 树由 ChatStyle 的注册表渲染。更完整的能力边界见 `docs/capability-map.md`。
 
