@@ -32,10 +32,18 @@ def test_codex_default_profile_resolves_after_fresh_import_in_isolated_home(tmp_
                       "OPENAI_API_MODEL='default-fixture-model'\n", encoding="utf-8")
     home.mkdir()
     source = Path(__file__).resolve().parents[1]
-    env = {"HOME": str(home), "CHATARCH_HOME": str(chatarch), "TMPDIR": str(tmp_path),
+    system_root = (os.environ.get("SystemRoot") or os.environ.get("SYSTEMROOT")) if os.name == "nt" else None
+    system_bins = ([str(Path(system_root) / "System32"), system_root] if system_root
+                   else ["/usr/bin", "/bin"])
+    env = {"HOME": str(home), "USERPROFILE": str(home),
+           "CHATARCH_HOME": str(chatarch), "TMPDIR": str(tmp_path),
            "GIT_CONFIG_GLOBAL": str(tmp_path / "gitconfig"), "GIT_CONFIG_NOSYSTEM": "1",
-           "PATH": f"{Path(sys.executable).parent}:/usr/bin:/bin", "PYTHONPATH": str(source / "src"),
+           "PATH": os.pathsep.join([str(Path(sys.executable).parent), *system_bins]),
+           "PYTHONPATH": str(source / "src"),
            "PYTHONDONTWRITEBYTECODE": "1"}
+    if system_root:
+        env["SYSTEMROOT"] = system_root
+        env["TEMP"] = env["TMP"] = str(tmp_path)
     code = ("import chatup.setup.codex as codex; "
             "codex.ensure_nodejs_requirement=lambda **kwargs: None; "
             "codex.should_install_global_npm_package=lambda *args, **kwargs: False; "

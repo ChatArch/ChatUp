@@ -293,6 +293,7 @@ def test_apply_attaches_without_touching_owner_service_and_reuses_own_entrypoint
     monkeypatch.setattr(cu.platform, "system", lambda: "Linux")
     monkeypatch.setattr(cu.platform, "machine", lambda: "x86_64")
     monkeypatch.setattr(cu, "_linux_distribution", lambda: "ubuntu")
+    monkeypatch.setattr(cu.shutil, "which", lambda name: "/usr/bin/xterm" if name == "xterm" else None)
     monkeypatch.setattr(cu, "_verified_driver", lambda runtime: True)
     monkeypatch.setattr(cu, "_run", lambda *a, **k: pytest.fail("owner service was touched"))
     monkeypatch.setenv("OPENAI_API_KEY", "private-fixture")
@@ -328,6 +329,7 @@ def test_apply_reuses_verified_legacy_dedicated_driver_without_pip(tmp_path, mon
     monkeypatch.setattr(cu.platform, "system", lambda: "Linux")
     monkeypatch.setattr(cu.platform, "machine", lambda: "x86_64")
     monkeypatch.setattr(cu, "_linux_distribution", lambda: "ubuntu")
+    monkeypatch.setattr(cu.shutil, "which", lambda name: "/usr/bin/xterm" if name == "xterm" else None)
     home = tmp_path / "managed"
     venv = home / "computer-use/venv"
     binary = venv / "bin/cua-driver"
@@ -348,6 +350,30 @@ def test_apply_reuses_verified_legacy_dedicated_driver_without_pip(tmp_path, mon
     apply_computer_use(plan)
     assert (plan.runtime / "venv").is_symlink()
     assert (plan.runtime / "venv").resolve() == venv
+
+
+def test_attached_desktop_without_xterm_plans_and_applies_only_terminal_prerequisite(tmp_path, monkeypatch):
+    import chatup.computer_use as cu
+    import chatup.setup.desktop as native_desktop
+
+    xauth, sockets = _x11(tmp_path)
+    monkeypatch.setattr(cu, "_x11_socket_dir", sockets)
+    monkeypatch.setattr(cu.stat, "S_ISSOCK", lambda mode: True)
+    _fake_live_x11(monkeypatch, cu)
+    monkeypatch.setattr(cu.platform, "system", lambda: "Linux")
+    monkeypatch.setattr(cu.platform, "machine", lambda: "x86_64")
+    monkeypatch.setattr(cu, "_linux_distribution", lambda: "ubuntu")
+    monkeypatch.setattr(cu.shutil, "which", lambda name: "/usr/bin/sudo" if name == "sudo" else None)
+    monkeypatch.setattr(cu, "_verified_driver", lambda runtime: True)
+    monkeypatch.setattr(native_desktop, "setup_desktop_app", lambda app, **kwargs:
+                        {"binary": sys.executable})
+    calls = []
+    monkeypatch.setattr(cu, "_run", lambda argv, **kwargs: calls.append(argv))
+    plan = plan_computer_use(home=tmp_path / "managed", display=":20", xauthority=xauth)
+    assert any("sudo apt-get install -y --no-install-recommends xterm" in action for action in plan.actions)
+    result = apply_computer_use(plan)
+    assert result["desktop"]["ownership"] == "attached"
+    assert calls == [["sudo", "apt-get", "install", "-y", "--no-install-recommends", "xterm"]]
 
 
 def test_new_desktop_apply_writes_only_owned_user_service_and_entrypoints(tmp_path, monkeypatch):
