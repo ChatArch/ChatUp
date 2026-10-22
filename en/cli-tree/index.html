@@ -351,6 +351,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#linux-computer-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      Linux Computer Use
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#local-glance-runtime" class="md-nav__link">
     <span class="md-ellipsis">
       Local Glance Runtime
@@ -544,6 +553,28 @@
   
   
     <li class="md-nav__item">
+      <a href="../computer-use/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Linux Computer Use
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../workspace/" class="md-nav__link">
         
   
@@ -589,6 +620,15 @@
   <a href="#top-level-commands" class="md-nav__link">
     <span class="md-ellipsis">
       Top-Level Commands
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#linux-computer-use" class="md-nav__link">
+    <span class="md-ellipsis">
+      Linux Computer Use
     </span>
   </a>
   
@@ -785,79 +825,84 @@
 <a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>├── macos               # Select supported macOS apps, including Blender on Apple Silicon
 <a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>├── remotion            # Initialize a locked local video project
 <a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>├── chrome-for-testing  # Manage Google Chrome for Testing browsers
-<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>├── chromedriver        # Manage ChromeDriver WebDriver servers
-<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>└── playwright          # Manage Playwright packages and Chromium browsers
+<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>├── computer-use        # Preview Linux X11 Computer Use; --sudo applies
+<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>├── chromedriver        # Manage ChromeDriver WebDriver servers
+<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>└── playwright          # Manage Playwright packages and Chromium browsers
 </code></pre></div>
 <p>Run <code>chatup --tree</code> to read back the registered tree with parameter signatures and command purposes. <code>chatup --tree-brief</code> keeps the same nodes and descriptions while omitting signatures. See <a href="../commands/">Command Reference</a> for complete options.</p>
+<h2 id="linux-computer-use">Linux Computer Use<a class="headerlink" href="#linux-computer-use" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>chatup computer-use [--sudo] [--dry-run] [--display DISPLAY] [--xauthority XAUTHORITY] [--state STATE] [--home HOME]
+</code></pre></div>
+<p>The bare command plans read-only; <code>--sudo --dry-run</code> stays read-only, while <code>--sudo</code> applies. It selects a same-user X11 desktop and creates separate side entrypoints. See <a href="../computer-use/">Computer Use</a>.</p>
 <h2 id="local-glance-runtime">Local Glance Runtime<a class="headerlink" href="#local-glance-runtime" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>chatup glance [--version latest|chatarch-vMAJOR.MINOR.PATCH] [--runtime-home PATH] [--dry-run] [-i|-I]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>chatup glance [--version latest|chatarch-vMAJOR.MINOR.PATCH] [--runtime-home PATH] [--dry-run] [-i|-I]
 </code></pre></div>
 <p>The bare command performs setup. It supports only Linux amd64 in the current published matrix, downloads the exact <code>ChatArch/glance</code> archive, <code>SHA256SUMS</code> and <code>BUILDINFO.txt</code>, verifies them, and reuses the ChatGlance portable APIs. The default root is <code>glance</code> under the effective ChatArch home. Existing configuration and data are preserved and no server is started. Use <code>chatglance runtime update</code> for an explicit installed-version change.</p>
 <h2 id="python-runtime">Python Runtime<a class="headerlink" href="#python-runtime" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>chatup uv
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>├── --venv, --venv-path PATH           # Target venv; default ~/.chatarch/venv
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>├── --python, --python-version TEXT   # Python version; default 3.12
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>├── -f, --force                       # Explicitly recreate the environment
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>├── --activate / --no-activate        # Update existing Bash/Zsh rc; enabled by default
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>└── --log-level TEXT                  # Log level
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>chatup uv
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>├── --venv, --venv-path PATH           # Target venv; default ~/.chatarch/venv
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>├── --python, --python-version TEXT   # Python version; default 3.12
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>├── -f, --force                       # Explicitly recreate the environment
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>├── --activate / --no-activate        # Update existing Bash/Zsh rc; enabled by default
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>└── --log-level TEXT                  # Log level
 </code></pre></div>
 <p>Missing rc files are not created; Windows skips this step. <code>--no-activate</code> leaves startup configuration unchanged. See <a href="../quickstart/">Quick Start</a>.</p>
 <h2 id="macos-apps">macOS Apps<a class="headerlink" href="#macos-apps" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>chatup macos [--app snipaste|iterm|chrome|blender]... [--dry-run] [--log-level LEVEL] [-i|-I]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>chatup macos [--app snipaste|iterm|chrome|blender]... [--dry-run] [--log-level LEVEL] [-i|-I]
 </code></pre></div>
 <p>macOS only, with Snipaste, iTerm2, Chrome and Blender checked by default on Apple Silicon; Intel retains the first three. Space toggles and Enter installs. Repeat <code>--app</code> to select a subset, use <code>-I</code> to skip prompts, or <code>--dry-run</code> to preview. See the <a href="../commands/#macos">macOS install contract</a>.</p>
 <h2 id="remotion-video-projects">Remotion Video Projects<a class="headerlink" href="#remotion-video-projects" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>chatup remotion [PROJECT_DIR] [--browser-executable PATH] [--dry-run] [--log-level LEVEL] [-i|-I]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>chatup remotion [PROJECT_DIR] [--browser-executable PATH] [--dry-run] [--log-level LEVEL] [-i|-I]
 </code></pre></div>
 <p>Create a local video project with locked dependencies. Missing directories prompt in a terminal, and existing unrelated paths are protected. See the <a href="../commands/#remotion">Remotion contract</a> for runtime requirements and browser behavior.</p>
 <h2 id="chrome-snipaste-and-iterm2">Chrome, Snipaste, and iTerm2<a class="headerlink" href="#chrome-snipaste-and-iterm2" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>chatup chrome [--dry-run] [--sudo] [-y|--yes] [--log-level LEVEL]
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>chatup snipaste [--dry-run] [-y|--yes] [--log-level LEVEL]
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>chatup iterm [--dry-run] [--log-level LEVEL]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>chatup chrome [--dry-run] [--sudo] [-y|--yes] [--log-level LEVEL]
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>chatup snipaste [--dry-run] [-y|--yes] [--log-level LEVEL]
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>chatup iterm [--dry-run] [--log-level LEVEL]
 </code></pre></div>
 <p>Chrome installs the regular system browser; Snipaste supports macOS and Windows; iTerm2 is macOS-only. See the <a href="../commands/#chrome-iterm">install contract</a>.</p>
 <h2 id="chatgpt-desktop-app">ChatGPT Desktop App<a class="headerlink" href="#chatgpt-desktop-app" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>chatup chatgpt
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>├── --dry-run   # Show the install plan without running it
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>└── -y, --yes   # Accept Windows Store source/package agreements
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>chatup chatgpt
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>├── --dry-run   # Show the install plan without running it
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>└── -y, --yes   # Accept Windows Store source/package agreements
 </code></pre></div>
 <p>Installs the new ChatGPT desktop app including Codex, not the Codex CLI or ChatGPT Classic. macOS uses Homebrew; Windows uses the exact official Microsoft Store ID. See the <a href="../commands/#chatgpt-desktop">desktop install contract</a> for prerequisites, Linux preview guidance, native storage paths and Python APIs.</p>
 <h2 id="twikoo">Twikoo<a class="headerlink" href="#twikoo" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>chatup twikoo
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>├── --version VERSION
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>├── --repo OWNER/REPO
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>├── --home PATH
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>├── --name INSTANCE
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>├── --port PORT
-<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>├── --bind-address ADDRESS
-<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>├── --install / --no-install
-<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>├── --init / --no-init
-<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>├── --service / --no-service
-<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>├── --start / --no-start
-<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>├── --smoke / --no-smoke
-<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>└── --force
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>chatup twikoo
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>├── --version VERSION
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>├── --repo OWNER/REPO
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>├── --home PATH
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>├── --name INSTANCE
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>├── --port PORT
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>├── --bind-address ADDRESS
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>├── --install / --no-install
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>├── --init / --no-init
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>├── --service / --no-service
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>├── --start / --no-start
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>├── --smoke / --no-smoke
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>└── --force
 </code></pre></div>
 <p><code>chatup twikoo</code> installs Twikoo from GitHub Release binaries and prepares the multi-instance layout under <code>~/.chatarch/twikoo/instances/&lt;name&gt;/</code>. Each instance gets its own <code>bin/twikoo</code> and adjacent <code>bin/.env -&gt; ../env/twikoo.env</code>, so instances do not accidentally share the runtime-adjacent <code>.env</code> that the release binary auto-loads. It binds to <code>127.0.0.1</code> by default; local/public domain entry remains the responsibility of NGINX/public-entry.</p>
 <h2 id="cursor-agent">Cursor Agent<a class="headerlink" href="#cursor-agent" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>chatup cursor-agent
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>├── --auth-json PATH
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>├── --auth-env PATH
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>├── -e, --env FILE_OR_PROFILE
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>├── --env-profile NAME
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>├── --save-profile NAME
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>├── --cli-config PATH
-<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>├── --agent-state PATH
-<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>├── --api-key-env NAME
-<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>├── --credential-store native|file-wrapper
-<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>├── --install-only
-<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>├── --verify / --no-verify
-<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>└── -i / -I
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>chatup cursor-agent
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>├── --auth-json PATH
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>├── --auth-env PATH
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>├── -e, --env FILE_OR_PROFILE
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>├── --env-profile NAME
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>├── --save-profile NAME
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>├── --cli-config PATH
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>├── --agent-state PATH
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>├── --api-key-env NAME
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>├── --credential-store native|file-wrapper
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>├── --install-only
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>├── --verify / --no-verify
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>└── -i / -I
 </code></pre></div>
 <p><code>cursor-agent</code> manages Cursor Agent CLI installation and login-state copying, and registers the ChatEnv <code>CursorAgent</code> config type. It never prints tokens in argv or output; Cursor-owned files such as <code>auth.json</code>, <code>cli-config.json</code>, and <code>agent-cli-state.json</code> are written safely, while ChatEnv profile <code>.env</code> files are left to ChatEnv's own storage mechanism. <code>-e/--env</code> can quickly read either an env file or a ChatEnv profile. For migrated Linux file auth on macOS, use <code>--credential-store file-wrapper</code> to write a token-free wrapper.</p>
 <p>Common migration form:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>chatup<span class="w"> </span>cursor-agent<span class="w"> </span>--auth-json<span class="w"> </span>./auth.json<span class="w"> </span>--cli-config<span class="w"> </span>./cli-config.json<span class="w"> </span>--agent-state<span class="w"> </span>./agent-cli-state.json<span class="w"> </span>--credential-store<span class="w"> </span>file-wrapper<span class="w"> </span>-I
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>chatup<span class="w"> </span>cursor-agent<span class="w"> </span>-e<span class="w"> </span>./cursor.env<span class="w"> </span>--credential-store<span class="w"> </span>file-wrapper<span class="w"> </span>-I
-<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>chatup<span class="w"> </span>cursor-agent<span class="w"> </span>-e<span class="w"> </span>work<span class="w"> </span>--credential-store<span class="w"> </span>file-wrapper<span class="w"> </span>-I
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>chatup<span class="w"> </span>cursor-agent<span class="w"> </span>--auth-json<span class="w"> </span>./auth.json<span class="w"> </span>--cli-config<span class="w"> </span>./cli-config.json<span class="w"> </span>--agent-state<span class="w"> </span>./agent-cli-state.json<span class="w"> </span>--credential-store<span class="w"> </span>file-wrapper<span class="w"> </span>-I
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>chatup<span class="w"> </span>cursor-agent<span class="w"> </span>-e<span class="w"> </span>./cursor.env<span class="w"> </span>--credential-store<span class="w"> </span>file-wrapper<span class="w"> </span>-I
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>chatup<span class="w"> </span>cursor-agent<span class="w"> </span>-e<span class="w"> </span>work<span class="w"> </span>--credential-store<span class="w"> </span>file-wrapper<span class="w"> </span>-I
 </code></pre></div>
 <h2 id="artifact-identity">Artifact Identity<a class="headerlink" href="#artifact-identity" title="Permanent link">&para;</a></h2>
 <table>
@@ -889,89 +934,89 @@
 <p><code>Chrome for Testing</code> is Google's official distribution name. The <code>for-testing</code> suffix identifies the artifact; it does not expose a ChatUp <code>test</code> operation. None of the three backends has a <code>test</code> subcommand. Health checks are named <code>doctor</code>.</p>
 <p><code>chatup chromium</code> is intentionally unregistered. ChatUp will add an independent Chromium backend only after selecting and verifying a real Chromium source, revision contract, platform layout, and acceptance path.</p>
 <h2 id="chrome-for-testing">Chrome for Testing<a class="headerlink" href="#chrome-for-testing" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>chatup chrome-for-testing
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>├── install
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>│   ├── --version VERSION
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>│   ├── --channel stable|beta|dev|canary
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>│   ├── --platform PLATFORM
-<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>│   ├── --home PATH
-<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>│   ├── --sha256 HEX
-<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>│   ├── --force
-<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>│   ├── --doctor / --no-doctor
-<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>│   ├── --output text|json
-<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a>│   └── -i / -I
-<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>├── list [--home PATH] [--output text|json]
-<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>├── show [VERSION] [--platform PLATFORM] [--output text|json] [-i|-I]
-<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a>├── path [VERSION] [--platform PLATFORM] [--output text|json] [-i|-I]
-<a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a>├── doctor [VERSION] [--execute|--no-execute] [--output text|json] [-i|-I]
-<a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a>├── remove [VERSION] --yes [--output text|json] [-i|-I]
-<a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a>└── gc [--dry-run|--apply] [--yes] [--minimum-age-hours HOURS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>chatup chrome-for-testing
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>├── install
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>│   ├── --version VERSION
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>│   ├── --channel stable|beta|dev|canary
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>│   ├── --platform PLATFORM
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>│   ├── --home PATH
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>│   ├── --sha256 HEX
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>│   ├── --force
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>│   ├── --doctor / --no-doctor
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>│   ├── --output text|json
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>│   └── -i / -I
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>├── list [--home PATH] [--output text|json]
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>├── show [VERSION] [--platform PLATFORM] [--output text|json] [-i|-I]
+<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>├── path [VERSION] [--platform PLATFORM] [--output text|json] [-i|-I]
+<a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a>├── doctor [VERSION] [--execute|--no-execute] [--output text|json] [-i|-I]
+<a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a>├── remove [VERSION] --yes [--output text|json] [-i|-I]
+<a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a>└── gc [--dry-run|--apply] [--yes] [--minimum-age-hours HOURS]
 </code></pre></div>
 <p><code>--version</code> and <code>--channel</code> are mutually exclusive for installation. Stable is the default when neither is given. Resolve-style operations require an exact four-component version; channels and old <code>chrome@...</code> / <code>cft@...</code> references are rejected.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>chatup<span class="w"> </span>chrome-for-testing<span class="w"> </span>install<span class="w"> </span>--channel<span class="w"> </span>stable<span class="w"> </span>-I
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>chatup<span class="w"> </span>chrome-for-testing<span class="w"> </span>install<span class="w"> </span>--version<span class="w"> </span><span class="m">145</span>.0.7632.6<span class="w"> </span>--output<span class="w"> </span>json<span class="w"> </span>-I
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>chatup<span class="w"> </span>chrome-for-testing<span class="w"> </span>path<span class="w"> </span><span class="m">145</span>.0.7632.6<span class="w"> </span>-I
-<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>chatup<span class="w"> </span>chrome-for-testing<span class="w"> </span>doctor<span class="w"> </span><span class="m">145</span>.0.7632.6<span class="w"> </span>--output<span class="w"> </span>json<span class="w"> </span>-I
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>chatup<span class="w"> </span>chrome-for-testing<span class="w"> </span>install<span class="w"> </span>--channel<span class="w"> </span>stable<span class="w"> </span>-I
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>chatup<span class="w"> </span>chrome-for-testing<span class="w"> </span>install<span class="w"> </span>--version<span class="w"> </span><span class="m">145</span>.0.7632.6<span class="w"> </span>--output<span class="w"> </span>json<span class="w"> </span>-I
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>chatup<span class="w"> </span>chrome-for-testing<span class="w"> </span>path<span class="w"> </span><span class="m">145</span>.0.7632.6<span class="w"> </span>-I
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>chatup<span class="w"> </span>chrome-for-testing<span class="w"> </span>doctor<span class="w"> </span><span class="m">145</span>.0.7632.6<span class="w"> </span>--output<span class="w"> </span>json<span class="w"> </span>-I
 </code></pre></div>
 <h2 id="chromedriver">ChromeDriver<a class="headerlink" href="#chromedriver" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>chatup chromedriver
-<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>├── install
-<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>│   ├── --version VERSION
-<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>│   ├── --channel stable|beta|dev|canary
-<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>│   ├── --match-browser PATH
-<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>│   ├── --match-cft-version VERSION
-<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>│   ├── --platform PLATFORM
-<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>│   ├── --home PATH
-<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>│   ├── --sha256 HEX
-<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>│   ├── --force
-<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>│   ├── --doctor / --no-doctor
-<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a>│   ├── --output text|json
-<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a>│   └── -i / -I
-<a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a>├── list [--home PATH] [--output text|json]
-<a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a>├── show [VERSION] [--platform PLATFORM] [--output text|json] [-i|-I]
-<a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a>├── path [VERSION] [--platform PLATFORM] [--output text|json] [-i|-I]
-<a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a>├── doctor [VERSION] [--execute|--no-execute] [--output text|json] [-i|-I]
-<a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a>├── remove [VERSION] --yes [--output text|json] [-i|-I]
-<a id="__codelineno-12-19" name="__codelineno-12-19" href="#__codelineno-12-19"></a>└── gc [--dry-run|--apply] [--yes] [--minimum-age-hours HOURS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>chatup chromedriver
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>├── install
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>│   ├── --version VERSION
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>│   ├── --channel stable|beta|dev|canary
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>│   ├── --match-browser PATH
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>│   ├── --match-cft-version VERSION
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>│   ├── --platform PLATFORM
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>│   ├── --home PATH
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>│   ├── --sha256 HEX
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>│   ├── --force
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>│   ├── --doctor / --no-doctor
+<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>│   ├── --output text|json
+<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>│   └── -i / -I
+<a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a>├── list [--home PATH] [--output text|json]
+<a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a>├── show [VERSION] [--platform PLATFORM] [--output text|json] [-i|-I]
+<a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a>├── path [VERSION] [--platform PLATFORM] [--output text|json] [-i|-I]
+<a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a>├── doctor [VERSION] [--execute|--no-execute] [--output text|json] [-i|-I]
+<a id="__codelineno-13-18" name="__codelineno-13-18" href="#__codelineno-13-18"></a>├── remove [VERSION] --yes [--output text|json] [-i|-I]
+<a id="__codelineno-13-19" name="__codelineno-13-19" href="#__codelineno-13-19"></a>└── gc [--dry-run|--apply] [--yes] [--minimum-age-hours HOURS]
 </code></pre></div>
 <p>The four install selectors are mutually exclusive. <code>--match-browser</code> reads <code>--version</code> from the supplied browser binary, resolves Google's build manifest first, and falls back to the milestone manifest; the browser and driver patch components need not match. <code>--match-cft-version</code> uses an exact CFT version directly. ChromeDriver is not involved in ChatPost's current extension/CDP Zhihu path.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>chatup<span class="w"> </span>chromedriver<span class="w"> </span>install<span class="w"> </span>--channel<span class="w"> </span>stable<span class="w"> </span>-I
-<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>chatup<span class="w"> </span>chromedriver<span class="w"> </span>install<span class="w"> </span>--match-cft-version<span class="w"> </span><span class="m">145</span>.0.7632.6<span class="w"> </span>-I
-<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>chatup<span class="w"> </span>chromedriver<span class="w"> </span>install<span class="w"> </span>--match-browser<span class="w"> </span>/path/to/browser<span class="w"> </span>--output<span class="w"> </span>json<span class="w"> </span>-I
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>chatup<span class="w"> </span>chromedriver<span class="w"> </span>install<span class="w"> </span>--channel<span class="w"> </span>stable<span class="w"> </span>-I
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>chatup<span class="w"> </span>chromedriver<span class="w"> </span>install<span class="w"> </span>--match-cft-version<span class="w"> </span><span class="m">145</span>.0.7632.6<span class="w"> </span>-I
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>chatup<span class="w"> </span>chromedriver<span class="w"> </span>install<span class="w"> </span>--match-browser<span class="w"> </span>/path/to/browser<span class="w"> </span>--output<span class="w"> </span>json<span class="w"> </span>-I
 </code></pre></div>
 <h2 id="playwright">Playwright<a class="headerlink" href="#playwright" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>chatup playwright
-<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>├── install [VERSION]
-<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>│   ├── --browser chromium
-<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>│   ├── --home PATH
-<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>│   ├── --force
-<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>│   ├── --doctor / --no-doctor
-<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>│   ├── --output text|json
-<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>│   └── -i / -I
-<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>├── path [VERSION] [--browser chromium] [--output text|json] [-i|-I]
-<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>└── doctor [VERSION] [--execute|--no-execute] [--output text|json] [-i|-I]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>chatup playwright
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>├── install [VERSION]
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>│   ├── --browser chromium
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>│   ├── --home PATH
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>│   ├── --force
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>│   ├── --doctor / --no-doctor
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>│   ├── --output text|json
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>│   └── -i / -I
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>├── path [VERSION] [--browser chromium] [--output text|json] [-i|-I]
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a>└── doctor [VERSION] [--execute|--no-execute] [--output text|json] [-i|-I]
 </code></pre></div>
 <p>The Playwright backend accepts an exact three-component package version. <code>install</code> uses an available Node.js/npm runtime to install that package and download its declared Chromium revision into the same ChatArch-owned installation. <code>path</code> returns the executable resolved by Playwright itself. This backend creates no profile, launches no browser, and installs no ChromeDriver.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>chatup<span class="w"> </span>nodejs<span class="w"> </span>-I
-<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>chatup<span class="w"> </span>playwright<span class="w"> </span>install<span class="w"> </span><span class="m">1</span>.61.1<span class="w"> </span>--output<span class="w"> </span>json<span class="w"> </span>-I
-<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>chatup<span class="w"> </span>playwright<span class="w"> </span>path<span class="w"> </span><span class="m">1</span>.61.1<span class="w"> </span>-I
-<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>chatup<span class="w"> </span>playwright<span class="w"> </span>doctor<span class="w"> </span><span class="m">1</span>.61.1<span class="w"> </span>--output<span class="w"> </span>json<span class="w"> </span>-I
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>chatup<span class="w"> </span>nodejs<span class="w"> </span>-I
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>chatup<span class="w"> </span>playwright<span class="w"> </span>install<span class="w"> </span><span class="m">1</span>.61.1<span class="w"> </span>--output<span class="w"> </span>json<span class="w"> </span>-I
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>chatup<span class="w"> </span>playwright<span class="w"> </span>path<span class="w"> </span><span class="m">1</span>.61.1<span class="w"> </span>-I
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>chatup<span class="w"> </span>playwright<span class="w"> </span>doctor<span class="w"> </span><span class="m">1</span>.61.1<span class="w"> </span>--output<span class="w"> </span>json<span class="w"> </span>-I
 </code></pre></div>
 <h2 id="independent-storage">Independent Storage<a class="headerlink" href="#independent-storage" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>~/.chatarch/
-<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>├── chrome-for-testing/
-<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>│   └── &lt;version&gt;/&lt;platform&gt;/
-<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>│       ├── installation.json
-<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>│       └── &lt;Google archive tree&gt;/
-<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>├── chromedriver/
-<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>│   └── &lt;version&gt;/&lt;platform&gt;/
-<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>│       ├── installation.json
-<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>│       └── &lt;Google archive tree&gt;/
-<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a>└── playwright/
-<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a>    └── &lt;playwright-version&gt;/&lt;browser&gt;/
-<a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a>        ├── installation.json
-<a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a>        ├── package/
-<a id="__codelineno-16-14" name="__codelineno-16-14" href="#__codelineno-16-14"></a>        └── browsers/
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>~/.chatarch/
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>├── chrome-for-testing/
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>│   └── &lt;version&gt;/&lt;platform&gt;/
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>│       ├── installation.json
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>│       └── &lt;Google archive tree&gt;/
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>├── chromedriver/
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>│   └── &lt;version&gt;/&lt;platform&gt;/
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>│       ├── installation.json
+<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>│       └── &lt;Google archive tree&gt;/
+<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>└── playwright/
+<a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a>    └── &lt;playwright-version&gt;/&lt;browser&gt;/
+<a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a>        ├── installation.json
+<a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a>        ├── package/
+<a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a>        └── browsers/
 </code></pre></div>
 <p>Chrome for Testing and ChromeDriver enforce official Google HTTPS provenance, optional SHA-256 verification, bounded ZIP extraction, and atomic directory replacement. Playwright uses npm package integrity and Playwright's browser manifest/download flow with the same atomic installation boundary. None modifies system Chrome, creates profiles, stores cookies, or manages accounts/extensions.</p>
 <p><code>remove</code> requires explicit <code>--yes</code>. <code>gc</code> defaults to dry-run and only targets backend temporary/backup directories older than the minimum age; deletion requires <code>--apply --yes</code>.</p>
@@ -986,16 +1031,16 @@
 </ul>
 <h2 id="python-api">Python API<a class="headerlink" href="#python-api" title="Permanent link">&para;</a></h2>
 <p>Consumers choose an exact backend module instead of a generic Browser base:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">chatup.chrome_for_testing</span><span class="w"> </span><span class="kn">import</span> <span class="n">resolve</span> <span class="k">as</span> <span class="n">resolve_cft</span>
-<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">chatup.chromedriver</span><span class="w"> </span><span class="kn">import</span> <span class="n">resolve</span> <span class="k">as</span> <span class="n">resolve_driver</span>
-<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">chatup.playwright</span><span class="w"> </span><span class="kn">import</span> <span class="n">resolve</span> <span class="k">as</span> <span class="n">resolve_playwright</span>
-<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>
-<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="n">browser</span> <span class="o">=</span> <span class="n">resolve_cft</span><span class="p">(</span><span class="s2">"145.0.7632.6"</span><span class="p">)</span>
-<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="n">driver</span> <span class="o">=</span> <span class="n">resolve_driver</span><span class="p">(</span><span class="s2">"145.0.7632.6"</span><span class="p">)</span>
-<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="n">playwright_browser</span> <span class="o">=</span> <span class="n">resolve_playwright</span><span class="p">(</span><span class="s2">"1.61.1"</span><span class="p">,</span> <span class="n">browser</span><span class="o">=</span><span class="s2">"chromium"</span><span class="p">)</span>
-<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="nb">print</span><span class="p">(</span><span class="n">browser</span><span class="o">.</span><span class="n">binary_path</span><span class="p">)</span>
-<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="nb">print</span><span class="p">(</span><span class="n">driver</span><span class="o">.</span><span class="n">binary_path</span><span class="p">)</span>
-<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a><span class="nb">print</span><span class="p">(</span><span class="n">playwright_browser</span><span class="o">.</span><span class="n">binary_path</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">chatup.chrome_for_testing</span><span class="w"> </span><span class="kn">import</span> <span class="n">resolve</span> <span class="k">as</span> <span class="n">resolve_cft</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">chatup.chromedriver</span><span class="w"> </span><span class="kn">import</span> <span class="n">resolve</span> <span class="k">as</span> <span class="n">resolve_driver</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">chatup.playwright</span><span class="w"> </span><span class="kn">import</span> <span class="n">resolve</span> <span class="k">as</span> <span class="n">resolve_playwright</span>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="n">browser</span> <span class="o">=</span> <span class="n">resolve_cft</span><span class="p">(</span><span class="s2">"145.0.7632.6"</span><span class="p">)</span>
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="n">driver</span> <span class="o">=</span> <span class="n">resolve_driver</span><span class="p">(</span><span class="s2">"145.0.7632.6"</span><span class="p">)</span>
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="n">playwright_browser</span> <span class="o">=</span> <span class="n">resolve_playwright</span><span class="p">(</span><span class="s2">"1.61.1"</span><span class="p">,</span> <span class="n">browser</span><span class="o">=</span><span class="s2">"chromium"</span><span class="p">)</span>
+<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="nb">print</span><span class="p">(</span><span class="n">browser</span><span class="o">.</span><span class="n">binary_path</span><span class="p">)</span>
+<a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="nb">print</span><span class="p">(</span><span class="n">driver</span><span class="o">.</span><span class="n">binary_path</span><span class="p">)</span>
+<a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a><span class="nb">print</span><span class="p">(</span><span class="n">playwright_browser</span><span class="o">.</span><span class="n">binary_path</span><span class="p">)</span>
 </code></pre></div>
 <p>ChatPost can select either a <code>chatup.chrome_for_testing</code> or <code>chatup.playwright</code> descriptor according to the proven task. It still owns isolated user-data directories, runner processes, CDP/bridge endpoints, extensions, manual login, account mapping, and the publication ledger.</p>
 
