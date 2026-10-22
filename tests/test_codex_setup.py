@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import json
 import os
+from pathlib import Path
+import subprocess
+import sys
 
 import click
 import pytest
@@ -17,6 +20,41 @@ def _set_test_home(monkeypatch, home):
     monkeypatch.setenv("HOME", str(home))
     monkeypatch.setenv("USERPROFILE", str(home))
     monkeypatch.delenv("CODEX_HOME", raising=False)
+
+
+def test_codex_default_profile_resolves_after_fresh_import_in_isolated_home(tmp_path):
+    home = tmp_path / "home"
+    chatarch = tmp_path / "chatarch"
+    active = chatarch / "envs/OpenAI/.env"
+    active.parent.mkdir(parents=True)
+    active.write_text("OPENAI_API_KEY='default-fixture-key'\n"
+                      "OPENAI_API_BASE='https://default.example.invalid/v1'\n"
+                      "OPENAI_API_MODEL='default-fixture-model'\n", encoding="utf-8")
+    home.mkdir()
+    source = Path(__file__).resolve().parents[1]
+    system_root = (os.environ.get("SystemRoot") or os.environ.get("SYSTEMROOT")) if os.name == "nt" else None
+    system_bins = ([str(Path(system_root) / "System32"), system_root] if system_root
+                   else ["/usr/bin", "/bin"])
+    env = {"HOME": str(home), "USERPROFILE": str(home),
+           "CHATARCH_HOME": str(chatarch), "TMPDIR": str(tmp_path),
+           "GIT_CONFIG_GLOBAL": str(tmp_path / "gitconfig"), "GIT_CONFIG_NOSYSTEM": "1",
+           "PATH": os.pathsep.join([str(Path(sys.executable).parent), *system_bins]),
+           "PYTHONPATH": str(source / "src"),
+           "PYTHONDONTWRITEBYTECODE": "1"}
+    if system_root:
+        env["SYSTEMROOT"] = system_root
+        env["TEMP"] = env["TMP"] = str(tmp_path)
+    code = ("import chatup.setup.codex as codex; "
+            "codex.ensure_nodejs_requirement=lambda **kwargs: None; "
+            "codex.should_install_global_npm_package=lambda *args, **kwargs: False; "
+            "codex.setup_codex(interactive=False)")
+    result = subprocess.run([sys.executable, "-c", code], cwd=source, env=env,
+                            text=True, capture_output=True, timeout=15)
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert json.loads((home / ".codex/auth.json").read_text()) == {"OPENAI_API_KEY": "default-fixture-key"}
+    config = (home / ".codex/config.toml").read_text()
+    assert 'base_url = "https://default.example.invalid/v1"' in config
+    assert 'model = "default-fixture-model"' in config
 
 
 def test_codex_env_profile_does_not_backfill_missing_key_from_active_or_process_env(

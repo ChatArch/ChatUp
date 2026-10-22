@@ -20,6 +20,7 @@ chatup
 |-- macos               # 勾选 macOS 应用，Apple Silicon 可选 Blender
 |-- remotion            # 初始化带锁定依赖的本地视频项目
 |-- chrome-for-testing # 管理 Google Chrome for Testing 浏览器
+|-- computer-use       # 预览/应用同用户 Linux X11 Computer Use
 |-- chromedriver       # 管理 ChromeDriver WebDriver server
 |-- playwright         # 管理 Playwright package 与 Chromium browser
 |-- frp         # 安装 FRP Client/Server
@@ -46,6 +47,10 @@ chatup
 - **基础运行环境**
 
     `uv`、`nodejs`、`docker`、`zsh`、`chrome-for-testing`、`chromedriver`、`playwright`、`frp` 面向一台新机器的基础依赖准备。`doctor` 用来做最小健康检查。
+
+- **Linux X11 Computer Use**
+
+    `computer-use` 只读规划同用户桌面复用、受管 driver 和独立入口；仅 `--sudo` 应用。参见 [Computer Use](computer-use.md)。
 
 - **本地服务安装**
 

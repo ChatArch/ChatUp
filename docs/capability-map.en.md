@@ -20,6 +20,7 @@ chatup
 |-- macos               # Select supported macOS apps, including Blender on Apple Silicon
 |-- remotion            # Initialize a locked local video project
 |-- chrome-for-testing # Manage Google Chrome for Testing browsers
+|-- computer-use       # Preview/apply same-user Linux X11 Computer Use
 |-- chromedriver       # Manage ChromeDriver WebDriver servers
 |-- playwright         # Manage Playwright packages and Chromium browsers
 |-- frp         # Install FRP Client/Server
@@ -44,6 +45,10 @@ chatup
 - **Base Runtime**
 
     `uv`, `nodejs`, `docker`, `zsh`, `chrome-for-testing`, `chromedriver`, `playwright`, and `frp` prepare common dependencies for a new machine. `doctor` is the minimum health check.
+
+- **Linux X11 Computer Use**
+
+    `computer-use` plans same-user desktop reuse, a managed driver, and separate entrypoints without writes; only `--sudo` applies. See [Computer Use](computer-use.md).
 
 - **Local Services**
 

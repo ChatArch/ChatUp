@@ -39,11 +39,20 @@ chatup
 ├── macos               # 勾选 macOS 应用，Apple Silicon 可选 Blender
 ├── remotion            # 初始化带锁定依赖的本地视频项目
 ├── chrome-for-testing  # 管理 Google Chrome for Testing 浏览器
+├── computer-use        # 预览 Linux X11 Computer Use，--sudo 才应用
 ├── chromedriver        # 管理 ChromeDriver WebDriver server
 └── playwright          # 管理 Playwright package 与 Chromium browser
 ```
 
 运行 `chatup --tree` 可回读带参数签名和命令目的的真实注册树；`chatup --tree-brief` 保留相同节点和说明，但省略参数签名。完整参数见 [命令参考](commands.md)。
+
+## Linux Computer Use
+
+```text
+chatup computer-use [--sudo] [--dry-run] [--display DISPLAY] [--xauthority XAUTHORITY] [--state STATE] [--home HOME]
+```
+
+裸命令只读规划；`--sudo --dry-run` 仍只读，只有 `--sudo` 应用。选择同用户 X11 桌面并生成独立侧入口；详见 [Computer Use](computer-use.md)。
 
 ## Glance 本地运行时
 

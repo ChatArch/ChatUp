@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.2.24
+
+### Added
+- Add top-level `chatup computer-use` with a strictly read-only default plan, explicit `--sudo` apply, same-user X11 desktop selection/reuse, and a dedicated managed `cua-driver==0.36.0` runtime with target-bound MCP/Chrome/terminal/status entrypoints.
+- Support an owned Debian/Ubuntu Linux x86_64 Xfce/TigerVNC user session when no authorized desktop is available; VNC is loopback-only and authenticated.
+
+### Safety
+- Keep Chrome on the ordinary user's default profile without automatic relaunch or upgrade, preserve existing desktop and Agent configuration, and refuse stale or mismatched target entrypoints without controller fallback.
+- Make CLI import/read-only planning avoid ChatEnv directory creation and provider config loading. Hermes per-topic SSH screenshot placement remains a separate issue and is not fixed by installation.
+
 ## 0.2.23
 
 ### Added

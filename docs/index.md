@@ -14,6 +14,7 @@ ChatUp 是 ChatArch 的独立安装与初始化 CLI，用来把一台机器整�
 | 查看完整一级 CLI 树和 CFT/ChromeDriver 独立 contract | [CLI 树](cli-tree.md) |
 | 查看命令分组、参数边界和服务默认路径 | [命令参考](commands.md) |
 | 校对哪些 ChatArch setup 流程已经有一等命令 | [CLI 能力地图](capability-map.md) |
+| 预览 Linux X11 Computer Use 并确认执行端边界 | [Linux Computer Use](computer-use.md) |
 | 理解 `chatup workspace` 创建的目录和项目记录约定 | [工作区脚手架](workspace.md) |
 | 安装 ChatTea-compatible Gitea、ChatData-compatible MySQL、user-level NGINX 和 CRS | [命令参考](commands.md) |
 | 确认 ChatArch 默认目录、安全边界和交互约定 | [CLI 能力地图](capability-map.md) |
