@@ -83,6 +83,15 @@ chatup chrome --sudo --yes # Linux: allow elevation and package confirmation
 
 macOS downloads official DMG/ZIP artifacts and verifies publisher signatures, without Homebrew. Apps go to `/Applications`, falling back to `~/Applications` if needed. Windows uses exact WinGet packages `Google.Chrome.EXE` (current user) and `liule.Snipaste`, with `--yes` required to accept first-time agreements. Chrome also verifies the installed executable's Google signature, product identity and version. Linux x86_64 supports Chrome through official DEB/RPM packages with apt/dnf/yum/zypper. Existing apps are verified and reused; defaults and profiles are unchanged. Automation browsers remain under `chatup chrome-for-testing`. See the [install contract](https://arch.gh.wzhecnu.cn/ChatUp/en/commands/#chrome-iterm).
 
+## WeType (微信输入法)
+
+```bash
+chatup wetype --dry-run
+chatup wetype
+```
+
+Install the official signed macOS input method; reuse existing installations. The command prints activation and default voice shortcut guidance: hold Fn to talk or Fn+Space for continuous input. See the [WeType contract](https://arch.gh.wzhecnu.cn/ChatUp/en/commands/#wetype).
+
 ## ChatGPT / Codex Desktop App
 
 ```bash
@@ -101,7 +110,7 @@ Installs the official new ChatGPT desktop app including Codex. Requires Homebrew
 | --- | --- |
 | Base runtime | `doctor`, `uv`, `nodejs`, `docker`, `zsh`, `chrome-for-testing`, `chromedriver`, `playwright`, `frp` |
 | Workspace scaffold | `workspace` |
-| Desktop apps | `macos` (Snipaste/iTerm2/Chrome/Blender selection), `chrome`, `snipaste` (macOS/Windows), `iterm` (macOS only), `chatgpt` (includes Codex) |
+| Desktop apps | `macos` (Snipaste/iTerm2/Chrome/Blender selection), `chrome`, `snipaste` (macOS/Windows), `iterm` / `wetype` (macOS only), `chatgpt` (includes Codex) |
 | Linux X11 Computer Use | `computer-use` (read-only preview by default; `--sudo` applies) |
 | Video projects | `remotion` |
 | Local service installers | `gitea`, `glance`, `mysql`, `nginx`, `crs` |

@@ -59,3 +59,16 @@ def snipaste_cli(**kwargs) -> None:
 def iterm_cli(**kwargs) -> None:
     """Install iTerm2 from the official download (macOS only)."""
     _install("iterm", **kwargs)
+
+
+@click.command(name="wetype")
+@click.option("--dry-run", is_flag=True, help="Show the installation plan without downloading or installing.")
+@click.option("--log-level", type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"], case_sensitive=False), default="INFO")
+def wetype_cli(**kwargs) -> None:
+    """Install WeType (微信输入法) from the official download (macOS only)."""
+    _install("wetype", **kwargs)
+    if not kwargs["dry_run"]:
+        click.echo("Enable WeType in System Settings > Keyboard > Text Input > Edit > +.")
+        click.echo("If it is not listed, log out and back in, then add it under Chinese, Simplified.")
+        click.echo("Default voice shortcuts: hold Fn to talk; Fn+Space starts continuous input.")
+        click.echo("Customize these in WeType Settings > Voice Input; allow microphone access when prompted.")

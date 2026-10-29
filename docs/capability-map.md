@@ -17,6 +17,7 @@ chatup
 |-- chrome              # 按当前系统安装普通 Google Chrome
 |-- snipaste            # 在 macOS 或 Windows 安装 Snipaste
 |-- iterm               # 安装 iTerm2（仅限 macOS）
+|-- wetype              # 安装微信输入法（仅限 macOS）
 |-- macos               # 勾选 macOS 应用，Apple Silicon 可选 Blender
 |-- remotion            # 初始化带锁定依赖的本地视频项目
 |-- chrome-for-testing # 管理 Google Chrome for Testing 浏览器
@@ -113,6 +114,8 @@ chatup crs                 # 准备本地 CRS、Redis、secret、admin SPA 和 s
 `chatup remotion PROJECT_DIR` 创建带锁定依赖和可渲染示例的视频项目，要求已有 Node/npm，保护已有目录并检测本机浏览器。它使用项目目录，可配合 macOS 的 Chrome/Blender 安装入口。详见[Remotion 约定](commands.md#remotion)。
 
 `chatup chrome` 按系统安装普通 Google Chrome；`chatup snipaste` 在 macOS 或 Windows 安装 Snipaste；`chatup iterm` 在 macOS 安装 iTerm2。三个命令支持 `--dry-run`，验证并复用已有安装，macOS 无需 Homebrew。Windows 通过 WinGet 的精确包 ID 验证。详见[安装约定](commands.md#chrome-iterm)。
+
+`chatup wetype` 将官方签名的微信输入法安装到 macOS Input Methods，验证并复用已有安装，显示启用与语音快捷键提示。支持 `--dry-run`，Windows/Linux 当前不支持。详见[微信输入法约定](commands.md#wetype)。
 
 `chatup chatgpt` 通过 macOS Homebrew 或 Windows 官方 Microsoft Store 精确 ID 安装含 Codex 的新版 ChatGPT 桌面应用。`--dry-run` 无副作用，安装后回读包管理器记录。应用与缓存使用包管理器/OpenAI 的原生目录，不属于 ChatArch 自管状态。不启动应用、不登录、不改 Codex CLI 配置，也不自动安装 Linux preview。详见[桌面安装约定](commands.md#chatgpt-desktop)。
 

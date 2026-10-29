@@ -17,6 +17,7 @@ chatup
 |-- chrome              # Install regular Google Chrome for the current OS
 |-- snipaste            # Install Snipaste on macOS or Windows
 |-- iterm               # Install iTerm2 (macOS only)
+|-- wetype              # Install WeType (macOS only)
 |-- macos               # Select supported macOS apps, including Blender on Apple Silicon
 |-- remotion            # Initialize a locked local video project
 |-- chrome-for-testing # Manage Google Chrome for Testing browsers
@@ -187,6 +188,19 @@ Desktop installers do not write CFT/ChromeDriver/Playwright metadata, browser pr
 
 Sources: [Google Chrome](https://www.google.com/chrome/), [Snipaste](https://www.snipaste.com/), [iTerm2 downloads](https://iterm2.com/downloads.html).
 
+## WeType {#wetype}
+
+```bash
+chatup wetype --dry-run
+chatup wetype
+```
+
+`chatup wetype` supports Intel and Apple Silicon macOS. It uses the official universal 3.0.0 (build 670) ZIP advertised by the [WeType website](https://z.weixin.qq.com/) through its [InstallInfo manifest](https://download.weread.qq.com/app/wxkb/mac/3.0.0/install_info_3.0.0_670.json), without Homebrew. Options are `--dry-run` and `--log-level DEBUG|INFO|WARNING|ERROR`. A dry run performs no network requests, subprocesses or filesystem writes.
+
+Existing `/Library/Input Methods/WeType.app` or `~/Library/Input Methods/WeType.app` bundles are verified and reused, including newer versions. Fresh installs use the writable system Input Methods directory or fall back to the user's directory, without sudo. Before staged copying and atomic placement, verify bundle ID `com.tencent.inputmethod.wetype`, version, executable, minimum macOS, Tencent Developer ID Team `88L2Q4487U`, and Gatekeeper notarization. Invalid existing bundles are never overwritten. Temporary downloads follow `CHATARCH_HOME` and are cleaned after success or failure.
+
+Add WeType under System Settings > Keyboard > Text Input > Edit > + (Chinese, Simplified); log out and back in if it is not listed. Default voice shortcuts: hold `Fn` to talk and release to finish, or `Fn + Space` for continuous input and any key to finish. Customize shortcuts in WeType Settings > Voice Input and allow microphone access when prompted on first use. The command prints these instructions without launching the app, selecting an input source, granting permissions or changing shortcuts. It does not change the `chatup macos` default apps. Windows and Linux currently return explicit unsupported-platform errors.
+
 ## ChatGPT Desktop App {#chatgpt-desktop}
 
 `chatup chatgpt` installs the official new ChatGPT desktop app, including Codex. It is separate from `chatup codex` (the Codex CLI), and does not install ChatGPT Classic or the deprecated `codex-app` cask.
@@ -258,7 +272,7 @@ chatup cursor-agent --install-only -I
 
 Cursor Agent uses its official Windows PowerShell installer. Hermes uses the ChatArch fork's Windows `install.ps1`, first checking the resolved home/install targets and then installing noninteractively; no gateway or WebUI is started by default. The current official Cursor installer recreates `%LOCALAPPDATA%\\cursor-agent`. ChatUp refuses to launch it if that directory already exists, preventing deletion of existing user data; migrate and confirm it yourself before retrying. ChatUp does not read or migrate existing credentials. The native acceptance gates cover the hosted Windows test matrix, managed Node/Codex/OpenCode smoke, and a read-only Hermes path probe—not live user sign-in or model calls.
 
-`iterm` and `macos` are macOS-only; `zsh` is POSIX-only; `crs` is currently a POSIX service path; `glance` currently ships a Linux amd64 release asset only. Windows binary/configuration support for Gitea, MySQL, Twikoo, and NGINX does not imply support for their systemd service/start operations. Discourse/Zulip Docker configuration is not Docker Desktop service acceptance. See the capability map for the per-command boundary.
+`iterm`, `wetype` and `macos` are macOS-only; `zsh` is POSIX-only; `crs` is currently a POSIX service path; `glance` currently ships a Linux amd64 release asset only. Windows binary/configuration support for Gitea, MySQL, Twikoo, and NGINX does not imply support for their systemd service/start operations. Discourse/Zulip Docker configuration is not Docker Desktop service acceptance. See the capability map for the per-command boundary.
 
 ## Cursor Agent Command Contract
 

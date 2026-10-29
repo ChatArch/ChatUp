@@ -83,4 +83,5 @@ def test_cli_tree_is_in_mkdocs_nav_and_backend_contracts_are_complete():
         assert "chatup chrome" in text
         assert "chatup snipaste" in text
         assert "chatup iterm" in text
+        assert "chatup wetype" in text
         assert "from chatup.chrome import" not in text

@@ -36,6 +36,7 @@ chatup
 ├── chrome              # 按当前系统安装普通 Google Chrome
 ├── snipaste            # 在 macOS 或 Windows 安装 Snipaste
 ├── iterm               # 安装 iTerm2（仅限 macOS）
+├── wetype              # 安装微信输入法（仅限 macOS）
 ├── macos               # 勾选 macOS 应用，Apple Silicon 可选 Blender
 ├── remotion            # 初始化带锁定依赖的本地视频项目
 ├── chrome-for-testing  # 管理 Google Chrome for Testing 浏览器
@@ -100,6 +101,14 @@ chatup iterm [--dry-run] [--log-level LEVEL]
 ```
 
 Chrome 安装普通系统浏览器；Snipaste 支持 macOS 和 Windows；iTerm2 仅限 macOS。详见[安装约定](commands.md#chrome-iterm)。
+
+## 微信输入法
+
+```text
+chatup wetype [--dry-run] [--log-level LEVEL]
+```
+
+将官方签名的微信输入法安装到 Input Methods，验证并复用已有安装，提示启用方式与默认 Fn / Fn+空格语音快捷键。详见[微信输入法约定](commands.md#wetype)。
 
 ## ChatGPT 桌面应用
 

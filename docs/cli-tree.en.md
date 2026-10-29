@@ -36,6 +36,7 @@ chatup
 ├── chrome              # Install regular Google Chrome for the current OS
 ├── snipaste            # Install Snipaste on macOS or Windows
 ├── iterm               # Install iTerm2 (macOS only)
+├── wetype              # Install WeType (macOS only)
 ├── macos               # Select supported macOS apps, including Blender on Apple Silicon
 ├── remotion            # Initialize a locked local video project
 ├── chrome-for-testing  # Manage Google Chrome for Testing browsers
@@ -100,6 +101,14 @@ chatup iterm [--dry-run] [--log-level LEVEL]
 ```
 
 Chrome installs the regular system browser; Snipaste supports macOS and Windows; iTerm2 is macOS-only. See the [install contract](commands.md#chrome-iterm).
+
+## WeType
+
+```text
+chatup wetype [--dry-run] [--log-level LEVEL]
+```
+
+Install the official signed input method in Input Methods. Reuse verified existing installations; print activation and default Fn / Fn+Space voice shortcut guidance. See the [WeType contract](commands.md#wetype).
 
 ## ChatGPT Desktop App
 

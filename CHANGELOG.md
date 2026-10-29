@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+- Add `chatup wetype` for the official universal macOS WeType 3.0.0 input method, with Input Methods destinations, Tencent signature/notarization checks, staged installation and verified reuse of existing versions.
+- Provide side-effect-free previews and activation/default voice shortcut guidance without changing input sources, permissions, preferences or the `macos` app selection.
+
 ## 0.2.24
 
 ### Added
