@@ -22,7 +22,7 @@ def desktop(monkeypatch):
     return module
 
 
-@pytest.mark.parametrize("app", ["chrome", "iterm"])
+@pytest.mark.parametrize("app", ["chrome", "iterm", "wetype"])
 def test_mac_dry_run_does_not_need_brew_or_touch_disk(desktop, monkeypatch, app):
     monkeypatch.setattr(desktop, "_run", lambda *a, **k: pytest.fail("must not run a process"))
     monkeypatch.setattr(desktop, "_download", lambda *a: pytest.fail("must not download"))
@@ -36,10 +36,13 @@ def test_mac_dry_run_does_not_need_brew_or_touch_disk(desktop, monkeypatch, app)
 
 
 @pytest.mark.parametrize("system", ["Linux", "Windows", "FreeBSD"])
-def test_iterm_rejects_other_platforms_before_any_side_effect(desktop, monkeypatch, system):
+@pytest.mark.parametrize("app", ["iterm", "wetype"])
+def test_macos_apps_reject_other_platforms_before_any_side_effect(desktop, monkeypatch, system, app):
     monkeypatch.setattr(desktop.platform, "system", lambda: system)
     monkeypatch.setattr(desktop, "_download", lambda *a: pytest.fail("must not download"))
-    result = CliRunner().invoke(main, ["iterm"])
+    monkeypatch.setattr(desktop, "_run", lambda *a, **k: pytest.fail("must not execute"))
+    monkeypatch.setattr(desktop, "_cache_dir", lambda: pytest.fail("must not create cache"))
+    result = CliRunner().invoke(main, [app])
     assert result.exit_code != 0
     assert "macOS only" in result.output
 
@@ -92,6 +95,7 @@ def mac_install(desktop, monkeypatch, tmp_path):
     apps.mkdir()
     user_apps = tmp_path / "user" / "Applications"
     monkeypatch.setattr(desktop, "_mac_app_dirs", lambda: (apps, user_apps))
+    monkeypatch.setattr(desktop, "_mac_input_method_dirs", lambda: (apps, user_apps))
     cache = tmp_path / "cache"
     cache.mkdir()
     monkeypatch.setattr(desktop, "_cache_dir", lambda: cache)
@@ -125,7 +129,7 @@ def mac_install(desktop, monkeypatch, tmp_path):
     shutil.rmtree(tmp_path)
 
 
-@pytest.mark.parametrize("app", ["chrome", "iterm", "snipaste", "blender"])
+@pytest.mark.parametrize("app", ["chrome", "iterm", "snipaste", "blender", "wetype"])
 def test_mac_install_verifies_and_is_idempotent(desktop, mac_install, app):
     apps, _, cache, calls = mac_install
     first = desktop.setup_desktop_app(app)
@@ -254,7 +258,8 @@ def test_mac_failures_clean_staging_and_do_not_claim_success(desktop, mac_instal
 
 
 @pytest.mark.parametrize("unsafe", ["../escape", "symlink"])
-def test_iterm_rejects_unsafe_zip(desktop, mac_install, monkeypatch, unsafe):
+@pytest.mark.parametrize("app", ["iterm", "wetype"])
+def test_macos_apps_reject_unsafe_zip(desktop, mac_install, monkeypatch, unsafe, app):
     def download(url, archive):
         with zipfile.ZipFile(archive, "w") as bundle:
             if unsafe == "symlink":
@@ -265,7 +270,89 @@ def test_iterm_rejects_unsafe_zip(desktop, mac_install, monkeypatch, unsafe):
                 bundle.writestr(unsafe, "unsafe")
     monkeypatch.setattr(desktop, "_download", download)
     with pytest.raises(RuntimeError, match="archive"):
-        desktop.setup_desktop_app("iterm")
+        desktop.setup_desktop_app(app)
+
+
+@pytest.mark.parametrize("machine", ["arm64", "x86_64"])
+def test_wetype_uses_input_method_directories(desktop, monkeypatch, tmp_path, machine):
+    monkeypatch.setattr(desktop.platform, "machine", lambda: machine)
+    system = tmp_path / "Library" / "Input Methods"
+    user = tmp_path / "user" / "Library" / "Input Methods"
+    monkeypatch.setattr(desktop, "_mac_input_method_dirs", lambda: (system, user))
+    monkeypatch.setattr(desktop, "_mac_app_dirs", lambda: pytest.fail("not a desktop application"))
+    monkeypatch.setattr(desktop.os, "access", lambda path, mode: Path(path) == system)
+    assert desktop.plan_desktop_install("wetype")["path"] == str(system / "WeType.app")
+    monkeypatch.setattr(desktop.os, "access", lambda *a: False)
+    assert desktop.plan_desktop_install("wetype")["path"] == str(user / "WeType.app")
+    (user / "WeType.app").mkdir(parents=True)
+    monkeypatch.setattr(desktop.os, "access", lambda *a: True)
+    assert desktop.plan_desktop_install("wetype")["path"] == str(user / "WeType.app")
+
+
+def test_wetype_preserves_newer_existing_user_install(desktop, mac_install, monkeypatch):
+    _, user, _, calls = mac_install
+    monkeypatch.setitem(desktop.MAC_APPS, "wetype", {
+        **desktop.MAC_APPS["wetype"], "download_version": "9.0.0",
+    })
+    make_bundle(user / "WeType.app", desktop.MAC_APPS["wetype"])
+    monkeypatch.setitem(desktop.MAC_APPS, "wetype", {
+        **desktop.MAC_APPS["wetype"], "download_version": "3.0.0",
+    })
+    result = CliRunner().invoke(main, ["wetype"])
+    assert result.exit_code == 0, result.output
+    assert "Already installed" in result.output
+    assert "9.0.0" in result.output
+    assert "System Settings > Keyboard > Text Input" in result.output
+    assert "Fn+Space" in result.output
+    assert {Path(command[0]).name for command in calls} == {"codesign", "spctl"}
+
+
+@pytest.mark.parametrize("failure", ["signature", "notarization", "version", "copy"])
+def test_wetype_failure_never_installs_or_reports_success(desktop, mac_install, monkeypatch, failure):
+    apps, _, cache, calls = mac_install
+    original = desktop._run
+
+    def run(command, **kwargs):
+        suffix = {"signature": "codesign", "notarization": "spctl", "copy": "ditto"}.get(failure)
+        if suffix and command[0].endswith(suffix):
+            raise RuntimeError(failure + " failed")
+        return original(command, **kwargs)
+
+    monkeypatch.setattr(desktop, "_run", run)
+    if failure == "version":
+        original_bundle = desktop._mac_bundle
+        monkeypatch.setattr(desktop, "_mac_bundle", lambda *a: {**original_bundle(*a), "version": "0.0.1"})
+    result = CliRunner().invoke(main, ["wetype"])
+    assert result.exit_code != 0
+    assert "Installation verified" not in result.output
+    assert "Default voice shortcuts" not in result.output
+    assert not (apps / "WeType.app").exists()
+    assert not list(cache.iterdir())
+
+
+def test_wetype_invalid_existing_bundle_is_not_overwritten(desktop, mac_install):
+    apps, _, _, calls = mac_install
+    target = apps / "WeType.app"
+    target.mkdir()
+    (target / "keep.txt").write_text("keep", encoding="utf-8")
+    result = CliRunner().invoke(main, ["wetype"])
+    assert result.exit_code != 0
+    assert "never overwritten" in result.output
+    assert (target / "keep.txt").read_text(encoding="utf-8") == "keep"
+    assert not calls
+
+
+def test_wetype_broken_system_symlink_is_not_shadowed(desktop, monkeypatch, tmp_path, require_symlink_privilege):
+    system = tmp_path / "system"
+    system.mkdir()
+    target = system / "WeType.app"
+    target.symlink_to(tmp_path / "missing", target_is_directory=True)
+    monkeypatch.setattr(desktop, "_mac_input_method_dirs", lambda: (system, tmp_path / "user"))
+    monkeypatch.setattr(desktop, "_download", lambda *a: pytest.fail("must not download"))
+    assert desktop.plan_desktop_install("wetype")["path"] == str(target)
+    result = CliRunner().invoke(main, ["wetype"])
+    assert result.exit_code != 0
+    assert "never overwritten" in result.output
 
 
 @pytest.mark.parametrize(

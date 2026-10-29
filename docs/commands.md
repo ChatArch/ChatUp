@@ -17,6 +17,7 @@ chatup
 |-- chrome              # 按当前系统安装普通 Google Chrome
 |-- snipaste            # 在 macOS 或 Windows 安装 Snipaste
 |-- iterm               # 安装 iTerm2（仅限 macOS）
+|-- wetype              # 安装微信输入法（仅限 macOS）
 |-- macos               # 勾选 macOS 应用，Apple Silicon 可选 Blender
 |-- remotion            # 初始化带锁定依赖的本地视频项目
 |-- chrome-for-testing # 管理 Google Chrome for Testing 浏览器
@@ -187,6 +188,19 @@ Linux 需要对应系统包管理器；普通用户必须显式提供 `--sudo`�
 
 来源：[Google Chrome](https://www.google.com/chrome/)、[Snipaste](https://www.snipaste.com/)、[iTerm2 下载](https://iterm2.com/downloads.html)。
 
+## 微信输入法 {#wetype}
+
+```bash
+chatup wetype --dry-run
+chatup wetype
+```
+
+`chatup wetype` 仅支持 macOS Intel 和 Apple Silicon，使用[微信输入法官网](https://z.weixin.qq.com/)的 [InstallInfo](https://download.weread.qq.com/app/wxkb/mac/3.0.0/install_info_3.0.0_670.json) 提供的官方 universal 3.0.0（build 670）ZIP，无需 Homebrew。支持 `--dry-run` 和 `--log-level DEBUG|INFO|WARNING|ERROR`；预览不联网、不执行进程、不写目录。
+
+先检查 `/Library/Input Methods/WeType.app` 和 `~/Library/Input Methods/WeType.app`；已有有效安装验证后复用，保留较新版本。首次安装到可写的系统 Input Methods 目录，否则使用当前用户的同名目录，无需 sudo。校验 bundle ID `com.tencent.inputmethod.wetype`、版本、可执行文件、最低 macOS 要求、腾讯 Team ID `88L2Q4487U` 的 Developer ID 签名与 Gatekeeper 公证，再暂存复制并原子移入目标。异常已有安装不会被覆盖。下载缓存遵循 `CHATARCH_HOME`，完成或失败后清理。
+
+安装后在「系统设置 → 键盘 → 文本输入 → 编辑 → +」中添加微信输入法（简体中文）；未出现时可注销后重新登录。默认按住 `Fn` 说话、松开结束；`Fn + 空格` 启动连续输入、按任意键结束。在「微信输入法设置 → 语音输入」中可自定义快捷键，首次使用需按系统提示授权麦克风。命令只安装并显示这些提示，不自动启动、选择输入法、授权或修改快捷键，也不加入 `chatup macos` 的默认应用集合。Windows/Linux 当前返回明确的不支持错误。
+
 ## ChatGPT 桌面应用 {#chatgpt-desktop}
 
 `chatup chatgpt` 安装官方新版 ChatGPT 桌面应用，包含 Codex。它不是 `chatup codex`（Codex CLI），也不安装 ChatGPT Classic 或已弃用的 `codex-app`。
@@ -258,7 +272,7 @@ chatup cursor-agent --install-only -I
 
 Cursor Agent 使用其官方 Windows PowerShell 安装器，Hermes 使用 ChatArch fork 的 Windows `install.ps1`，先确认实际 home/install 目标，再非交互安装，不默认启动 gateway/WebUI。当前官方 Cursor 安装器会重建 `%LOCALAPPDATA%\\cursor-agent`；ChatUp 在该目录已存在时拒绝自动执行，避免删除既有用户数据，需先自行迁移并确认后重试。ChatUp 不读取或迁移现有认证资料。Windows 配置及 native 安装的验收限于 CI 矩阵、受管 Node/Codex/OpenCode smoke、Hermes 路径只读探针；不包含真实用户登录或模型请求。
 
-`iterm` 和 `macos` 为 macOS-only，`zsh` 为 POSIX-only，`crs` 当前为 POSIX 服务路径；`glance` 当前只有 Linux amd64 release asset。Gitea、MySQL、Twikoo 和 NGINX 的 Windows 二进制/配置能力与 systemd service/start 分开，后者不宣称原生 Windows 可用。Discourse/Zulip 的 Docker 配置不是 Docker Desktop 服务验收。细分范围见 capability map。
+`iterm`、`wetype` 和 `macos` 为 macOS-only，`zsh` 为 POSIX-only，`crs` 当前为 POSIX 服务路径；`glance` 当前只有 Linux amd64 release asset。Gitea、MySQL、Twikoo 和 NGINX 的 Windows 二进制/配置能力与 systemd service/start 分开，后者不宣称原生 Windows 可用。Discourse/Zulip 的 Docker 配置不是 Docker Desktop 服务验收。细分范围见 capability map。
 
 ## Cursor Agent 命令约定
 

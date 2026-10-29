@@ -85,6 +85,15 @@ chatup chrome --sudo --yes # Linux：允许提权并确认包安装
 
 macOS 直接下载官方 DMG/ZIP 并校验开发者签名，无需 Homebrew；默认装到 `/Applications`，不可写时使用 `~/Applications`。Windows 使用 WinGet 精确包 `Google.Chrome.EXE`（当前用户安装）和 `liule.Snipaste`，需以 `--yes` 接受首次协议，Chrome 还会验证已安装程序的 Google 签名、产品身份和版本；Linux x86_64 支持 Chrome 的官方 DEB/RPM 与 apt/dnf/yum/zypper。已安装时验证并复用，不改默认浏览器、终端或用户配置。自动化浏览器仍使用 `chatup chrome-for-testing`。详见[安装约定](https://arch.gh.wzhecnu.cn/ChatUp/commands/#chrome-iterm)。
 
+## 微信输入法
+
+```bash
+chatup wetype --dry-run
+chatup wetype
+```
+
+安装官方签名的 macOS 微信输入法，验证并复用已有安装，并提示首次启用方式。默认按住 Fn 说话，Fn+空格开始连续输入；在「微信输入法设置 → 语音输入」中自定义。详见[微信输入法约定](https://arch.gh.wzhecnu.cn/ChatUp/commands/#wetype)。
+
 ## ChatGPT / Codex 桌面应用
 
 ```bash
@@ -103,7 +112,7 @@ chatup chatgpt --yes  # Windows 首次安装时接受 Store 协议
 | --- | --- |
 | 基础运行环境 | `doctor`、`uv`、`nodejs`、`docker`、`zsh`、`chrome-for-testing`、`chromedriver`、`playwright`、`frp` |
 | 工作区脚手架 | `workspace` |
-| 桌面应用 | `macos`（Snipaste/iTerm2/Chrome/Blender 多选）、`chrome`、`snipaste`（macOS/Windows）、`iterm`（仅 macOS）、`chatgpt`（含 Codex） |
+| 桌面应用 | `macos`（Snipaste/iTerm2/Chrome/Blender 多选）、`chrome`、`snipaste`（macOS/Windows）、`iterm` / `wetype`（仅 macOS）、`chatgpt`（含 Codex） |
 | Linux X11 Computer Use | `computer-use`（默认只读预览，`--sudo` 应用） |
 | 视频项目 | `remotion` |
 | 本地服务安装 | `gitea`、`glance`、`discourse`、`zulip`、`mysql`、`nginx`、`crs` |

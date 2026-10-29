@@ -17,6 +17,7 @@ chatup
 |-- chrome              # Install regular Google Chrome for the current OS
 |-- snipaste            # Install Snipaste on macOS or Windows
 |-- iterm               # Install iTerm2 (macOS only)
+|-- wetype              # Install WeType (macOS only)
 |-- macos               # Select supported macOS apps, including Blender on Apple Silicon
 |-- remotion            # Initialize a locked local video project
 |-- chrome-for-testing # Manage Google Chrome for Testing browsers
@@ -107,6 +108,8 @@ Local-service commands use user-level layouts by default:
 `chatup remotion PROJECT_DIR` creates a local video project with locked dependencies and a renderable example. It requires existing Node/npm, protects existing directories and detects a local browser. Projects can use the Chrome/Blender tools prepared by the macOS installer. See the [Remotion contract](commands.md#remotion).
 
 `chatup chrome` installs regular Google Chrome for the current OS. `chatup snipaste` installs Snipaste on macOS or Windows. `chatup iterm` installs iTerm2 on macOS. All three support `--dry-run` and reuse verified existing installations; macOS does not require Homebrew and Windows verifies exact WinGet package IDs. See the [install contract](commands.md#chrome-iterm).
+
+`chatup wetype` installs the signed official macOS input method in Input Methods, reuses verified existing installations and prints activation/voice shortcut guidance. Supports `--dry-run`; Windows and Linux are not supported. See the [WeType contract](commands.md#wetype).
 
 `chatup chatgpt` installs the official new ChatGPT desktop app including Codex through Homebrew on macOS or the exact Microsoft Store product on Windows. `--dry-run` has no side effects; installation is checked through the package manager. Native app/cache paths are owned by the package manager and OpenAI, not ChatArch. No launch, login, Codex CLI config changes or automatic Linux preview installation. See the [desktop install contract](commands.md#chatgpt-desktop).
 

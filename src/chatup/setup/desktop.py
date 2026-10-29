@@ -61,6 +61,17 @@ MAC_APPS = {
         "sha256": "dc4125399b8bfefe283cc1624d6cfc7809d1cac20ace51072127eb371f31f210",
         "notarized": True,
     },
+    "wetype": {
+        "app": "WeType (微信输入法)",
+        "bundle": "WeType.app",
+        "bundle_id": "com.tencent.inputmethod.wetype",
+        "team_id": "88L2Q4487U",
+        # Payload advertised by https://z.weixin.qq.com/ via its InstallInfo.
+        "url": "https://download.weread.qq.com/app/wxkb/mac/3.0.0/WeType_3.0.0_670.zip",
+        "format": "zip",
+        "download_version": "3.0.0",
+        "notarized": True,
+    },
 }
 LINUX_PACKAGES = {
     "apt-get": ("deb", ["install"]),
@@ -74,6 +85,10 @@ def _mac_app_dirs() -> tuple[Path, Path]:
     return Path("/Applications"), Path.home() / "Applications"
 
 
+def _mac_input_method_dirs() -> tuple[Path, Path]:
+    return Path("/Library/Input Methods"), Path.home() / "Library" / "Input Methods"
+
+
 def _is_root() -> bool:
     return hasattr(os, "geteuid") and os.geteuid() == 0
 
@@ -83,7 +98,7 @@ def plan_desktop_install(app: str, *, sudo: bool = False, yes: bool = False) -> 
     spec = MAC_APPS[app]
     system = platform.system()
     plan = {"app": spec["app"], "platform": system}
-    if system != "Darwin" and app in {"iterm", "blender"}:
+    if system != "Darwin" and app in {"iterm", "blender", "wetype"}:
         raise RuntimeError(f"{spec['app']} is supported on macOS only; current platform: {system}.")
     if system not in {"Darwin", "Windows"} and app == "snipaste":
         raise RuntimeError(f"{spec['app']} is supported on macOS and Windows only; current platform: {system}.")
@@ -92,8 +107,9 @@ def plan_desktop_install(app: str, *, sudo: bool = False, yes: bool = False) -> 
             raise RuntimeError(f"Unsupported macOS architecture: {platform.machine()}.")
         if spec.get("architectures") and platform.machine().lower() not in spec["architectures"]:
             raise RuntimeError(f"{spec['app']} installation supports Apple Silicon macOS only; current architecture: {platform.machine()}.")
-        directories = _mac_app_dirs()
-        existing = next((d / spec["bundle"] for d in directories if (d / spec["bundle"]).exists()), None)
+        directories = _mac_input_method_dirs() if app == "wetype" else _mac_app_dirs()
+        existing = next((d / spec["bundle"] for d in directories
+                         if (d / spec["bundle"]).exists() or (d / spec["bundle"]).is_symlink()), None)
         directory = directories[0] if os.access(directories[0], os.W_OK) else directories[1]
         return {**plan, **spec, "method": "macos", "path": str(existing or directory / spec["bundle"])}
     if system == "Windows":
