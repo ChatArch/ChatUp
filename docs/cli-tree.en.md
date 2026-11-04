@@ -37,6 +37,7 @@ chatup
 ├── snipaste            # Install Snipaste on macOS or Windows
 ├── iterm               # Install iTerm2 (macOS only)
 ├── wetype              # Install WeType (macOS only)
+├── doubao              # Install Doubao desktop (macOS only)
 ├── macos               # Select supported macOS apps, including Blender on Apple Silicon
 ├── remotion            # Initialize a locked local video project
 ├── chrome-for-testing  # Manage Google Chrome for Testing browsers
@@ -109,6 +110,14 @@ chatup wetype [--dry-run] [--log-level LEVEL]
 ```
 
 Install the official signed input method in Input Methods. Reuse verified existing installations; print activation and default Fn / Fn+Space voice shortcut guidance. See the [WeType contract](commands.md#wetype).
+
+## Doubao Desktop App
+
+```text
+chatup doubao [--dry-run] [--log-level LOG-LEVEL]
+```
+
+Install official 2.34.6 on Apple Silicon and Intel Macs running macOS 12+, using Arm64 / X64 DMGs. Verify signatures and notarization, and reuse existing installations. A dry run makes no network requests, subprocesses or directory writes. See the [Doubao install contract](commands.md#doubao) for native paths, failure cleanup and Python APIs.
 
 ## ChatGPT Desktop App
 

@@ -18,6 +18,7 @@ chatup
 |-- snipaste            # Install Snipaste on macOS or Windows
 |-- iterm               # Install iTerm2 (macOS only)
 |-- wetype              # Install WeType (macOS only)
+|-- doubao              # Install Doubao desktop (macOS only)
 |-- macos               # Select supported macOS apps, including Blender on Apple Silicon
 |-- remotion            # Initialize a locked local video project
 |-- chrome-for-testing # Manage Google Chrome for Testing browsers
@@ -201,6 +202,31 @@ Existing `/Library/Input Methods/WeType.app` or `~/Library/Input Methods/WeType.
 
 Add WeType under System Settings > Keyboard > Text Input > Edit > + (Chinese, Simplified); log out and back in if it is not listed. Default voice shortcuts: hold `Fn` to talk and release to finish, or `Fn + Space` for continuous input and any key to finish. Customize shortcuts in WeType Settings > Voice Input and allow microphone access when prompted on first use. The command prints these instructions without launching the app, selecting an input source, granting permissions or changing shortcuts. It does not change the `chatup macos` default apps. Windows and Linux currently return explicit unsupported-platform errors.
 
+## Doubao Desktop App {#doubao}
+
+```bash
+chatup doubao --dry-run
+chatup doubao
+```
+
+`chatup doubao` supports Apple Silicon and Intel Macs running macOS 12+. It uses official 2.34.6 DMGs advertised by the [Doubao website](https://www.doubao.com/download) through its [update settings API](https://www.doubao.com/service/settings/v3/?device_platform=web&brand=doubao&aid=582465). The release is pinned: `arm64` / `aarch64` use the Arm64 package and `x86_64` / `amd64` use X64, without Homebrew. Options are `--dry-run` and `--log-level DEBUG|INFO|WARNING|ERROR`. A dry run only reads local platform and paths, without network requests, subprocesses or directory writes. Unsupported systems, architectures or macOS versions fail before downloading.
+
+Existing `/Applications/Doubao.app` and `~/Applications/Doubao.app` bundles are verified and reused, including newer versions. Invalid apps and broken symlinks cause errors and are never overwritten; an invalid system app is not bypassed by installing a user copy. Fresh installs use writable `/Applications`, falling back to `~/Applications` without sudo. Bundle ID `com.bot.pc.doubao`, version, executable, minimum macOS, Developer ID Team `96L78H6LMH`, and Gatekeeper notarization are verified before staged copying and atomic placement, followed by installed-bundle readback. Download or verification failures exit nonzero, preserve existing apps, clean staging and detach the DMG. A still-mounted image retains its cache with a warning showing the path instead of recursively removing mounted contents.
+
+Temporary downloads use `~/.chatarch/cache/desktop` (respecting `CHATARCH_HOME`); native application data remains app-owned. The command does not upgrade, launch, log in, grant permissions, enable startup items or add Doubao to `chatup macos` defaults.
+
+Python callers can reuse the same workflow directly:
+
+```python
+from chatup.setup.desktop import plan_desktop_install, setup_desktop_app
+
+plan = plan_desktop_install("doubao")
+result = setup_desktop_app("doubao", dry_run=True)
+# Actual installation: setup_desktop_app("doubao")
+```
+
+Plans include `app`, `platform`, `url`, `path` and verification requirements. Install results add `status` (`planned` / `already_installed` / `installed`) and `verified`, with `version` and `binary` after successful verification. Failures raise `RuntimeError` and produce a nonzero CLI exit.
+
 ## ChatGPT Desktop App {#chatgpt-desktop}
 
 `chatup chatgpt` installs the official new ChatGPT desktop app, including Codex. It is separate from `chatup codex` (the Codex CLI), and does not install ChatGPT Classic or the deprecated `codex-app` cask.
@@ -272,7 +298,7 @@ chatup cursor-agent --install-only -I
 
 Cursor Agent uses its official Windows PowerShell installer. Hermes uses the ChatArch fork's Windows `install.ps1`, first checking the resolved home/install targets and then installing noninteractively; no gateway or WebUI is started by default. The current official Cursor installer recreates `%LOCALAPPDATA%\\cursor-agent`. ChatUp refuses to launch it if that directory already exists, preventing deletion of existing user data; migrate and confirm it yourself before retrying. ChatUp does not read or migrate existing credentials. The native acceptance gates cover the hosted Windows test matrix, managed Node/Codex/OpenCode smoke, and a read-only Hermes path probe—not live user sign-in or model calls.
 
-`iterm`, `wetype` and `macos` are macOS-only; `zsh` is POSIX-only; `crs` is currently a POSIX service path; `glance` currently ships a Linux amd64 release asset only. Windows binary/configuration support for Gitea, MySQL, Twikoo, and NGINX does not imply support for their systemd service/start operations. Discourse/Zulip Docker configuration is not Docker Desktop service acceptance. See the capability map for the per-command boundary.
+`iterm`, `wetype`, `doubao` and `macos` are macOS-only; `zsh` is POSIX-only; `crs` is currently a POSIX service path; `glance` currently ships a Linux amd64 release asset only. Windows binary/configuration support for Gitea, MySQL, Twikoo, and NGINX does not imply support for their systemd service/start operations. Discourse/Zulip Docker configuration is not Docker Desktop service acceptance. See the capability map for the per-command boundary.
 
 ## Cursor Agent Command Contract
 

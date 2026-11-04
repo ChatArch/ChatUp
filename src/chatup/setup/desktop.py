@@ -72,6 +72,23 @@ MAC_APPS = {
         "download_version": "3.0.0",
         "notarized": True,
     },
+    "doubao": {
+        "app": "Doubao (豆包)",
+        "bundle": "Doubao.app",
+        "bundle_id": "com.bot.pc.doubao",
+        "team_id": "96L78H6LMH",
+        # Pinned release advertised by the official site's saman_update_address:
+        # https://www.doubao.com/service/settings/v3/?device_platform=web&brand=doubao&aid=582465
+        "url": "https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/doubao_pc/2.34.6/Doubao_universal_2.34.6.dmg",
+        "architecture_urls": {
+            "arm64": "https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/doubao_pc/2.34.6/Doubao_Arm64_2.34.6.dmg",
+            "x86_64": "https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/doubao_pc/2.34.6/Doubao_X64_2.34.6.dmg",
+        },
+        "format": "dmg",
+        "download_version": "2.34.6",
+        "minimum_macos": "12.0",
+        "notarized": True,
+    },
 }
 LINUX_PACKAGES = {
     "apt-get": ("deb", ["install"]),
@@ -93,12 +110,17 @@ def _is_root() -> bool:
     return hasattr(os, "geteuid") and os.geteuid() == 0
 
 
+def _mac_version(value: str) -> tuple[int, ...]:
+    parts = tuple(int(part) for part in value.split("."))
+    return parts + (0,) * max(0, 3 - len(parts))
+
+
 def plan_desktop_install(app: str, *, sudo: bool = False, yes: bool = False) -> dict[str, Any]:
     """Describe the current platform's installation without writes or processes."""
     spec = MAC_APPS[app]
     system = platform.system()
     plan = {"app": spec["app"], "platform": system}
-    if system != "Darwin" and app in {"iterm", "blender", "wetype"}:
+    if system != "Darwin" and app in {"iterm", "blender", "wetype", "doubao"}:
         raise RuntimeError(f"{spec['app']} is supported on macOS only; current platform: {system}.")
     if system not in {"Darwin", "Windows"} and app == "snipaste":
         raise RuntimeError(f"{spec['app']} is supported on macOS and Windows only; current platform: {system}.")
@@ -107,6 +129,14 @@ def plan_desktop_install(app: str, *, sudo: bool = False, yes: bool = False) -> 
             raise RuntimeError(f"Unsupported macOS architecture: {platform.machine()}.")
         if spec.get("architectures") and platform.machine().lower() not in spec["architectures"]:
             raise RuntimeError(f"{spec['app']} installation supports Apple Silicon macOS only; current architecture: {platform.machine()}.")
+        minimum = spec.get("minimum_macos")
+        current = platform.mac_ver()[0]
+        if minimum and current and _mac_version(current) < _mac_version(minimum):
+            raise RuntimeError(f"{spec['app']} requires macOS {minimum} or later; current: {current}.")
+        if spec.get("architecture_urls"):
+            machine = platform.machine().lower()
+            architecture = "arm64" if machine in {"arm64", "aarch64"} else "x86_64"
+            spec = {**spec, "url": spec["architecture_urls"][architecture]}
         directories = _mac_input_method_dirs() if app == "wetype" else _mac_app_dirs()
         existing = next((d / spec["bundle"] for d in directories
                          if (d / spec["bundle"]).exists() or (d / spec["bundle"]).is_symlink()), None)
@@ -206,9 +236,7 @@ def _mac_bundle(plan: dict[str, Any], path: Path) -> dict[str, str]:
         minimum = info.get("LSMinimumSystemVersion", "")
         current = platform.mac_ver()[0]
         if minimum and current:
-            def version_tuple(value):
-                return tuple(int(part) for part in value.split(".")) + (0,) * (3 - len(value.split(".")))
-            if version_tuple(current) < version_tuple(minimum):
+            if _mac_version(current) < _mac_version(minimum):
                 raise ValueError(f"requires macOS {minimum} or later; current: {current}")
     except (OSError, ValueError, plistlib.InvalidFileException) as exc:
         raise RuntimeError(f"Cannot verify {plan['app']} at {path}: {exc}. Existing apps are never overwritten.") from exc

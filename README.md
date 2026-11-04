@@ -94,6 +94,15 @@ chatup wetype
 
 安装官方签名的 macOS 微信输入法，验证并复用已有安装，并提示首次启用方式。默认按住 Fn 说话，Fn+空格开始连续输入；在「微信输入法设置 → 语音输入」中自定义。详见[微信输入法约定](https://arch.gh.wzhecnu.cn/ChatUp/commands/#wetype)。
 
+## 豆包电脑版
+
+```bash
+chatup doubao --dry-run
+chatup doubao
+```
+
+在 macOS 12+ 的 Apple Silicon 或 Intel Mac 安装官方豆包 2.34.6，校验开发者签名与公证，无需 Homebrew。验证并复用已有安装；不自动启动、登录、授权或加入 `chatup macos` 默认集合。详见[豆包安装约定](https://arch.gh.wzhecnu.cn/ChatUp/commands/#doubao)。
+
 ## ChatGPT / Codex 桌面应用
 
 ```bash
@@ -112,7 +121,7 @@ chatup chatgpt --yes  # Windows 首次安装时接受 Store 协议
 | --- | --- |
 | 基础运行环境 | `doctor`、`uv`、`nodejs`、`docker`、`zsh`、`chrome-for-testing`、`chromedriver`、`playwright`、`frp` |
 | 工作区脚手架 | `workspace` |
-| 桌面应用 | `macos`（Snipaste/iTerm2/Chrome/Blender 多选）、`chrome`、`snipaste`（macOS/Windows）、`iterm` / `wetype`（仅 macOS）、`chatgpt`（含 Codex） |
+| 桌面应用 | `macos`（Snipaste/iTerm2/Chrome/Blender 多选）、`chrome`、`snipaste`（macOS/Windows）、`iterm` / `wetype` / `doubao`（仅 macOS）、`chatgpt`（含 Codex） |
 | Linux X11 Computer Use | `computer-use`（默认只读预览，`--sudo` 应用） |
 | 视频项目 | `remotion` |
 | 本地服务安装 | `gitea`、`glance`、`discourse`、`zulip`、`mysql`、`nginx`、`crs` |
