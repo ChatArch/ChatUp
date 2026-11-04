@@ -37,6 +37,7 @@ chatup
 ├── snipaste            # 在 macOS 或 Windows 安装 Snipaste
 ├── iterm               # 安装 iTerm2（仅限 macOS）
 ├── wetype              # 安装微信输入法（仅限 macOS）
+├── doubao              # 安装豆包电脑版（仅限 macOS）
 ├── macos               # 勾选 macOS 应用，Apple Silicon 可选 Blender
 ├── remotion            # 初始化带锁定依赖的本地视频项目
 ├── chrome-for-testing  # 管理 Google Chrome for Testing 浏览器
@@ -109,6 +110,14 @@ chatup wetype [--dry-run] [--log-level LEVEL]
 ```
 
 将官方签名的微信输入法安装到 Input Methods，验证并复用已有安装，提示启用方式与默认 Fn / Fn+空格语音快捷键。详见[微信输入法约定](commands.md#wetype)。
+
+## 豆包电脑版
+
+```text
+chatup doubao [--dry-run] [--log-level LOG-LEVEL]
+```
+
+在 macOS 12+ 的 Apple Silicon 和 Intel Mac 安装官方 2.34.6，对应 Arm64 / X64 DMG；验证签名与公证并复用已有安装。预览不联网、不执行进程、不写目录。详见[豆包安装约定](commands.md#doubao)，包括原生目录、失败清理和 Python API。
 
 ## ChatGPT 桌面应用
 

@@ -1,8 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.2.25
 
 ### Added
+- Add `chatup doubao` for official macOS Doubao 2.34.6 downloads selected for Apple Silicon or Intel, with bundle identity, developer signature and notarization checks, staged installation and verified reuse of existing versions.
+- Provide a side-effect-free Doubao install preview without launching the app, logging in, granting permissions or changing the `macos` default app selection.
 - Add `chatup wetype` for the official universal macOS WeType 3.0.0 input method, with Input Methods destinations, Tencent signature/notarization checks, staged installation and verified reuse of existing versions.
 - Provide side-effect-free previews and activation/default voice shortcut guidance without changing input sources, permissions, preferences or the `macos` app selection.
 

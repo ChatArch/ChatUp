@@ -18,6 +18,7 @@ chatup
 |-- snipaste            # Install Snipaste on macOS or Windows
 |-- iterm               # Install iTerm2 (macOS only)
 |-- wetype              # Install WeType (macOS only)
+|-- doubao              # Install Doubao desktop (macOS only)
 |-- macos               # Select supported macOS apps, including Blender on Apple Silicon
 |-- remotion            # Initialize a locked local video project
 |-- chrome-for-testing # Manage Google Chrome for Testing browsers
@@ -112,6 +113,8 @@ Local-service commands use user-level layouts by default:
 `chatup wetype` installs the signed official macOS input method in Input Methods, reuses verified existing installations and prints activation/voice shortcut guidance. Supports `--dry-run`; Windows and Linux are not supported. See the [WeType contract](commands.md#wetype).
 
 `chatup chatgpt` installs the official new ChatGPT desktop app including Codex through Homebrew on macOS or the exact Microsoft Store product on Windows. `--dry-run` has no side effects; installation is checked through the package manager. Native app/cache paths are owned by the package manager and OpenAI, not ChatArch. No launch, login, Codex CLI config changes or automatic Linux preview installation. See the [desktop install contract](commands.md#chatgpt-desktop).
+
+`chatup doubao` installs official Doubao 2.34.6 on Apple Silicon or Intel Macs running macOS 12+, without Homebrew. It supports side-effect-free `--dry-run`, signature/notarization checks and reuse of existing installations. It does not overwrite invalid apps, launch, log in, grant permissions or add Doubao to `chatup macos` defaults. See the [Doubao install contract](commands.md#doubao).
 
 ## Agent Toolchains
 

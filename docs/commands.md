@@ -18,6 +18,7 @@ chatup
 |-- snipaste            # 在 macOS 或 Windows 安装 Snipaste
 |-- iterm               # 安装 iTerm2（仅限 macOS）
 |-- wetype              # 安装微信输入法（仅限 macOS）
+|-- doubao              # 安装豆包电脑版（仅限 macOS）
 |-- macos               # 勾选 macOS 应用，Apple Silicon 可选 Blender
 |-- remotion            # 初始化带锁定依赖的本地视频项目
 |-- chrome-for-testing # 管理 Google Chrome for Testing 浏览器
@@ -201,6 +202,31 @@ chatup wetype
 
 安装后在「系统设置 → 键盘 → 文本输入 → 编辑 → +」中添加微信输入法（简体中文）；未出现时可注销后重新登录。默认按住 `Fn` 说话、松开结束；`Fn + 空格` 启动连续输入、按任意键结束。在「微信输入法设置 → 语音输入」中可自定义快捷键，首次使用需按系统提示授权麦克风。命令只安装并显示这些提示，不自动启动、选择输入法、授权或修改快捷键，也不加入 `chatup macos` 的默认应用集合。Windows/Linux 当前返回明确的不支持错误。
 
+## 豆包电脑版 {#doubao}
+
+```bash
+chatup doubao --dry-run
+chatup doubao
+```
+
+`chatup doubao` 支持 macOS 12+ 的 Apple Silicon 和 Intel Mac，使用[豆包官网](https://www.doubao.com/download)的[更新配置 API](https://www.doubao.com/service/settings/v3/?device_platform=web&brand=doubao&aid=582465) 提供的官方 2.34.6 DMG。版本固定：`arm64` / `aarch64` 使用 Arm64 包，`x86_64` / `amd64` 使用 X64 包，无需 Homebrew。支持 `--dry-run` 和 `--log-level DEBUG|INFO|WARNING|ERROR`；预览只读取本机平台和路径，不联网、不执行进程、不写目录。其他系统、架构或低于最低要求的 macOS 在下载前报错。
+
+先检查 `/Applications/Doubao.app` 和 `~/Applications/Doubao.app`，验证并复用已有安装，包括较新版本；无效应用或断开的符号链接会报错，不覆盖，也不会通过另装用户目录来绕过异常系统应用。首次安装到可写的 `/Applications`，否则使用 `~/Applications`，无需 sudo。校验 bundle ID `com.bot.pc.doubao`、版本、可执行文件、最低 macOS 要求、Developer ID Team `96L78H6LMH` 的签名与 Gatekeeper 公证，再暂存复制并原子移入目标，最后回读验证。下载或校验失败时非零退出，保留已有应用，清理暂存文件并卸载 DMG；仍挂载的镜像会保留缓存并提示路径，避免递归清理挂载内容。
+
+缓存使用 `~/.chatarch/cache/desktop`（遵循 `CHATARCH_HOME`）；豆包应用数据仍由应用按原生目录管理。命令不自动升级、启动、登录、授权或设置开机启动，也不把豆包加入 `chatup macos` 默认集合。
+
+Python 调用可直接复用相同安装流程：
+
+```python
+from chatup.setup.desktop import plan_desktop_install, setup_desktop_app
+
+plan = plan_desktop_install("doubao")
+result = setup_desktop_app("doubao", dry_run=True)
+# 真正安装：setup_desktop_app("doubao")
+```
+
+计划含 `app`、`platform`、`url`、`path` 和验证要求；安装结果另含 `status`（`planned` / `already_installed` / `installed`）与 `verified`，验证成功时包含 `version` 和 `binary`。失败抛出 `RuntimeError`，CLI 非零退出。
+
 ## ChatGPT 桌面应用 {#chatgpt-desktop}
 
 `chatup chatgpt` 安装官方新版 ChatGPT 桌面应用，包含 Codex。它不是 `chatup codex`（Codex CLI），也不安装 ChatGPT Classic 或已弃用的 `codex-app`。
@@ -272,7 +298,7 @@ chatup cursor-agent --install-only -I
 
 Cursor Agent 使用其官方 Windows PowerShell 安装器，Hermes 使用 ChatArch fork 的 Windows `install.ps1`，先确认实际 home/install 目标，再非交互安装，不默认启动 gateway/WebUI。当前官方 Cursor 安装器会重建 `%LOCALAPPDATA%\\cursor-agent`；ChatUp 在该目录已存在时拒绝自动执行，避免删除既有用户数据，需先自行迁移并确认后重试。ChatUp 不读取或迁移现有认证资料。Windows 配置及 native 安装的验收限于 CI 矩阵、受管 Node/Codex/OpenCode smoke、Hermes 路径只读探针；不包含真实用户登录或模型请求。
 
-`iterm`、`wetype` 和 `macos` 为 macOS-only，`zsh` 为 POSIX-only，`crs` 当前为 POSIX 服务路径；`glance` 当前只有 Linux amd64 release asset。Gitea、MySQL、Twikoo 和 NGINX 的 Windows 二进制/配置能力与 systemd service/start 分开，后者不宣称原生 Windows 可用。Discourse/Zulip 的 Docker 配置不是 Docker Desktop 服务验收。细分范围见 capability map。
+`iterm`、`wetype`、`doubao` 和 `macos` 为 macOS-only，`zsh` 为 POSIX-only，`crs` 当前为 POSIX 服务路径；`glance` 当前只有 Linux amd64 release asset。Gitea、MySQL、Twikoo 和 NGINX 的 Windows 二进制/配置能力与 systemd service/start 分开，后者不宣称原生 Windows 可用。Discourse/Zulip 的 Docker 配置不是 Docker Desktop 服务验收。细分范围见 capability map。
 
 ## Cursor Agent 命令约定
 

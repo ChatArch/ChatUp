@@ -72,3 +72,11 @@ def wetype_cli(**kwargs) -> None:
         click.echo("If it is not listed, log out and back in, then add it under Chinese, Simplified.")
         click.echo("Default voice shortcuts: hold Fn to talk; Fn+Space starts continuous input.")
         click.echo("Customize these in WeType Settings > Voice Input; allow microphone access when prompted.")
+
+
+@click.command(name="doubao")
+@click.option("--dry-run", is_flag=True, help="Show the installation plan without downloading or installing.")
+@click.option("--log-level", type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"], case_sensitive=False), default="INFO")
+def doubao_cli(**kwargs) -> None:
+    """Install Doubao (豆包) from the official download (macOS only)."""
+    _install("doubao", **kwargs)

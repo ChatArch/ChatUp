@@ -22,7 +22,7 @@ def desktop(monkeypatch):
     return module
 
 
-@pytest.mark.parametrize("app", ["chrome", "iterm", "wetype"])
+@pytest.mark.parametrize("app", ["chrome", "iterm", "wetype", "doubao"])
 def test_mac_dry_run_does_not_need_brew_or_touch_disk(desktop, monkeypatch, app):
     monkeypatch.setattr(desktop, "_run", lambda *a, **k: pytest.fail("must not run a process"))
     monkeypatch.setattr(desktop, "_download", lambda *a: pytest.fail("must not download"))
@@ -30,13 +30,13 @@ def test_mac_dry_run_does_not_need_brew_or_touch_disk(desktop, monkeypatch, app)
     monkeypatch.setattr(desktop.shutil, "which", lambda _: pytest.fail("must not need Homebrew"))
     result = CliRunner().invoke(main, [app, "--dry-run"])
     assert result.exit_code == 0, result.output
-    assert desktop.MAC_APPS[app]["url"] in result.output
+    assert desktop.plan_desktop_install(app)["url"] in result.output
     assert "Dry run" in result.output
     assert "Installation verified" not in result.output
 
 
 @pytest.mark.parametrize("system", ["Linux", "Windows", "FreeBSD"])
-@pytest.mark.parametrize("app", ["iterm", "wetype"])
+@pytest.mark.parametrize("app", ["iterm", "wetype", "doubao"])
 def test_macos_apps_reject_other_platforms_before_any_side_effect(desktop, monkeypatch, system, app):
     monkeypatch.setattr(desktop.platform, "system", lambda: system)
     monkeypatch.setattr(desktop, "_download", lambda *a: pytest.fail("must not download"))
@@ -102,7 +102,8 @@ def mac_install(desktop, monkeypatch, tmp_path):
     calls = []
 
     def download(url, archive):
-        spec = next(s for s in desktop.MAC_APPS.values() if s["url"] == url)
+        spec = next(s for s in desktop.MAC_APPS.values()
+                    if s["url"] == url or url in s.get("architecture_urls", {}).values())
         fixture = tmp_path / "source" / spec["bundle"]
         make_bundle(fixture, spec)
         calls.append(["download", url])
@@ -129,7 +130,7 @@ def mac_install(desktop, monkeypatch, tmp_path):
     shutil.rmtree(tmp_path)
 
 
-@pytest.mark.parametrize("app", ["chrome", "iterm", "snipaste", "blender", "wetype"])
+@pytest.mark.parametrize("app", ["chrome", "iterm", "snipaste", "blender", "wetype", "doubao"])
 def test_mac_install_verifies_and_is_idempotent(desktop, mac_install, app):
     apps, _, cache, calls = mac_install
     first = desktop.setup_desktop_app(app)
@@ -140,6 +141,8 @@ def test_mac_install_verifies_and_is_idempotent(desktop, mac_install, app):
     assert not list(cache.iterdir())
     assert any(command[0].endswith("codesign") and desktop.MAC_APPS[app]["team_id"] in command[-2] for command in calls)
     assert all(command[-2].startswith("=anchor ") for command in calls if command[0].endswith("codesign"))
+    if desktop.MAC_APPS[app].get("notarized"):
+        assert sum(command[0].endswith("spctl") for command in calls) == 3
     if desktop.MAC_APPS[app]["format"] == "dmg":
         assert calls[-1][1] == "detach"
     calls.clear()
@@ -198,37 +201,42 @@ def test_blender_failed_verification_or_copy_detaches_image(desktop, mac_install
     assert calls[-1][1] == "detach"
 
 
-def test_mac_reuses_user_application(desktop, mac_install):
+@pytest.mark.parametrize("app", ["iterm", "doubao"])
+def test_mac_reuses_user_application(desktop, mac_install, app):
     _, user_apps, _, calls = mac_install
-    make_bundle(user_apps / "iTerm.app", desktop.MAC_APPS["iterm"])
-    result = desktop.setup_desktop_app("iterm")
+    bundle = desktop.MAC_APPS[app]["bundle"]
+    make_bundle(user_apps / bundle, desktop.MAC_APPS[app])
+    result = desktop.setup_desktop_app(app)
     assert result["status"] == "already_installed"
-    assert result["path"] == str(user_apps / "iTerm.app")
+    assert result["path"] == str(user_apps / bundle)
     assert not any(command[0] == "download" for command in calls)
 
 
-def test_mac_falls_back_to_user_applications(desktop, mac_install, monkeypatch):
+@pytest.mark.parametrize("app", ["iterm", "doubao"])
+def test_mac_falls_back_to_user_applications(desktop, mac_install, monkeypatch, app):
     apps, user_apps, _, _ = mac_install
     real_access = desktop.os.access
     monkeypatch.setattr(desktop.os, "access", lambda p, mode: False if Path(p) == apps else real_access(p, mode))
-    result = desktop.setup_desktop_app("iterm")
-    assert result["path"] == str(user_apps / "iTerm.app")
+    result = desktop.setup_desktop_app(app)
+    assert result["path"] == str(user_apps / desktop.MAC_APPS[app]["bundle"])
 
 
-def test_mac_never_overwrites_invalid_existing_app(desktop, mac_install):
+@pytest.mark.parametrize("app", ["iterm", "doubao"])
+def test_mac_never_overwrites_invalid_existing_app(desktop, mac_install, app):
     apps, _, _, calls = mac_install
-    target = apps / "iTerm.app"
+    target = apps / desktop.MAC_APPS[app]["bundle"]
     target.mkdir()
     sentinel = target / "keep.txt"
     sentinel.write_text("keep", encoding="utf-8")
     with pytest.raises(RuntimeError, match="never overwritten"):
-        desktop.setup_desktop_app("iterm")
+        desktop.setup_desktop_app(app)
     assert sentinel.read_text(encoding="utf-8") == "keep"
     assert not calls
 
 
 @pytest.mark.parametrize("failure", ["download", "signature", "copy", "timeout", "minimum_os"])
-def test_mac_failures_clean_staging_and_do_not_claim_success(desktop, mac_install, monkeypatch, failure):
+@pytest.mark.parametrize("app", ["chrome", "doubao"])
+def test_mac_failures_clean_staging_and_do_not_claim_success(desktop, mac_install, monkeypatch, failure, app):
     apps, _, cache, calls = mac_install
     original = desktop._run
 
@@ -248,7 +256,7 @@ def test_mac_failures_clean_staging_and_do_not_claim_success(desktop, mac_instal
         monkeypatch.setattr(desktop, "_download", download)
     if failure == "minimum_os":
         monkeypatch.setattr(desktop.platform, "mac_ver", lambda: ("13.0", (), ""))
-    result = CliRunner().invoke(main, ["chrome"])
+    result = CliRunner().invoke(main, [app])
     assert result.exit_code != 0
     assert "Installation verified" not in result.output
     assert not list(apps.iterdir())
@@ -308,7 +316,8 @@ def test_wetype_preserves_newer_existing_user_install(desktop, mac_install, monk
 
 
 @pytest.mark.parametrize("failure", ["signature", "notarization", "version", "copy"])
-def test_wetype_failure_never_installs_or_reports_success(desktop, mac_install, monkeypatch, failure):
+@pytest.mark.parametrize("app", ["wetype", "doubao"])
+def test_signed_app_failure_never_installs_or_reports_success(desktop, mac_install, monkeypatch, failure, app):
     apps, _, cache, calls = mac_install
     original = desktop._run
 
@@ -322,11 +331,11 @@ def test_wetype_failure_never_installs_or_reports_success(desktop, mac_install, 
     if failure == "version":
         original_bundle = desktop._mac_bundle
         monkeypatch.setattr(desktop, "_mac_bundle", lambda *a: {**original_bundle(*a), "version": "0.0.1"})
-    result = CliRunner().invoke(main, ["wetype"])
+    result = CliRunner().invoke(main, [app])
     assert result.exit_code != 0
     assert "Installation verified" not in result.output
     assert "Default voice shortcuts" not in result.output
-    assert not (apps / "WeType.app").exists()
+    assert not (apps / desktop.MAC_APPS[app]["bundle"]).exists()
     assert not list(cache.iterdir())
 
 
@@ -353,6 +362,175 @@ def test_wetype_broken_system_symlink_is_not_shadowed(desktop, monkeypatch, tmp_
     result = CliRunner().invoke(main, ["wetype"])
     assert result.exit_code != 0
     assert "never overwritten" in result.output
+
+
+@pytest.mark.parametrize("machine,suffix", [
+    ("arm64", "Arm64"), ("aarch64", "Arm64"),
+    ("x86_64", "X64"), ("amd64", "X64"),
+])
+def test_doubao_plan_selects_official_architecture_without_io(desktop, monkeypatch, machine, suffix):
+    monkeypatch.setattr(desktop.platform, "machine", lambda: machine)
+    monkeypatch.setattr(desktop.platform, "mac_ver", lambda: ("12.0", (), ""))
+    monkeypatch.setattr(desktop, "_run", lambda *a, **k: pytest.fail("no processes in a plan"))
+    monkeypatch.setattr(desktop.urllib.request, "urlopen", lambda *a, **k: pytest.fail("no network in a plan"))
+    monkeypatch.setattr(desktop, "_cache_dir", lambda: pytest.fail("no writes in a plan"))
+    result = desktop.setup_desktop_app("doubao", dry_run=True)
+    assert result["status"] == "planned" and result["verified"] is False
+    assert result["url"] == (
+        "https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/doubao_pc/"
+        f"2.34.6/Doubao_{suffix}_2.34.6.dmg"
+    )
+    assert result["bundle_id"] == "com.bot.pc.doubao"
+    assert result["team_id"] == "96L78H6LMH"
+    assert result["notarized"] is True
+
+
+@pytest.mark.parametrize("machine,macos,error", [
+    ("arm64", "11.7.10", "requires macOS 12.0"),
+    ("ppc", "15.0", "architecture"),
+])
+def test_doubao_rejects_unsupported_mac_before_install_io(desktop, monkeypatch, machine, macos, error):
+    monkeypatch.setattr(desktop.platform, "machine", lambda: machine)
+    monkeypatch.setattr(desktop.platform, "mac_ver", lambda: (macos, (), ""))
+    monkeypatch.setattr(desktop, "_download", lambda *a: pytest.fail("must not download"))
+    monkeypatch.setattr(desktop, "_run", lambda *a, **k: pytest.fail("must not execute"))
+    monkeypatch.setattr(desktop, "_cache_dir", lambda: pytest.fail("must not create cache"))
+    result = CliRunner().invoke(main, ["doubao"])
+    assert result.exit_code != 0
+    assert error in result.output
+
+
+@pytest.mark.parametrize("location", ["system", "user"])
+def test_doubao_preserves_newer_existing_install(desktop, mac_install, location):
+    apps, user, cache, calls = mac_install
+    target = (apps if location == "system" else user) / "Doubao.app"
+    make_bundle(target, {**desktop.MAC_APPS["doubao"], "download_version": "9.0.0"})
+    result = desktop.setup_desktop_app("doubao")
+    assert result["status"] == "already_installed"
+    assert result["version"] == "9.0.0" and result["verified"] is True
+    assert {Path(command[0]).name for command in calls} == {"codesign", "spctl"}
+    assert not list(cache.iterdir())
+
+
+def test_doubao_fresh_intel_install_uses_x64_artifact(desktop, mac_install, monkeypatch):
+    _, _, _, calls = mac_install
+    monkeypatch.setattr(desktop.platform, "machine", lambda: "x86_64")
+    result = desktop.setup_desktop_app("doubao")
+    assert result["status"] == "installed" and result["verified"] is True
+    assert calls[0][0] == "download" and calls[0][1].endswith("/Doubao_X64_2.34.6.dmg")
+
+
+@pytest.mark.parametrize("verification", ["codesign", "spctl"])
+def test_doubao_untrusted_existing_app_is_preserved(desktop, mac_install, monkeypatch, verification):
+    apps, _, cache, calls = mac_install
+    target = apps / "Doubao.app"
+    make_bundle(target, desktop.MAC_APPS["doubao"])
+    original = desktop._run
+
+    def run(command, **kwargs):
+        if command[0].endswith(verification):
+            raise RuntimeError("untrusted publisher or notarization")
+        return original(command, **kwargs)
+
+    monkeypatch.setattr(desktop, "_run", run)
+    with pytest.raises(RuntimeError, match="untrusted"):
+        desktop.setup_desktop_app("doubao")
+    assert (target / "Contents" / "Info.plist").exists()
+    assert not any(command[0] == "download" for command in calls)
+    assert not list(cache.iterdir())
+
+
+def test_doubao_broken_system_symlink_is_not_shadowed(desktop, mac_install, require_symlink_privilege):
+    apps, user, _, calls = mac_install
+    target = apps / "Doubao.app"
+    target.symlink_to(apps / "missing", target_is_directory=True)
+    make_bundle(user / "Doubao.app", desktop.MAC_APPS["doubao"])
+    with pytest.raises(RuntimeError, match="never overwritten"):
+        desktop.setup_desktop_app("doubao")
+    assert target.is_symlink()
+    assert not calls
+
+
+def test_doubao_invalid_download_identity_is_rejected_before_copy(desktop, mac_install, monkeypatch):
+    apps, _, cache, calls = mac_install
+    original = desktop._run
+
+    def run(command, **kwargs):
+        result = original(command, **kwargs)
+        if command[0].endswith("hdiutil") and command[1] == "attach":
+            mount = Path(command[command.index("-mountpoint") + 1])
+            info_path = mount / "Doubao.app" / "Contents" / "Info.plist"
+            info = plistlib.loads(info_path.read_bytes())
+            info["CFBundleIdentifier"] = "example.invalid"
+            info_path.write_bytes(plistlib.dumps(info))
+        return result
+
+    monkeypatch.setattr(desktop, "_run", run)
+    with pytest.raises(RuntimeError, match="bundle identity"):
+        desktop.setup_desktop_app("doubao")
+    assert not (apps / "Doubao.app").exists()
+    assert not any(command[0].endswith("ditto") for command in calls)
+    assert calls[-1][1] == "detach"
+    assert not list(cache.iterdir())
+
+
+def test_doubao_does_not_overwrite_app_appearing_during_copy(desktop, mac_install, monkeypatch):
+    apps, _, cache, _ = mac_install
+    target = apps / "Doubao.app"
+    original = desktop._run
+
+    def run(command, **kwargs):
+        result = original(command, **kwargs)
+        if command[0].endswith("ditto"):
+            target.mkdir()
+            (target / "keep.txt").write_text("another installer", encoding="utf-8")
+        return result
+
+    monkeypatch.setattr(desktop, "_run", run)
+    with pytest.raises(RuntimeError, match="refusing to overwrite"):
+        desktop.setup_desktop_app("doubao")
+    assert (target / "keep.txt").read_text(encoding="utf-8") == "another installer"
+    assert list(apps.iterdir()) == [target]
+    assert not list(cache.iterdir())
+
+
+def test_doubao_retains_cache_when_image_cannot_be_detached(desktop, mac_install, monkeypatch):
+    _, _, cache, calls = mac_install
+    original = desktop._run
+
+    def run(command, **kwargs):
+        if command[0].endswith("hdiutil") and command[1] == "detach":
+            calls.append(command)
+            return subprocess.CompletedProcess(command, 1, "", "busy")
+        return original(command, **kwargs)
+
+    monkeypatch.setattr(desktop, "_run", run)
+    monkeypatch.setattr(desktop.os.path, "ismount", lambda path: Path(path).name == "volume")
+    result = desktop.setup_desktop_app("doubao")
+    assert result["verified"] is True
+    assert calls[-1][1:3] == ["detach", "-force"]
+    work = next(cache.iterdir())
+    assert (work / "download.dmg").exists() and (work / "volume").exists()
+
+
+def test_doubao_registered_without_changing_macos_defaults():
+    from chatup.commands.macos import MACOS_APPS
+
+    assert "doubao" not in MACOS_APPS
+    for args in (["doubao", "--help"], ["--tree"], ["--tree-brief"]):
+        result = CliRunner().invoke(main, args)
+        assert result.exit_code == 0, result.output
+        assert "doubao" in result.output
+
+
+@pytest.mark.parametrize("relative", [
+    "README.md", "README.en.md", "docs/commands.md", "docs/commands.en.md",
+    "docs/cli-tree.md", "docs/cli-tree.en.md", "docs/capability-map.md",
+    "docs/capability-map.en.md",
+])
+def test_doubao_is_documented(relative):
+    text = (Path(__file__).resolve().parents[2] / relative).read_text(encoding="utf-8")
+    assert "chatup doubao" in text
 
 
 @pytest.mark.parametrize(

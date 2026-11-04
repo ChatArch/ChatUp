@@ -92,6 +92,15 @@ chatup wetype
 
 Install the official signed macOS input method; reuse existing installations. The command prints activation and default voice shortcut guidance: hold Fn to talk or Fn+Space for continuous input. See the [WeType contract](https://arch.gh.wzhecnu.cn/ChatUp/en/commands/#wetype).
 
+## Doubao Desktop App
+
+```bash
+chatup doubao --dry-run
+chatup doubao
+```
+
+Install official Doubao 2.34.6 on Apple Silicon or Intel Macs running macOS 12+, with publisher signature and notarization verification, without Homebrew. Verified existing installations are reused. The command does not launch, log in, grant permissions or add Doubao to `chatup macos` defaults. See the [Doubao install contract](https://arch.gh.wzhecnu.cn/ChatUp/en/commands/#doubao).
+
 ## ChatGPT / Codex Desktop App
 
 ```bash
@@ -110,7 +119,7 @@ Installs the official new ChatGPT desktop app including Codex. Requires Homebrew
 | --- | --- |
 | Base runtime | `doctor`, `uv`, `nodejs`, `docker`, `zsh`, `chrome-for-testing`, `chromedriver`, `playwright`, `frp` |
 | Workspace scaffold | `workspace` |
-| Desktop apps | `macos` (Snipaste/iTerm2/Chrome/Blender selection), `chrome`, `snipaste` (macOS/Windows), `iterm` / `wetype` (macOS only), `chatgpt` (includes Codex) |
+| Desktop apps | `macos` (Snipaste/iTerm2/Chrome/Blender selection), `chrome`, `snipaste` (macOS/Windows), `iterm` / `wetype` / `doubao` (macOS only), `chatgpt` (includes Codex) |
 | Linux X11 Computer Use | `computer-use` (read-only preview by default; `--sudo` applies) |
 | Video projects | `remotion` |
 | Local service installers | `gitea`, `glance`, `mysql`, `nginx`, `crs` |
