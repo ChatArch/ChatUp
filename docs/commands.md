@@ -20,7 +20,7 @@ chatup
 |-- wetype              # 安装微信输入法（仅限 macOS）
 |-- doubao              # 安装豆包电脑版（仅限 macOS）
 |-- uuremote            # 安装 UU 远程（仅限 macOS）
-|-- all                 # 复选批量配置当前系统支持的常规环境
+|-- all                 # 复选当前系统支持的完整命令树
 |-- macos               # 勾选 macOS 应用，Apple Silicon 可选 Blender
 |-- remotion            # 初始化带锁定依赖的本地视频项目
 |-- chrome-for-testing # 管理 Google Chrome for Testing 浏览器
@@ -107,15 +107,18 @@ chatup
 | `chatup cc-connect` | 安装 CC Connect CLI 和运行依赖。 |
 | `chatup lark-cli` | 配置官方 lark-cli，并复用 ChatEnv 飞书配置。 |
 
-## 跨系统复选批量配置 {#all}
+## 全命令复选入口 {#all}
 
 ```bash
 chatup all
+chatup all --list
 chatup all --only uv --only chrome --dry-run -I
-chatup all --only chrome --only snipaste -I
+chatup all --only 'chrome-for-testing install' -i
 ```
 
-交互式 `chatup all` 在 macOS、Windows、Linux 上显示当前系统、架构及安装方式支持的普通环境选项：uv、Node.js，以及 Chrome、Snipaste、iTerm2、Blender、微信输入法、豆包、UU 远程中的可用项；默认全不选，空选择不产生写入。`Space` 勾选、`Enter` 执行、`Ctrl-C` 取消。无 TTY 时必须显式重复 `--only` 并可加 `-I`，绝不默认安装全部；不支持的指定项在运行前报错。`--dry-run` 只显示计划，不调用安装器。选中的命令使用原有一等入口，失败记录后继续其他项，最终非零退出。首次安装 UU 远程或 Linux Chrome 需要 `--sudo`；Windows 协议或 Linux 包管理器确认用 `--yes`。排除会启动服务、绑定账号或需要额外配置的命令。首次设置 uv 会按它自身默认选项更新已有 shell 激活块；如需不同参数请单独运行 `chatup uv`。
+`chatup all` 在 macOS、Windows、Linux 上读取真实注册的 Click 命令树，按操作系统、架构和原命令的只读支持检查筛选，覆盖基础环境、桌面、Agent、服务、工作区及浏览器管理；三组命令显示实际子命令，例如 `chrome-for-testing install`。仅 `all` 本身和不可执行的组标题不作为选项。`--list` 不需要 TTY，可只读回看当前机器能选的全部命令。复选框默认全不选：`Space` 勾选、`Enter` 运行、`Ctrl-C` 取消；空选择不写入。无 TTY 必须重复 `--only 'COMMAND PATH'` 显式指定；不支持或未注册的选项在运行前报错。`--dry-run` 对所有命令都只列出将执行的路径，不运行其内部安装器（部分原命令没有自己的 dry-run）。
+
+选中后依次调用原命令，不修改其认证和必填参数规则；不足的输入在可交互终端沿用原命令提示，非交互会报错。`remove`/`gc` 等管理操作会显示在树中，但 `all --yes` 不代替其删除确认；若需要特定版本或必须的确认标志，直接使用相应的独立命令。`--sudo` 只传给被选中的 Chrome、UU 远程、Docker 或 Linux Computer Use；`--yes` 只传给 Chrome、Snipaste、ChatGPT 的安装协议。非 Linux 系统选 NGINX、MySQL、Twikoo 时只配置其支持的运行时，显式跳过 user-level systemd 服务。选 `macos` 会沿用其自身默认的多选/安装行为。任一操作失败会报告并继续其他项，最后非零退出；主动取消则停止批量流程。不自动安装全部、不为未选项写入、不替用户登录或输入秘密。
 
 ## macOS 常用应用 {#macos}
 

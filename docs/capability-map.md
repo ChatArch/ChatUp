@@ -20,7 +20,7 @@ chatup
 |-- wetype              # 安装微信输入法（仅限 macOS）
 |-- doubao              # 安装豆包电脑版（仅限 macOS）
 |-- uuremote            # 安装 UU 远程（仅限 macOS）
-|-- all                 # 按系统筛选并复选批量安装常规环境
+|-- all                 # 按系统筛选并复选完整命令树
 |-- macos               # 勾选 macOS 应用，Apple Silicon 可选 Blender
 |-- remotion            # 初始化带锁定依赖的本地视频项目
 |-- chrome-for-testing # 管理 Google Chrome for Testing 浏览器
@@ -124,7 +124,7 @@ chatup crs                 # 准备本地 CRS、Redis、secret、admin SPA 和 s
 
 `chatup doubao` 在 macOS 12+ Apple Silicon 或 Intel Mac 安装官方豆包 2.34.6，无需 Homebrew。支持无副作用的 `--dry-run`，校验签名与公证后复用已有安装；不覆盖无效应用、不启动、不登录、不授权，不加入 `chatup macos` 默认集合。详见[豆包安装约定](commands.md#doubao)。
 
-`chatup all` 根据当前系统/架构筛选普通安装项，默认不勾选；无交互必须明确 `--only`，且 `--dry-run` 无写入。`chatup uuremote` 在 macOS 11+ 安装经过 SHA-256、Apple 签名和公证验证的官方 pkg，首次安装需 `--sudo`；安装包会启动客户端，但不自动登录或授权。详见[批量安装](commands.md#all)和[UU 远程](commands.md#uuremote)。
+`chatup all` 从注册命令树列出当前系统/架构支持的全部可执行命令（Agent、工作区、服务、浏览器管理也在内），默认不勾选；无交互必须明确 `--only`，`--list` 与 `--dry-run` 无写入。原命令的必填参数和确认规则不被绕过。`chatup uuremote` 在 macOS 11+ 安装经过 SHA-256、Apple 签名和公证验证的官方 pkg，首次安装需 `--sudo`；安装包会启动客户端，但不自动登录或授权。详见[全命令入口](commands.md#all)和[UU 远程](commands.md#uuremote)。
 
 ## Agent 工具链
 

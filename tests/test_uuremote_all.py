@@ -114,10 +114,10 @@ def test_uuremote_fails_closed_without_install(pkg_install, monkeypatch, tmp_pat
 
 
 @pytest.mark.parametrize("system,machine,expected,missing", [
-    ("Darwin", "arm64", "uuremote", None),
-    ("Darwin", "x86_64", "uuremote", "blender"),
-    ("Windows", "AMD64", "snipaste", "uuremote"),
-    ("Linux", "x86_64", "chrome", "snipaste"),
+    ("Darwin", "arm64", "uuremote", "glance"),
+    ("Darwin", "x86_64", "macos", "mysql"),
+    ("Windows", "AMD64", "chatgpt", "uuremote"),
+    ("Linux", "x86_64", "mysql", "snipaste"),
 ])
 def test_all_filters_by_host(monkeypatch, system, machine, expected, missing):
     batch = importlib.import_module("chatup.commands.all")
@@ -130,7 +130,36 @@ def test_all_filters_by_host(monkeypatch, system, machine, expected, missing):
     assert expected in available
     if missing:
         assert missing not in available
-    assert {"uv", "nodejs"} <= set(available)
+    assert {"uv", "nodejs", "workspace", "codex", "hermes", "discourse", "zulip",
+            "nginx", "chrome-for-testing install", "chromedriver list", "playwright doctor"} <= set(available)
+    assert "all" not in available
+    assert "chrome-for-testing" not in available
+
+
+def test_all_registered_leaf_coverage_and_read_only_listing(monkeypatch):
+    batch = importlib.import_module("chatup.commands.all")
+    monkeypatch.setattr(batch.platform, "system", lambda: "Darwin")
+    monkeypatch.setattr(batch.platform, "machine", lambda: "arm64")
+    monkeypatch.setattr(batch.platform, "mac_ver", lambda: ("15.0", (), ""))
+    expected = {
+        path for path in batch._registered_leaves()
+        if batch._supported(path, "Darwin", "arm64")
+    }
+    assert set(batch.supported_items()) == expected
+    assert len(expected) > 35
+    listing = CliRunner().invoke(main, ["all", "--list", "-I"])
+    assert listing.exit_code == 0, listing.output
+    assert {line.split(" - ", 1)[0] for line in listing.output.splitlines()} == expected
+
+
+def test_all_linux_computer_use_requires_supported_distribution(monkeypatch):
+    batch = importlib.import_module("chatup.commands.all")
+    monkeypatch.setattr(batch.platform, "system", lambda: "Linux")
+    monkeypatch.setattr(batch.platform, "machine", lambda: "x86_64")
+    monkeypatch.setattr(batch.platform, "freedesktop_os_release", lambda: {"ID": "ubuntu"})
+    assert "computer-use" in batch.supported_items()
+    monkeypatch.setattr(batch.platform, "freedesktop_os_release", lambda: {"ID": "fedora"})
+    assert "computer-use" not in batch.supported_items()
 
 
 def test_all_requires_selection_or_tty_and_empty_selection_is_safe(monkeypatch):
@@ -157,7 +186,7 @@ def test_all_checkbox_shows_only_supported_items(monkeypatch):
     monkeypatch.setattr(batch, "ask_checkbox", select)
     result = CliRunner().invoke(main, ["all"])
     assert result.exit_code == 0, result.output
-    assert seen == [("Select tools to set up", ["uv", "chrome"], [])]
+    assert seen == [("Select ChatUp actions to run", ["uv", "chrome"], [])]
 
 
 def test_all_executes_only_selected_and_reports_partial_failure(monkeypatch):
@@ -172,13 +201,13 @@ def test_all_executes_only_selected_and_reports_partial_failure(monkeypatch):
     monkeypatch.setitem(main.commands, "chrome", click.Command("chrome", callback=chrome))
     monkeypatch.setitem(main.commands, "snipaste", click.Command("snipaste", callback=snipaste))
     invalid = CliRunner().invoke(main, ["all", "--only", "uuremote", "-I"])
-    assert invalid.exit_code != 0 and "Unsupported" in invalid.output
+    assert invalid.exit_code != 0 and "unsupported" in invalid.output
     assert not called
     result = CliRunner().invoke(main, ["all", "--only", "chrome", "--only", "snipaste", "--only", "chrome", "-I"])
     assert result.exit_code != 0 and "chrome" in result.output
     assert [name for name, _ in called] == ["chrome", "snipaste"]
-    assert called[0][1]["sudo"] is False
-    assert called[1][1]["yes"] is False
+    assert called[0][1] == {}
+    assert called[1][1] == {}
 
 
 def test_all_invokes_base_runtime_commands_with_defaults(monkeypatch):
@@ -189,13 +218,74 @@ def test_all_invokes_base_runtime_commands_with_defaults(monkeypatch):
     monkeypatch.setitem(main.commands, "nodejs", click.Command("nodejs", callback=lambda **kw: calls.append(("nodejs", kw))))
     result = CliRunner().invoke(main, ["all", "--only", "uv", "--only", "nodejs", "-I"])
     assert result.exit_code == 0, result.output
-    assert calls == [("uv", {}), ("nodejs", {"interactive": False})]
+    assert calls == [("uv", {}), ("nodejs", {})]
 
 
 def test_all_dry_run_does_not_invoke_installers(monkeypatch):
     batch = importlib.import_module("chatup.commands.all")
     monkeypatch.setattr(batch, "supported_items", lambda: {"uv": "uv", "uuremote": "UU Remote"})
-    monkeypatch.setattr(batch, "plan_desktop_install", lambda *a, **k: {"method": "macos_pkg", "path": "/Applications/UURemote.app"})
     result = CliRunner().invoke(main, ["all", "--only", "uv", "--only", "uuremote", "--dry-run", "-I"])
     assert result.exit_code == 0, result.output
-    assert "Dry run" in result.output and "macos_pkg" in result.output
+    assert "Dry run" in result.output and "Would run: chatup uuremote" in result.output
+
+
+def test_all_group_leaf_dispatch_uses_registered_command(monkeypatch):
+    batch = importlib.import_module("chatup.commands.all")
+    monkeypatch.setattr(batch, "supported_items", lambda: {"playwright doctor": "Playwright doctor"})
+    called = []
+    group = click.Group("playwright")
+    group.add_command(click.Command("doctor", callback=lambda: called.append("doctor")))
+    monkeypatch.setitem(main.commands, "playwright", group)
+    result = CliRunner().invoke(main, ["all", "--only", "playwright doctor", "-I"])
+    assert result.exit_code == 0, result.output
+    assert called == ["doctor"]
+
+
+def test_all_never_forwards_yes_to_destructive_leaf(monkeypatch):
+    batch = importlib.import_module("chatup.commands.all")
+    monkeypatch.setattr(batch, "supported_items", lambda: {"chromedriver remove": "Remove ChromeDriver"})
+    called = []
+    group = click.Group("chromedriver")
+    group.add_command(click.Command("remove", callback=lambda: called.append("remove")))
+    monkeypatch.setitem(main.commands, "chromedriver", group)
+    result = CliRunner().invoke(main, ["all", "--only", "chromedriver remove", "--yes", "-I"])
+    assert result.exit_code == 0, result.output
+    assert called == ["remove"]
+
+
+def test_all_preserves_platform_specific_service_and_interaction_options(monkeypatch):
+    batch = importlib.import_module("chatup.commands.all")
+    monkeypatch.setattr(batch.platform, "system", lambda: "Windows")
+    called = []
+
+    @click.command("nginx")
+    @click.option("--service/--no-service", default=True)
+    def nginx(service):
+        called.append(("nginx", service))
+
+    @click.command("nodejs")
+    @click.option("--interactive/--no-interactive", "-i/-I", default=None)
+    def nodejs(interactive):
+        called.append(("nodejs", interactive))
+
+    monkeypatch.setitem(main.commands, "nginx", nginx)
+    monkeypatch.setitem(main.commands, "nodejs", nodejs)
+    monkeypatch.setattr(batch, "supported_items", lambda: {"nginx": "NGINX", "nodejs": "Node.js"})
+    result = CliRunner().invoke(main, ["all", "--only", "nginx", "--only", "nodejs", "-I"])
+    assert result.exit_code == 0, result.output
+    assert called == [("nginx", False), ("nodejs", False)]
+
+
+def test_all_group_with_missing_required_version_does_not_run_next_action(monkeypatch):
+    batch = importlib.import_module("chatup.commands.all")
+    monkeypatch.setattr(batch, "supported_items", lambda: {"playwright doctor": "Doctor", "doctor": "Doctor CLI"})
+    called = []
+    group = click.Group("playwright")
+    group.add_command(click.Command("doctor", params=[click.Argument(["version"])],
+                                    callback=lambda version: called.append(("playwright", version))))
+    monkeypatch.setitem(main.commands, "playwright", group)
+    monkeypatch.setitem(main.commands, "doctor", click.Command("doctor", callback=lambda: called.append("doctor")))
+    result = CliRunner().invoke(main, ["all", "--only", "playwright doctor", "--only", "doctor", "-I"])
+    assert result.exit_code != 0
+    assert "playwright doctor" in result.output
+    assert called == ["doctor"]

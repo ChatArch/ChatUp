@@ -20,7 +20,7 @@ chatup
 |-- wetype              # Install WeType (macOS only)
 |-- doubao              # Install Doubao desktop (macOS only)
 |-- uuremote            # Install UU Remote (macOS only)
-|-- all                 # Select ordinary setup tasks supported by this host
+|-- all                 # Select the complete host-supported command tree
 |-- macos               # Select supported macOS apps, including Blender on Apple Silicon
 |-- remotion            # Initialize a locked local video project
 |-- chrome-for-testing # Manage Google Chrome for Testing browsers
@@ -107,15 +107,18 @@ chatup
 | `chatup cc-connect` | Install the CC Connect CLI and runtime dependencies. |
 | `chatup lark-cli` | Configure the official lark-cli and reuse ChatEnv Feishu/Lark config. |
 
-## Cross-platform Batch Setup {#all}
+## Full Command Selector {#all}
 
 ```bash
 chatup all
+chatup all --list
 chatup all --only uv --only chrome --dry-run -I
-chatup all --only chrome --only snipaste -I
+chatup all --only 'chrome-for-testing install' -i
 ```
 
-Interactive `chatup all` filters ordinary tools by OS, architecture and install method: uv, Node.js, and supported desktop apps among Chrome, Snipaste, iTerm2, Blender, WeType, Doubao and UU Remote. Every checkbox starts unselected; an empty selection changes nothing. Use Space to toggle, Enter to run, Ctrl-C to cancel. In non-TTY environments explicit repeated `--only` is required; unsupported choices fail before installation. `--dry-run` only displays plans. The batch invokes the corresponding first-class command for each selected tool, continues after a failure and exits nonzero at the end. A fresh UU Remote install or Linux Chrome install requires `--sudo`; Windows agreements and Linux package-manager confirmation use `--yes`. Services and account-bound installers are excluded. A selected uv task uses its normal defaults, including updates to existing shell activation blocks; run `chatup uv` separately to customize those options.
+`chatup all` reads the registered Click command tree and filters by OS, architecture and the original command's read-only platform selectors on macOS, Windows and Linux. It offers runtimes, desktops, Agent/account tools, services, workspace setup and browser-management leaves such as `chrome-for-testing install`. Only `all` itself and non-actionable group headings are omitted. `--list` shows every supported action without a TTY or writes. Checkboxes start unselected: Space toggles, Enter runs, Ctrl-C cancels. Without a TTY, repeat `--only 'COMMAND PATH'` explicitly. Unsupported/unknown paths fail before changes. `--dry-run` prints selected paths only; it never invokes installers, including commands lacking their own preview mode.
+
+Selected actions run through their original CLI contracts. Missing inputs use the original terminal prompts or fail without a TTY. Management leaves such as `remove`/`gc` are listed, but `all --yes` does not approve deletion; use the direct command for an exact version or mandatory confirmation. `--sudo` is forwarded only for selected Chrome, UU Remote, Docker and Linux Computer Use operations; `--yes` only accepts package-manager agreements for Chrome, Snipaste and ChatGPT. On non-Linux hosts, NGINX/MySQL/Twikoo setup skips user-level systemd services while retaining supported runtime/config steps. Selecting `macos` retains that command's own multi-app defaults. Errors are reported per item, subsequent items continue and the batch exits nonzero on partial failure; explicit cancellation stops the batch. Nothing is installed by default, and no login or secret entry is automated.
 
 ## macOS Apps {#macos}
 

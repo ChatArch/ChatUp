@@ -11,7 +11,7 @@ chatup
 ├── --tree              # 输出带参数签名的真实已注册 CLI 树
 ├── --tree-brief        # 输出不带参数签名的同一棵 CLI 树
 ├── doctor              # 验证 ChatUp CLI 可调用
-├── all                 # 按当前系统复选批量配置常规环境
+├── all                 # 按当前系统复选完整 CLI 命令树
 ├── zsh                 # 配置 zsh、插件和 alias
 ├── cc-connect          # 安装 ChatArch CC Connect
 ├── gitea               # 安装 ChatTea-compatible Gitea
@@ -50,7 +50,7 @@ chatup
 
 运行 `chatup --tree` 可回读带参数签名和命令目的的真实注册树；`chatup --tree-brief` 保留相同节点和说明，但省略参数签名。完整参数见 [命令参考](commands.md)。
 
-`chatup all [--only NAME]... [--dry-run] [--sudo] [--yes] [-i|-I]` 只显示主机支持的常规安装项，终端复选框默认空；非交互必须重复 `--only` 显式选项。`--dry-run` 完全不执行安装，详情见 [批量配置](commands.md#all)。
+`chatup all [--list] [--only 'COMMAND PATH']... [--dry-run] [--sudo] [--yes] [-i|-I]` 从真实注册命令树列出本机支持的命令；嵌套管理命令以完整路径显示，例如 `chrome-for-testing install`。复选框默认空；非交互必须重复 `--only` 显式选择。`--list` 与 `--dry-run` 不执行安装；需要参数、提权或删除确认时沿用原命令规则，不自动代填。详见 [全命令入口](commands.md#all)。
 
 `chatup uuremote [--dry-run] [--sudo] [--log-level LEVEL]` 支持 macOS 11+，首次安装需 `--sudo`；使用官方固定版本 pkg 并验证签名、公证和 SHA-256。详见 [UU 远程](commands.md#uuremote)。
 

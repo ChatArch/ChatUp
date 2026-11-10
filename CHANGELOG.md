@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.27
+
+### Fixed
+- Expand `chatup all` from a narrow runtime/desktop subset to the host-supported registered command tree, including local services, Agent/workspace tools, and browser-management subcommands. Keep platform filtering, opt-in selection, existing command prompts/confirmation and a read-only list/dry run; never forward `--yes` to removal.
+
 ## 0.2.26
 
 ### Added
