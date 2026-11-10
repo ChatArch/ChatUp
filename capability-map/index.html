@@ -643,7 +643,7 @@
 <a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>|-- wetype              # 安装微信输入法（仅限 macOS）
 <a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>|-- doubao              # 安装豆包电脑版（仅限 macOS）
 <a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>|-- uuremote            # 安装 UU 远程（仅限 macOS）
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>|-- all                 # 按系统筛选并复选批量安装常规环境
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>|-- all                 # 按系统筛选并复选完整命令树
 <a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>|-- macos               # 勾选 macOS 应用，Apple Silicon 可选 Blender
 <a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>|-- remotion            # 初始化带锁定依赖的本地视频项目
 <a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>|-- chrome-for-testing # 管理 Google Chrome for Testing 浏览器
@@ -766,7 +766,7 @@
 <p><code>chatup wetype</code> 将官方签名的微信输入法安装到 macOS Input Methods，验证并复用已有安装，显示启用与语音快捷键提示。支持 <code>--dry-run</code>，Windows/Linux 当前不支持。详见<a href="../commands/#wetype">微信输入法约定</a>。</p>
 <p><code>chatup chatgpt</code> 通过 macOS Homebrew 或 Windows 官方 Microsoft Store 精确 ID 安装含 Codex 的新版 ChatGPT 桌面应用。<code>--dry-run</code> 无副作用，安装后回读包管理器记录。应用与缓存使用包管理器/OpenAI 的原生目录，不属于 ChatArch 自管状态。不启动应用、不登录、不改 Codex CLI 配置，也不自动安装 Linux preview。详见<a href="../commands/#chatgpt-desktop">桌面安装约定</a>。</p>
 <p><code>chatup doubao</code> 在 macOS 12+ Apple Silicon 或 Intel Mac 安装官方豆包 2.34.6，无需 Homebrew。支持无副作用的 <code>--dry-run</code>，校验签名与公证后复用已有安装；不覆盖无效应用、不启动、不登录、不授权，不加入 <code>chatup macos</code> 默认集合。详见<a href="../commands/#doubao">豆包安装约定</a>。</p>
-<p><code>chatup all</code> 根据当前系统/架构筛选普通安装项，默认不勾选；无交互必须明确 <code>--only</code>，且 <code>--dry-run</code> 无写入。<code>chatup uuremote</code> 在 macOS 11+ 安装经过 SHA-256、Apple 签名和公证验证的官方 pkg，首次安装需 <code>--sudo</code>；安装包会启动客户端，但不自动登录或授权。详见<a href="../commands/#all">批量安装</a>和<a href="../commands/#uuremote">UU 远程</a>。</p>
+<p><code>chatup all</code> 从注册命令树列出当前系统/架构支持的全部可执行命令（Agent、工作区、服务、浏览器管理也在内），默认不勾选；无交互必须明确 <code>--only</code>，<code>--list</code> 与 <code>--dry-run</code> 无写入。原命令的必填参数和确认规则不被绕过。<code>chatup uuremote</code> 在 macOS 11+ 安装经过 SHA-256、Apple 签名和公证验证的官方 pkg，首次安装需 <code>--sudo</code>；安装包会启动客户端，但不自动登录或授权。详见<a href="../commands/#all">全命令入口</a>和<a href="../commands/#uuremote">UU 远程</a>。</p>
 <h2 id="agent">Agent 工具链<a class="headerlink" href="#agent" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>chatup claude              # 配置 Claude Code CLI 和配置文件
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>chatup codex               # 配置 Codex CLI 和配置文件（设置时使用 CODEX_HOME）
