@@ -23,7 +23,7 @@ def test_uuremote_plan_is_read_only_and_platform_bound(monkeypatch):
     assert result.exit_code == 0, result.output
     assert "macos_pkg" not in result.output
     assert "e347e1dfd57566934ae881f58f09fdd6ab1afae7f521cbfff3aa27a46a6c9560" in result.output
-    assert "/Applications/UURemote.app" in result.output
+    assert desktop.plan_desktop_install("uuremote")["path"] in result.output
     for system, version in [("Windows", ""), ("Linux", ""), ("Darwin", "10.15")]:
         monkeypatch.setattr(desktop.platform, "system", lambda: system)
         monkeypatch.setattr(desktop.platform, "mac_ver", lambda: (version, (), ""))
