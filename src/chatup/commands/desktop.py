@@ -80,3 +80,14 @@ def wetype_cli(**kwargs) -> None:
 def doubao_cli(**kwargs) -> None:
     """Install Doubao (豆包) from the official download (macOS only)."""
     _install("doubao", **kwargs)
+
+
+@click.command(name="uuremote")
+@click.option("--dry-run", is_flag=True, help="Preview the signed vendor pkg install without changes.")
+@click.option("--sudo", is_flag=True, help="Allow sudo for the vendor's system installer and services.")
+@click.option("--log-level", type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR"], case_sensitive=False), default="INFO")
+def uuremote_cli(**kwargs) -> None:
+    """Install signed UU Remote for macOS (requires root for a new installation)."""
+    _install("uuremote", **kwargs)
+    if not kwargs["dry_run"]:
+        click.echo("Sign in yourself; enable remote control and macOS Screen Recording/Accessibility only if needed.")

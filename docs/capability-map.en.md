@@ -19,6 +19,8 @@ chatup
 |-- iterm               # Install iTerm2 (macOS only)
 |-- wetype              # Install WeType (macOS only)
 |-- doubao              # Install Doubao desktop (macOS only)
+|-- uuremote            # Install UU Remote (macOS only)
+|-- all                 # Filter and select ordinary tools for this host
 |-- macos               # Select supported macOS apps, including Blender on Apple Silicon
 |-- remotion            # Initialize a locked local video project
 |-- chrome-for-testing # Manage Google Chrome for Testing browsers
@@ -115,6 +117,8 @@ Local-service commands use user-level layouts by default:
 `chatup chatgpt` installs the official new ChatGPT desktop app including Codex through Homebrew on macOS or the exact Microsoft Store product on Windows. `--dry-run` has no side effects; installation is checked through the package manager. Native app/cache paths are owned by the package manager and OpenAI, not ChatArch. No launch, login, Codex CLI config changes or automatic Linux preview installation. See the [desktop install contract](commands.md#chatgpt-desktop).
 
 `chatup doubao` installs official Doubao 2.34.6 on Apple Silicon or Intel Macs running macOS 12+, without Homebrew. It supports side-effect-free `--dry-run`, signature/notarization checks and reuse of existing installations. It does not overwrite invalid apps, launch, log in, grant permissions or add Doubao to `chatup macos` defaults. See the [Doubao install contract](commands.md#doubao).
+
+`chatup all` filters ordinary tools by OS and architecture; all checkboxes start unselected. Without a TTY, specify `--only`; `--dry-run` makes no changes. `chatup uuremote` installs a pinned official pkg on macOS 11+ after SHA-256, Apple signature and notarization checks, requiring `--sudo` for a fresh install. The vendor package launches its app, but no sign-in or permissions are automated. See [Batch Setup](commands.en.md#all) and [UU Remote](commands.en.md#uuremote).
 
 ## Agent Toolchains
 

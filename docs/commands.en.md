@@ -19,6 +19,8 @@ chatup
 |-- iterm               # Install iTerm2 (macOS only)
 |-- wetype              # Install WeType (macOS only)
 |-- doubao              # Install Doubao desktop (macOS only)
+|-- uuremote            # Install UU Remote (macOS only)
+|-- all                 # Select ordinary setup tasks supported by this host
 |-- macos               # Select supported macOS apps, including Blender on Apple Silicon
 |-- remotion            # Initialize a locked local video project
 |-- chrome-for-testing # Manage Google Chrome for Testing browsers
@@ -104,6 +106,16 @@ chatup
 | `chatup hermes` | Install Hermes Agent and optional Hermes WebUI; fall back to `gpt-5.6-terra` only when no model is configured. Explicit models, profiles, existing config and environment values retain precedence. |
 | `chatup cc-connect` | Install the CC Connect CLI and runtime dependencies. |
 | `chatup lark-cli` | Configure the official lark-cli and reuse ChatEnv Feishu/Lark config. |
+
+## Cross-platform Batch Setup {#all}
+
+```bash
+chatup all
+chatup all --only uv --only chrome --dry-run -I
+chatup all --only chrome --only snipaste -I
+```
+
+Interactive `chatup all` filters ordinary tools by OS, architecture and install method: uv, Node.js, and supported desktop apps among Chrome, Snipaste, iTerm2, Blender, WeType, Doubao and UU Remote. Every checkbox starts unselected; an empty selection changes nothing. Use Space to toggle, Enter to run, Ctrl-C to cancel. In non-TTY environments explicit repeated `--only` is required; unsupported choices fail before installation. `--dry-run` only displays plans. The batch invokes the corresponding first-class command for each selected tool, continues after a failure and exits nonzero at the end. A fresh UU Remote install or Linux Chrome install requires `--sudo`; Windows agreements and Linux package-manager confirmation use `--yes`. Services and account-bound installers are excluded. A selected uv task uses its normal defaults, including updates to existing shell activation blocks; run `chatup uv` separately to customize those options.
 
 ## macOS Apps {#macos}
 
@@ -214,6 +226,15 @@ chatup doubao
 Existing `/Applications/Doubao.app` and `~/Applications/Doubao.app` bundles are verified and reused, including newer versions. Invalid apps and broken symlinks cause errors and are never overwritten; an invalid system app is not bypassed by installing a user copy. Fresh installs use writable `/Applications`, falling back to `~/Applications` without sudo. Bundle ID `com.bot.pc.doubao`, version, executable, minimum macOS, Developer ID Team `96L78H6LMH`, and Gatekeeper notarization are verified before staged copying and atomic placement, followed by installed-bundle readback. Download or verification failures exit nonzero, preserve existing apps, clean staging and detach the DMG. A still-mounted image retains its cache with a warning showing the path instead of recursively removing mounted contents.
 
 Temporary downloads use `~/.chatarch/cache/desktop` (respecting `CHATARCH_HOME`); native application data remains app-owned. The command does not upgrade, launch, log in, grant permissions, enable startup items or add Doubao to `chatup macos` defaults.
+
+## UU Remote {#uuremote}
+
+```bash
+chatup uuremote --dry-run
+chatup uuremote --sudo
+```
+
+On macOS 11+ Apple Silicon/Intel, download the pinned 4.46.0 pkg from the [UU website](https://uuyc.163.com/) through its [official release API](https://api.nrd.nie.163.com/api/v1/release/dl/4?channel=gwqd). Fresh installation requires explicit `--sudo` (or root): the vendor package writes `/Applications/UURemote.app`, system LaunchAgent/Daemon and a CLI link, and launches the app. A user-only application folder is not equivalent. The installer verifies the SHA-256, Apple Developer ID Installer Team `PU9BNSBJW7` and notarization before invoking the system installer, then verifies the app signature/version and Gatekeeper result. Existing valid apps are reused; orphan receipts/legacy components block destructive replacement. If the vendor updates the official download, the pinned checksum fails closed until ChatUp is updated. Signing in, granting Accessibility/Screen Recording and enabling remote control require user action.
 
 Python callers can reuse the same workflow directly:
 

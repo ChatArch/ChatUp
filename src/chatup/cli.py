@@ -7,7 +7,8 @@ from chatup import __version__
 from chatup.commands.chrome_for_testing import cli as chrome_for_testing_cli
 from chatup.commands.chromedriver import cli as chromedriver_cli
 from chatup.commands.computer_use import cli as computer_use_cli
-from chatup.commands.desktop import chrome_cli, doubao_cli, iterm_cli, snipaste_cli, wetype_cli
+from chatup.commands.all import all_cli
+from chatup.commands.desktop import chrome_cli, doubao_cli, iterm_cli, snipaste_cli, uuremote_cli, wetype_cli
 from chatup.commands.macos import macos_cli
 from chatup.commands.playwright import cli as playwright_cli
 from chatup.commands.remotion import remotion_cli
@@ -42,6 +43,8 @@ main.add_command(snipaste_cli)
 main.add_command(iterm_cli)
 main.add_command(wetype_cli)
 main.add_command(doubao_cli)
+main.add_command(uuremote_cli)
+main.add_command(all_cli)
 main.add_command(macos_cli)
 main.add_command(remotion_cli)
 

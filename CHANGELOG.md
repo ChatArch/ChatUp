@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.26
+
+### Added
+- Add `chatup uuremote` for macOS 11+ with a pinned official 4.46.0 pkg, checksum, installer signature/notarization and installed-app verification. Fresh installation requires explicit `--sudo`; orphan components fail closed. No automatic sign-in, permissions or remote-control enablement.
+- Add `chatup all` for host-filtered, empty-by-default checkbox selection of ordinary runtime/desktop setup tasks; require explicit `--only` without a TTY, support side-effect-free dry runs and report partial failures.
+
 ## 0.2.25
 
 ### Added

@@ -19,6 +19,8 @@ chatup
 |-- iterm               # 安装 iTerm2（仅限 macOS）
 |-- wetype              # 安装微信输入法（仅限 macOS）
 |-- doubao              # 安装豆包电脑版（仅限 macOS）
+|-- uuremote            # 安装 UU 远程（仅限 macOS）
+|-- all                 # 复选批量配置当前系统支持的常规环境
 |-- macos               # 勾选 macOS 应用，Apple Silicon 可选 Blender
 |-- remotion            # 初始化带锁定依赖的本地视频项目
 |-- chrome-for-testing # 管理 Google Chrome for Testing 浏览器
@@ -104,6 +106,16 @@ chatup
 | `chatup hermes` | 安装 Hermes Agent 和可选 Hermes WebUI；未配置模型时兜底为 `gpt-5.6-terra`，显式模型、profile、已有配置和环境值仍优先。 |
 | `chatup cc-connect` | 安装 CC Connect CLI 和运行依赖。 |
 | `chatup lark-cli` | 配置官方 lark-cli，并复用 ChatEnv 飞书配置。 |
+
+## 跨系统复选批量配置 {#all}
+
+```bash
+chatup all
+chatup all --only uv --only chrome --dry-run -I
+chatup all --only chrome --only snipaste -I
+```
+
+交互式 `chatup all` 在 macOS、Windows、Linux 上显示当前系统、架构及安装方式支持的普通环境选项：uv、Node.js，以及 Chrome、Snipaste、iTerm2、Blender、微信输入法、豆包、UU 远程中的可用项；默认全不选，空选择不产生写入。`Space` 勾选、`Enter` 执行、`Ctrl-C` 取消。无 TTY 时必须显式重复 `--only` 并可加 `-I`，绝不默认安装全部；不支持的指定项在运行前报错。`--dry-run` 只显示计划，不调用安装器。选中的命令使用原有一等入口，失败记录后继续其他项，最终非零退出。首次安装 UU 远程或 Linux Chrome 需要 `--sudo`；Windows 协议或 Linux 包管理器确认用 `--yes`。排除会启动服务、绑定账号或需要额外配置的命令。首次设置 uv 会按它自身默认选项更新已有 shell 激活块；如需不同参数请单独运行 `chatup uv`。
 
 ## macOS 常用应用 {#macos}
 
@@ -214,6 +226,15 @@ chatup doubao
 先检查 `/Applications/Doubao.app` 和 `~/Applications/Doubao.app`，验证并复用已有安装，包括较新版本；无效应用或断开的符号链接会报错，不覆盖，也不会通过另装用户目录来绕过异常系统应用。首次安装到可写的 `/Applications`，否则使用 `~/Applications`，无需 sudo。校验 bundle ID `com.bot.pc.doubao`、版本、可执行文件、最低 macOS 要求、Developer ID Team `96L78H6LMH` 的签名与 Gatekeeper 公证，再暂存复制并原子移入目标，最后回读验证。下载或校验失败时非零退出，保留已有应用，清理暂存文件并卸载 DMG；仍挂载的镜像会保留缓存并提示路径，避免递归清理挂载内容。
 
 缓存使用 `~/.chatarch/cache/desktop`（遵循 `CHATARCH_HOME`）；豆包应用数据仍由应用按原生目录管理。命令不自动升级、启动、登录、授权或设置开机启动，也不把豆包加入 `chatup macos` 默认集合。
+
+## UU 远程 {#uuremote}
+
+```bash
+chatup uuremote --dry-run
+chatup uuremote --sudo
+```
+
+macOS 11+ Apple Silicon/Intel 使用[UU 官网](https://uuyc.163.com/)的[官方安装 API](https://api.nrd.nie.163.com/api/v1/release/dl/4?channel=gwqd) 下载 4.46.0 pkg。首次安装必须显式 `--sudo`（或以 root 执行），因为官方包写入 `/Applications/UURemote.app`、系统 LaunchAgent/Daemon 和命令行链接，并会启动应用；不能使用用户应用目录替代。下载先校验固定 SHA-256，再验 Apple Developer ID Installer Team `PU9BNSBJW7` 与公证，通过系统 Installer 安装，最后验证 app bundle 签名、版本和 Gatekeeper。已安装应用只验证复用，不降级或覆盖；若仅有孤立 receipt/旧服务则拒绝覆盖并提示人工处理。官网发布新包时固定 SHA-256 不一致会安全失败，需更新 ChatUp 的版本和摘要。命令不登录、不代授 macOS 辅助功能或录屏权限，也不启用被控；这些步骤需用户自行确认。
 
 Python 调用可直接复用相同安装流程：
 
