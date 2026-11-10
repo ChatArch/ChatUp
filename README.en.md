@@ -60,6 +60,25 @@ chatup macos --dry-run             # Preview the installation plan
 
 macOS only. Apple Silicon selects Snipaste, iTerm2, Chrome and Blender by default; Intel retains the first three. In a terminal, use Space to toggle apps and Enter to install; deselecting all apps exits without installation. Repeat `--app snipaste|iterm|chrome|blender` to select several apps. Official downloads require no Homebrew, and verified existing apps are reused. See the [macOS install command](https://arch.gh.wzhecnu.cn/ChatUp/en/commands/#macos).
 
+## Batch Setup
+
+```bash
+chatup all                                    # Host-filtered checkbox menu; nothing preselected
+chatup all --only uv --only chrome --dry-run  # Preview selected items only
+chatup all --only nodejs --only chrome -I     # Explicit non-interactive batch
+```
+
+The batch offers ordinary runtimes and supported desktop apps on the detected OS, including UU Remote on macOS. Account-bound and service installers are excluded. Without a TTY, specify at least one `--only`. Each failure is reported, subsequent items continue, and the command exits nonzero on partial failure. A fresh privileged installation needs `--sudo`. See [Batch Setup](docs/commands.en.md#all).
+
+## UU Remote
+
+```bash
+chatup uuremote --dry-run
+chatup uuremote --sudo  # First install only; vendor package registers services and launches the app
+```
+
+Supports macOS 11+ on Apple Silicon and Intel. The pinned official 4.46.0 pkg is checked by SHA-256, Apple signature and notarization. Existing trusted installations are reused; the command never signs in, grants screen/accessibility permissions or enables remote control. See [UU Remote](docs/commands.en.md#uuremote).
+
 ## Remotion Video Projects
 
 ```bash
@@ -119,7 +138,7 @@ Installs the official new ChatGPT desktop app including Codex. Requires Homebrew
 | --- | --- |
 | Base runtime | `doctor`, `uv`, `nodejs`, `docker`, `zsh`, `chrome-for-testing`, `chromedriver`, `playwright`, `frp` |
 | Workspace scaffold | `workspace` |
-| Desktop apps | `macos` (Snipaste/iTerm2/Chrome/Blender selection), `chrome`, `snipaste` (macOS/Windows), `iterm` / `wetype` / `doubao` (macOS only), `chatgpt` (includes Codex) |
+| Desktop and batch setup | `all` (host-filtered ordinary setup), `macos` (Snipaste/iTerm2/Chrome/Blender selection), `chrome`, `snipaste` (macOS/Windows), `iterm` / `wetype` / `doubao` / `uuremote` (macOS only), `chatgpt` (includes Codex) |
 | Linux X11 Computer Use | `computer-use` (read-only preview by default; `--sudo` applies) |
 | Video projects | `remotion` |
 | Local service installers | `gitea`, `glance`, `mysql`, `nginx`, `crs` |

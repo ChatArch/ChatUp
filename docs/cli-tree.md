@@ -11,6 +11,7 @@ chatup
 ├── --tree              # 输出带参数签名的真实已注册 CLI 树
 ├── --tree-brief        # 输出不带参数签名的同一棵 CLI 树
 ├── doctor              # 验证 ChatUp CLI 可调用
+├── all                 # 按当前系统复选批量配置常规环境
 ├── zsh                 # 配置 zsh、插件和 alias
 ├── cc-connect          # 安装 ChatArch CC Connect
 ├── gitea               # 安装 ChatTea-compatible Gitea
@@ -38,6 +39,7 @@ chatup
 ├── iterm               # 安装 iTerm2（仅限 macOS）
 ├── wetype              # 安装微信输入法（仅限 macOS）
 ├── doubao              # 安装豆包电脑版（仅限 macOS）
+├── uuremote            # 安装 UU 远程（仅限 macOS）
 ├── macos               # 勾选 macOS 应用，Apple Silicon 可选 Blender
 ├── remotion            # 初始化带锁定依赖的本地视频项目
 ├── chrome-for-testing  # 管理 Google Chrome for Testing 浏览器
@@ -47,6 +49,10 @@ chatup
 ```
 
 运行 `chatup --tree` 可回读带参数签名和命令目的的真实注册树；`chatup --tree-brief` 保留相同节点和说明，但省略参数签名。完整参数见 [命令参考](commands.md)。
+
+`chatup all [--only NAME]... [--dry-run] [--sudo] [--yes] [-i|-I]` 只显示主机支持的常规安装项，终端复选框默认空；非交互必须重复 `--only` 显式选项。`--dry-run` 完全不执行安装，详情见 [批量配置](commands.md#all)。
+
+`chatup uuremote [--dry-run] [--sudo] [--log-level LEVEL]` 支持 macOS 11+，首次安装需 `--sudo`；使用官方固定版本 pkg 并验证签名、公证和 SHA-256。详见 [UU 远程](commands.md#uuremote)。
 
 ## Linux Computer Use
 

@@ -89,6 +89,19 @@ MAC_APPS = {
         "minimum_macos": "12.0",
         "notarized": True,
     },
+    "uuremote": {
+        "app": "UU Remote (网易UU远程)",
+        "bundle": "UURemote.app",
+        "bundle_id": "com.netease.uuremote",
+        "team_id": "PU9BNSBJW7",
+        # The official download endpoint supplies a short-lived signed CDN URL.
+        "url": "https://api.nrd.nie.163.com/api/v1/release/dl/4?channel=gwqd",
+        "format": "pkg",
+        "download_version": "4.46.0",
+        "sha256": "e347e1dfd57566934ae881f58f09fdd6ab1afae7f521cbfff3aa27a46a6c9560",
+        "minimum_macos": "11.0",
+        "notarized": True,
+    },
 }
 LINUX_PACKAGES = {
     "apt-get": ("deb", ["install"]),
@@ -120,7 +133,7 @@ def plan_desktop_install(app: str, *, sudo: bool = False, yes: bool = False) -> 
     spec = MAC_APPS[app]
     system = platform.system()
     plan = {"app": spec["app"], "platform": system}
-    if system != "Darwin" and app in {"iterm", "blender", "wetype", "doubao"}:
+    if system != "Darwin" and app in {"iterm", "blender", "wetype", "doubao", "uuremote"}:
         raise RuntimeError(f"{spec['app']} is supported on macOS only; current platform: {system}.")
     if system not in {"Darwin", "Windows"} and app == "snipaste":
         raise RuntimeError(f"{spec['app']} is supported on macOS and Windows only; current platform: {system}.")
@@ -140,8 +153,9 @@ def plan_desktop_install(app: str, *, sudo: bool = False, yes: bool = False) -> 
         directories = _mac_input_method_dirs() if app == "wetype" else _mac_app_dirs()
         existing = next((d / spec["bundle"] for d in directories
                          if (d / spec["bundle"]).exists() or (d / spec["bundle"]).is_symlink()), None)
-        directory = directories[0] if os.access(directories[0], os.W_OK) else directories[1]
-        return {**plan, **spec, "method": "macos", "path": str(existing or directory / spec["bundle"])}
+        directory = directories[0] if app == "uuremote" or os.access(directories[0], os.W_OK) else directories[1]
+        return {**plan, **spec, "method": "macos_pkg" if app == "uuremote" else "macos",
+                "path": str(existing or directory / spec["bundle"]), "sudo": sudo}
     if system == "Windows":
         package_id = spec.get("winget_id")
         if not package_id:
@@ -303,6 +317,58 @@ def _install_macos(plan: dict[str, Any]) -> dict[str, Any]:
             logger.warning("Disk image still mounted at %s; installer cache retained at %s", mount, work)
 
 
+def _uuremote_conflicts() -> list[Path]:
+    # The vendor pkg's scripts replace old apps/services/CLI and start the app.
+    return [
+        Path("/Applications/nrd-mac-client.app"),
+        Path("/Library/LaunchAgents/com.netease.uuremote.agent.plist"),
+        Path("/Library/LaunchDaemons/com.netease.uuremote.daemon.plist"),
+        Path.home() / "Library/LaunchAgents/com.netease.uuremote.plist",
+        Path("/usr/local/bin/uuyc-cli"), Path("/usr/local/bin/uuremote"),
+    ]
+
+
+def _install_macos_pkg(plan: dict[str, Any], *, sudo: bool) -> dict[str, Any]:
+    target = Path(plan["path"])
+    if target.exists() or target.is_symlink():
+        return {**plan, **_mac_bundle(plan, target), "status": "already_installed", "verified": True}
+    if not _is_root() and not sudo:
+        raise RuntimeError("Installing UU Remote requires root; re-run with --sudo.")
+    if not _is_root() and not shutil.which("sudo"):
+        raise RuntimeError("sudo is unavailable; run chatup uuremote as root.")
+    if any(path.exists() or path.is_symlink() for path in _uuremote_conflicts()):
+        raise RuntimeError("Existing UU Remote components found without an app; refusing to overwrite them.")
+    receipt = _run(["/usr/sbin/pkgutil", "--pkg-info", "com.netease.uuremote"], check=False)
+    if receipt.returncode == 0:
+        raise RuntimeError("UU Remote package receipt exists without an app; refusing to overwrite it.")
+    with tempfile.TemporaryDirectory(prefix="uuremote-", dir=_cache_dir()) as staging:
+        package = Path(staging) / "uuyc_4.46.0_nochannel.pkg"
+        _download(plan["url"], package)
+        checksum = hashlib.sha256()
+        with package.open("rb") as stream:
+            for block in iter(lambda: stream.read(1024 * 1024), b""):
+                checksum.update(block)
+        digest = checksum.hexdigest()
+        if digest != plan["sha256"]:
+            raise RuntimeError("UU Remote download SHA-256 verification failed.")
+        signature = _run(["/usr/sbin/pkgutil", "--check-signature", str(package)], timeout=120)
+        if ("Developer ID Installer:" not in signature.stdout
+                or f"({plan['team_id']})" not in signature.stdout
+                or "Notarization: trusted by the Apple notary service" not in signature.stdout):
+            raise RuntimeError("UU Remote installer publisher or notarization could not be verified.")
+        _run(["/usr/sbin/spctl", "--assess", "--type", "install", str(package)], timeout=120)
+        if target.exists() or target.is_symlink() or any(path.exists() or path.is_symlink() for path in _uuremote_conflicts()):
+            raise RuntimeError("UU Remote components appeared during download; refusing to overwrite them.")
+        command = ["/usr/sbin/installer", "-pkg", str(package), "-target", "/"]
+        if not _is_root():
+            command.insert(0, "sudo")
+        _run(command, timeout=1800)
+    details = _mac_bundle(plan, target)
+    if details["version"] != plan["download_version"]:
+        raise RuntimeError(f"Unexpected installed UU Remote version: {details['version']}.")
+    return {**plan, **details, "status": "installed", "verified": True}
+
+
 def _linux_chrome() -> dict[str, str] | None:
     binary = shutil.which("google-chrome-stable") or shutil.which("google-chrome")
     if not binary:
@@ -421,6 +487,8 @@ def setup_desktop_app(
         logger.info("Checking %s installation on %s", plan["app"], plan["platform"])
         if plan["method"] == "macos":
             return _install_macos(plan)
+        if plan["method"] == "macos_pkg":
+            return _install_macos_pkg(plan, sudo=sudo)
         if plan["method"] == "linux":
             return _install_linux(plan, sudo=sudo)
         return _install_windows(plan)
