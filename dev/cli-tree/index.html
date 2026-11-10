@@ -833,7 +833,7 @@
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>├── --tree              # 输出带参数签名的真实已注册 CLI 树
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>├── --tree-brief        # 输出不带参数签名的同一棵 CLI 树
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>├── doctor              # 验证 ChatUp CLI 可调用
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>├── all                 # 按当前系统复选批量配置常规环境
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>├── all                 # 按当前系统复选完整 CLI 命令树
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>├── zsh                 # 配置 zsh、插件和 alias
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>├── cc-connect          # 安装 ChatArch CC Connect
 <a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>├── gitea               # 安装 ChatTea-compatible Gitea
@@ -870,7 +870,7 @@
 <a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a>└── playwright          # 管理 Playwright package 与 Chromium browser
 </code></pre></div>
 <p>运行 <code>chatup --tree</code> 可回读带参数签名和命令目的的真实注册树；<code>chatup --tree-brief</code> 保留相同节点和说明，但省略参数签名。完整参数见 <a href="../commands/">命令参考</a>。</p>
-<p><code>chatup all [--only NAME]... [--dry-run] [--sudo] [--yes] [-i|-I]</code> 只显示主机支持的常规安装项，终端复选框默认空；非交互必须重复 <code>--only</code> 显式选项。<code>--dry-run</code> 完全不执行安装，详情见 <a href="../commands/#all">批量配置</a>。</p>
+<p><code>chatup all [--list] [--only 'COMMAND PATH']... [--dry-run] [--sudo] [--yes] [-i|-I]</code> 从真实注册命令树列出本机支持的命令；嵌套管理命令以完整路径显示，例如 <code>chrome-for-testing install</code>。复选框默认空；非交互必须重复 <code>--only</code> 显式选择。<code>--list</code> 与 <code>--dry-run</code> 不执行安装；需要参数、提权或删除确认时沿用原命令规则，不自动代填。详见 <a href="../commands/#all">全命令入口</a>。</p>
 <p><code>chatup uuremote [--dry-run] [--sudo] [--log-level LEVEL]</code> 支持 macOS 11+，首次安装需 <code>--sudo</code>；使用官方固定版本 pkg 并验证签名、公证和 SHA-256。详见 <a href="../commands/#uuremote">UU 远程</a>。</p>
 <h2 id="linux-computer-use">Linux Computer Use<a class="headerlink" href="#linux-computer-use" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>chatup computer-use [--sudo] [--dry-run] [--display DISPLAY] [--xauthority XAUTHORITY] [--state STATE] [--home HOME]

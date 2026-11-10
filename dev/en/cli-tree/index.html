@@ -833,7 +833,7 @@
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>├── --tree              # Print the registered CLI tree with signatures
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>├── --tree-brief        # Print the same CLI tree without signatures
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>├── doctor              # Verify that ChatUp is callable
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>├── all                 # Select ordinary setup tasks supported by this host
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>├── all                 # Select the complete host-supported CLI command tree
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>├── zsh                 # Configure zsh, plugins, and aliases
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>├── cc-connect          # Install ChatArch CC Connect
 <a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>├── gitea               # Install ChatTea-compatible Gitea
@@ -870,7 +870,7 @@
 <a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a>└── playwright          # Manage Playwright packages and Chromium browsers
 </code></pre></div>
 <p>Run <code>chatup --tree</code> to read back the registered tree with parameter signatures and command purposes. <code>chatup --tree-brief</code> keeps the same nodes and descriptions while omitting signatures. See <a href="../commands/">Command Reference</a> for complete options.</p>
-<p><code>chatup all [--only NAME]... [--dry-run] [--sudo] [--yes] [-i|-I]</code> filters ordinary setup items by the host, starts with no checkbox selected, and requires explicit repeated <code>--only</code> flags without a TTY. A dry run never installs anything. See <a href="../commands/#all">Batch Setup</a>.</p>
+<p><code>chatup all [--list] [--only 'COMMAND PATH']... [--dry-run] [--sudo] [--yes] [-i|-I]</code> derives every supported leaf from the registered CLI, including nested paths like <code>chrome-for-testing install</code>. No checkbox is preselected and non-TTY use requires explicit <code>--only</code>. List and dry-run do not execute commands; required inputs, elevation and deletion confirmation still follow each original command's rules. See <a href="../commands/#all">Full Selector</a>.</p>
 <p><code>chatup uuremote [--dry-run] [--sudo] [--log-level LEVEL]</code> supports macOS 11+; fresh installs require <code>--sudo</code> and verify the pinned official pkg's SHA-256, signature and notarization. See <a href="../commands/#uuremote">UU Remote</a>.</p>
 <h2 id="linux-computer-use">Linux Computer Use<a class="headerlink" href="#linux-computer-use" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>chatup computer-use [--sudo] [--dry-run] [--display DISPLAY] [--xauthority XAUTHORITY] [--state STATE] [--home HOME]

@@ -420,7 +420,7 @@
         <li class="md-nav__item">
   <a href="#all" class="md-nav__link">
     <span class="md-ellipsis">
-      Cross-platform Batch Setup
+      Full Command Selector
     </span>
   </a>
   
@@ -745,7 +745,7 @@
         <li class="md-nav__item">
   <a href="#all" class="md-nav__link">
     <span class="md-ellipsis">
-      Cross-platform Batch Setup
+      Full Command Selector
     </span>
   </a>
   
@@ -949,7 +949,7 @@
 <a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>|-- wetype              # Install WeType (macOS only)
 <a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>|-- doubao              # Install Doubao desktop (macOS only)
 <a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>|-- uuremote            # Install UU Remote (macOS only)
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>|-- all                 # Select ordinary setup tasks supported by this host
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>|-- all                 # Select the complete host-supported command tree
 <a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>|-- macos               # Select supported macOS apps, including Blender on Apple Silicon
 <a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>|-- remotion            # Initialize a locked local video project
 <a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>|-- chrome-for-testing # Manage Google Chrome for Testing browsers
@@ -1095,12 +1095,14 @@
 </tr>
 </tbody>
 </table>
-<h2 id="all">Cross-platform Batch Setup<a class="headerlink" href="#all" title="Permanent link">&para;</a></h2>
+<h2 id="all">Full Command Selector<a class="headerlink" href="#all" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>chatup<span class="w"> </span>all
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>chatup<span class="w"> </span>all<span class="w"> </span>--only<span class="w"> </span>uv<span class="w"> </span>--only<span class="w"> </span>chrome<span class="w"> </span>--dry-run<span class="w"> </span>-I
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>chatup<span class="w"> </span>all<span class="w"> </span>--only<span class="w"> </span>chrome<span class="w"> </span>--only<span class="w"> </span>snipaste<span class="w"> </span>-I
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>chatup<span class="w"> </span>all<span class="w"> </span>--list
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>chatup<span class="w"> </span>all<span class="w"> </span>--only<span class="w"> </span>uv<span class="w"> </span>--only<span class="w"> </span>chrome<span class="w"> </span>--dry-run<span class="w"> </span>-I
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>chatup<span class="w"> </span>all<span class="w"> </span>--only<span class="w"> </span><span class="s1">'chrome-for-testing install'</span><span class="w"> </span>-i
 </code></pre></div>
-<p>Interactive <code>chatup all</code> filters ordinary tools by OS, architecture and install method: uv, Node.js, and supported desktop apps among Chrome, Snipaste, iTerm2, Blender, WeType, Doubao and UU Remote. Every checkbox starts unselected; an empty selection changes nothing. Use Space to toggle, Enter to run, Ctrl-C to cancel. In non-TTY environments explicit repeated <code>--only</code> is required; unsupported choices fail before installation. <code>--dry-run</code> only displays plans. The batch invokes the corresponding first-class command for each selected tool, continues after a failure and exits nonzero at the end. A fresh UU Remote install or Linux Chrome install requires <code>--sudo</code>; Windows agreements and Linux package-manager confirmation use <code>--yes</code>. Services and account-bound installers are excluded. A selected uv task uses its normal defaults, including updates to existing shell activation blocks; run <code>chatup uv</code> separately to customize those options.</p>
+<p><code>chatup all</code> reads the registered Click command tree and filters by OS, architecture and the original command's read-only platform selectors on macOS, Windows and Linux. It offers runtimes, desktops, Agent/account tools, services, workspace setup and browser-management leaves such as <code>chrome-for-testing install</code>. Only <code>all</code> itself and non-actionable group headings are omitted. <code>--list</code> shows every supported action without a TTY or writes. Checkboxes start unselected: Space toggles, Enter runs, Ctrl-C cancels. Without a TTY, repeat <code>--only 'COMMAND PATH'</code> explicitly. Unsupported/unknown paths fail before changes. <code>--dry-run</code> prints selected paths only; it never invokes installers, including commands lacking their own preview mode.</p>
+<p>Selected actions run through their original CLI contracts. Missing inputs use the original terminal prompts or fail without a TTY. Management leaves such as <code>remove</code>/<code>gc</code> are listed, but <code>all --yes</code> does not approve deletion; use the direct command for an exact version or mandatory confirmation. <code>--sudo</code> is forwarded only for selected Chrome, UU Remote, Docker and Linux Computer Use operations; <code>--yes</code> only accepts package-manager agreements for Chrome, Snipaste and ChatGPT. On non-Linux hosts, NGINX/MySQL/Twikoo setup skips user-level systemd services while retaining supported runtime/config steps. Selecting <code>macos</code> retains that command's own multi-app defaults. Errors are reported per item, subsequent items continue and the batch exits nonzero on partial failure; explicit cancellation stops the batch. Nothing is installed by default, and no login or secret entry is automated.</p>
 <h2 id="macos">macOS Apps<a class="headerlink" href="#macos" title="Permanent link">&para;</a></h2>
 <p><code>chatup macos</code> is macOS-only. Apple Silicon offers Snipaste, iTerm2, Google Chrome and Blender, all selected by default; Intel retains the first three apps.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>chatup<span class="w"> </span>macos
