@@ -62,15 +62,16 @@ chatup macos --dry-run             # 只预览安装计划
 
 仅限 macOS。Apple Silicon 默认勾选 Snipaste、iTerm2、Chrome、Blender；Intel 保持前三项。终端中用空格切换勾选，回车安装；取消全部勾选则直接退出。可重复传入 `--app snipaste|iterm|chrome|blender` 选择多个应用。直接使用官方安装包，无需 Homebrew，已有应用验证后复用。详见[macOS 安装入口](https://arch.gh.wzhecnu.cn/ChatUp/commands/#macos)。
 
-## 常规环境批量配置
+## 全命令复选入口
 
 ```bash
-chatup all                                    # 当前系统支持的复选框菜单；默认不勾选
-chatup all --only uv --only chrome --dry-run  # 只预览选中的安装项
-chatup all --only nodejs --only chrome -I     # 无交互批量运行
+chatup all                                        # 当前系统支持的命令复选框；默认不勾选
+chatup all --list                                 # 只读列出可选命令
+chatup all --only uv --only chrome --dry-run -I  # 只预览选中的命令
+chatup all --only 'playwright install' -i        # 命令组的子命令，按原命令补参数
 ```
 
-`chatup all` 检测系统与架构，仅列出支持的 uv、Node.js、常规桌面应用；macOS 可选 UU 远程。服务、账号类配置不混入通用安装。无交互时必须用 `--only` 显式选择；`--sudo` 仅在选中需要提权的新安装时传入。单项失败会记录并继续下一项，最后以非零状态退出。详见[命令参考](docs/commands.md#all)。
+`chatup all` 从注册的 CLI 命令树列出当前系统支持的**所有命令**，包括基础环境、桌面应用、Agent、工作区、本地服务及浏览器管理子命令；不再局限于 uv/Node.js/桌面。无交互时必须用 `--only` 显式选择；`--dry-run` 只显示会执行的命令。选择后沿用原命令的参数、权限与确认规则；需要额外必填参数或删除确认的命令不会由 `all` 自动补齐。详见[命令参考](docs/commands.md#all)。
 
 ## UU 远程
 
@@ -140,7 +141,7 @@ chatup chatgpt --yes  # Windows 首次安装时接受 Store 协议
 | --- | --- |
 | 基础运行环境 | `doctor`、`uv`、`nodejs`、`docker`、`zsh`、`chrome-for-testing`、`chromedriver`、`playwright`、`frp` |
 | 工作区脚手架 | `workspace` |
-| 桌面应用与批量安装 | `all`（按系统筛选常规安装项）、`macos`（Snipaste/iTerm2/Chrome/Blender 多选）、`chrome`、`snipaste`（macOS/Windows）、`iterm` / `wetype` / `doubao` / `uuremote`（仅 macOS）、`chatgpt`（含 Codex） |
+| 全命令入口与桌面应用 | `all`（按系统筛选完整 CLI 树）、`macos`（Snipaste/iTerm2/Chrome/Blender 多选）、`chrome`、`snipaste`（macOS/Windows）、`iterm` / `wetype` / `doubao` / `uuremote`（仅 macOS）、`chatgpt`（含 Codex） |
 | Linux X11 Computer Use | `computer-use`（默认只读预览，`--sudo` 应用） |
 | 视频项目 | `remotion` |
 | 本地服务安装 | `gitea`、`glance`、`discourse`、`zulip`、`mysql`、`nginx`、`crs` |

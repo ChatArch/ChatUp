@@ -60,15 +60,16 @@ chatup macos --dry-run             # Preview the installation plan
 
 macOS only. Apple Silicon selects Snipaste, iTerm2, Chrome and Blender by default; Intel retains the first three. In a terminal, use Space to toggle apps and Enter to install; deselecting all apps exits without installation. Repeat `--app snipaste|iterm|chrome|blender` to select several apps. Official downloads require no Homebrew, and verified existing apps are reused. See the [macOS install command](https://arch.gh.wzhecnu.cn/ChatUp/en/commands/#macos).
 
-## Batch Setup
+## Full Command Selector
 
 ```bash
-chatup all                                    # Host-filtered checkbox menu; nothing preselected
-chatup all --only uv --only chrome --dry-run  # Preview selected items only
-chatup all --only nodejs --only chrome -I     # Explicit non-interactive batch
+chatup all                                        # Host-filtered CLI checkboxes; none preselected
+chatup all --list                                 # Read-only list of available actions
+chatup all --only uv --only chrome --dry-run -I  # Preview selected actions
+chatup all --only 'playwright install' -i        # Nested command uses its own input prompts
 ```
 
-The batch offers ordinary runtimes and supported desktop apps on the detected OS, including UU Remote on macOS. Account-bound and service installers are excluded. Without a TTY, specify at least one `--only`. Each failure is reported, subsequent items continue, and the command exits nonzero on partial failure. A fresh privileged installation needs `--sudo`. See [Batch Setup](docs/commands.en.md#all).
+`chatup all` derives every supported leaf from the registered CLI tree: runtimes, desktop apps, Agent and workspace tools, services, and browser-management subcommands. Without a TTY, specify at least one `--only`; `--dry-run` only previews. Selected commands retain their own required arguments, prompts, permissions and confirmations. Additional required flags or deletion approval must be supplied through the original command, never implicitly by `all`. See [Full Selector](docs/commands.en.md#all).
 
 ## UU Remote
 
@@ -138,7 +139,7 @@ Installs the official new ChatGPT desktop app including Codex. Requires Homebrew
 | --- | --- |
 | Base runtime | `doctor`, `uv`, `nodejs`, `docker`, `zsh`, `chrome-for-testing`, `chromedriver`, `playwright`, `frp` |
 | Workspace scaffold | `workspace` |
-| Desktop and batch setup | `all` (host-filtered ordinary setup), `macos` (Snipaste/iTerm2/Chrome/Blender selection), `chrome`, `snipaste` (macOS/Windows), `iterm` / `wetype` / `doubao` / `uuremote` (macOS only), `chatgpt` (includes Codex) |
+| Full selector and desktop apps | `all` (host-filtered complete CLI tree), `macos` (Snipaste/iTerm2/Chrome/Blender selection), `chrome`, `snipaste` (macOS/Windows), `iterm` / `wetype` / `doubao` / `uuremote` (macOS only), `chatgpt` (includes Codex) |
 | Linux X11 Computer Use | `computer-use` (read-only preview by default; `--sudo` applies) |
 | Video projects | `remotion` |
 | Local service installers | `gitea`, `glance`, `mysql`, `nginx`, `crs` |

@@ -20,7 +20,7 @@ chatup
 |-- wetype              # Install WeType (macOS only)
 |-- doubao              # Install Doubao desktop (macOS only)
 |-- uuremote            # Install UU Remote (macOS only)
-|-- all                 # Filter and select ordinary tools for this host
+|-- all                 # Filter and select the complete command tree for this host
 |-- macos               # Select supported macOS apps, including Blender on Apple Silicon
 |-- remotion            # Initialize a locked local video project
 |-- chrome-for-testing # Manage Google Chrome for Testing browsers
@@ -118,7 +118,7 @@ Local-service commands use user-level layouts by default:
 
 `chatup doubao` installs official Doubao 2.34.6 on Apple Silicon or Intel Macs running macOS 12+, without Homebrew. It supports side-effect-free `--dry-run`, signature/notarization checks and reuse of existing installations. It does not overwrite invalid apps, launch, log in, grant permissions or add Doubao to `chatup macos` defaults. See the [Doubao install contract](commands.md#doubao).
 
-`chatup all` filters ordinary tools by OS and architecture; all checkboxes start unselected. Without a TTY, specify `--only`; `--dry-run` makes no changes. `chatup uuremote` installs a pinned official pkg on macOS 11+ after SHA-256, Apple signature and notarization checks, requiring `--sudo` for a fresh install. The vendor package launches its app, but no sign-in or permissions are automated. See [Batch Setup](commands.en.md#all) and [UU Remote](commands.en.md#uuremote).
+`chatup all` enumerates every supported actionable registered command (including Agent/workspace, service and browser-management actions) by OS/architecture; checkboxes start unselected. Without a TTY, specify `--only`; `--list` and `--dry-run` make no changes. Original inputs and confirmations still apply. `chatup uuremote` installs a pinned official pkg on macOS 11+ after SHA-256, Apple signature and notarization checks, requiring `--sudo` for a fresh install. The vendor package launches its app, but no sign-in or permissions are automated. See [Full Selector](commands.en.md#all) and [UU Remote](commands.en.md#uuremote).
 
 ## Agent Toolchains
 

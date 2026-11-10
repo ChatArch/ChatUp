@@ -11,7 +11,7 @@ chatup
 ├── --tree              # Print the registered CLI tree with signatures
 ├── --tree-brief        # Print the same CLI tree without signatures
 ├── doctor              # Verify that ChatUp is callable
-├── all                 # Select ordinary setup tasks supported by this host
+├── all                 # Select the complete host-supported CLI command tree
 ├── zsh                 # Configure zsh, plugins, and aliases
 ├── cc-connect          # Install ChatArch CC Connect
 ├── gitea               # Install ChatTea-compatible Gitea
@@ -50,7 +50,7 @@ chatup
 
 Run `chatup --tree` to read back the registered tree with parameter signatures and command purposes. `chatup --tree-brief` keeps the same nodes and descriptions while omitting signatures. See [Command Reference](commands.md) for complete options.
 
-`chatup all [--only NAME]... [--dry-run] [--sudo] [--yes] [-i|-I]` filters ordinary setup items by the host, starts with no checkbox selected, and requires explicit repeated `--only` flags without a TTY. A dry run never installs anything. See [Batch Setup](commands.en.md#all).
+`chatup all [--list] [--only 'COMMAND PATH']... [--dry-run] [--sudo] [--yes] [-i|-I]` derives every supported leaf from the registered CLI, including nested paths like `chrome-for-testing install`. No checkbox is preselected and non-TTY use requires explicit `--only`. List and dry-run do not execute commands; required inputs, elevation and deletion confirmation still follow each original command's rules. See [Full Selector](commands.en.md#all).
 
 `chatup uuremote [--dry-run] [--sudo] [--log-level LEVEL]` supports macOS 11+; fresh installs require `--sudo` and verify the pinned official pkg's SHA-256, signature and notarization. See [UU Remote](commands.en.md#uuremote).
 
