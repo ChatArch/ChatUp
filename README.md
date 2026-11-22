@@ -131,7 +131,7 @@ chatup chatgpt
 chatup chatgpt --yes  # Windows 首次安装时接受 Store 协议
 ```
 
-安装包含 Codex 的新版官方 ChatGPT 桌面应用。macOS 需要 Homebrew，Windows 需要 WinGet；Linux preview 暂按[官方说明](https://learn.chatgpt.com/docs/linux/linux-app)手动安装。现有 `chatup codex` 仍安装/配置 Codex CLI。不会自动启动、登录或升级已有应用；[完整约定](https://arch.gh.wzhecnu.cn/ChatUp/commands/#chatgpt-desktop)。
+安装包含 Codex 的新版官方 ChatGPT 桌面应用。macOS 13+（Apple Silicon/Intel）直接下载与 `codex app` 相同的 OpenAI 官方 DMG，验证应用身份、签名与公证，无需 Homebrew；Windows 需要 WinGet。Linux preview 暂按[官方说明](https://learn.chatgpt.com/docs/linux/linux-app)手动安装。现有 `chatup codex` 仍安装/配置 Codex CLI。不会自动启动、登录或升级已有应用；[完整约定](https://arch.gh.wzhecnu.cn/ChatUp/commands/#chatgpt-desktop)。
 
 `chatup codex`、`chatup hermes` 未配置模型时默认使用 `gpt-5.6-terra`；用户指定的模型和已有配置仍优先。
 

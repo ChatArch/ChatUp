@@ -97,7 +97,7 @@ The docs are organized by task and capability so the site does not collapse into
 
 - **ChatArch Home**
 
-    ChatArch-managed install targets default to `~/.chatarch/...`. The native desktop installer `chatup chatgpt` leaves app and cache paths to the OS package manager.
+    ChatArch-managed install targets default to `~/.chatarch/...`. The native desktop installer `chatup chatgpt` uses macOS Applications directories with temporary downloads under `~/.chatarch/cache/desktop` (respecting `CHATARCH_HOME`); Windows uses the Microsoft Store.
 
 - **No Secret Echo**
 

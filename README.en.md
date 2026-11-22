@@ -129,7 +129,7 @@ chatup chatgpt
 chatup chatgpt --yes  # Accept first-time Microsoft Store agreements on Windows
 ```
 
-Installs the official new ChatGPT desktop app including Codex. Requires Homebrew on macOS or WinGet on Windows. Linux preview installation follows the [official manual instructions](https://learn.chatgpt.com/docs/linux/linux-app). Existing `chatup codex` still installs/configures the Codex CLI. No automatic launch, login or upgrade of existing installations. See the [full contract](https://arch.gh.wzhecnu.cn/ChatUp/en/commands/#chatgpt-desktop).
+Installs the official new ChatGPT desktop app including Codex. On macOS 13+ (Apple Silicon/Intel), downloads OpenAI's native DMG directly as `codex app` does, verifies identity, signature and notarization, and requires no Homebrew. Windows uses WinGet. Linux preview installation follows the [official manual instructions](https://learn.chatgpt.com/docs/linux/linux-app). Existing `chatup codex` still installs/configures the Codex CLI. No automatic launch, login or upgrade of existing installations. See the [full contract](https://arch.gh.wzhecnu.cn/ChatUp/en/commands/#chatgpt-desktop).
 
 `chatup codex` and `chatup hermes` default to `gpt-5.6-terra` only when no model is configured; explicit choices and existing configuration retain precedence.
 

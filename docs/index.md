@@ -97,7 +97,7 @@ ChatUp 是 ChatArch 的独立安装与初始化 CLI，用来把一台机器整�
 
 - **ChatArch 目录**
 
-    ChatArch 自管安装项默认落在 `~/.chatarch/...`；`chatup chatgpt` 是原生桌面应用安装入口，应用和缓存目录交给系统包管理器管理。
+    ChatArch 自管安装项默认落在 `~/.chatarch/...`；`chatup chatgpt` 在 macOS 使用 Applications 目录，下载暂存于 `~/.chatarch/cache/desktop`（遵循 `CHATARCH_HOME`）；Windows 使用 Microsoft Store。
 
 - **敏感值不回显**
 

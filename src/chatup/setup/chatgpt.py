@@ -1,6 +1,6 @@
 """Install the official ChatGPT desktop app (the successor to Codex App).
 
-The OS package manager owns downloads, signatures, application paths and state.
+macOS uses OpenAI's native DMG; Windows uses the official Microsoft Store product.
 This module never launches the app or changes Codex CLI configuration/auth.
 """
 from __future__ import annotations
@@ -10,7 +10,6 @@ import shutil
 import subprocess
 from typing import Any
 
-CHATGPT_CASK = "homebrew/cask/chatgpt"
 CHATGPT_STORE_ID = "9PLM9XGG6VKS"
 DOWNLOAD_URL = "https://chatgpt.com/download/"
 LINUX_GUIDE_URL = "https://learn.chatgpt.com/docs/linux/linux-app"
@@ -20,16 +19,14 @@ def plan_chatgpt_install(*, yes: bool = False) -> dict[str, Any]:
     """Return a side-effect-free install plan for the current OS.
 
     ``yes`` explicitly accepts Microsoft Store source/package agreements.
-    Homebrew/WinGet resolve the current release and enforce OS/CPU requirements.
+    Native macOS planning and WinGet enforce the platform requirements.
     Linux preview installation is deliberately not automated here.
     """
     system = platform.system()
     if system == "Darwin":
-        manager = "brew"
-        package = CHATGPT_CASK
-        command = [manager, "install", "--cask", package]
-        verify_command = [manager, "list", "--cask", "--versions", package]
-        manager_url = "https://brew.sh/"
+        from chatup.setup.desktop import plan_desktop_install
+
+        return {**plan_desktop_install("chatgpt"), "manager": "native", "download_url": DOWNLOAD_URL}
     elif system == "Windows":
         manager = "winget"
         package = CHATGPT_STORE_ID
@@ -70,25 +67,12 @@ def _is_installed(plan: dict[str, Any], executable: str) -> bool:
     )
     if result.returncode != 0 or not result.stdout.strip():
         return False
-    if plan["manager"] == "brew":
-        for line in result.stdout.splitlines():
-            parts = line.split()
-            if len(parts) < 2 or parts[0] != "chatgpt":
-                continue
-            if any(version.startswith("1.") for version in parts[1:]):
-                raise RuntimeError(
-                    "An older ChatGPT Classic cask is registered as chatgpt. "
-                    "Migrate it manually with Homebrew before installing the new "
-                    f"ChatGPT/Codex app: {DOWNLOAD_URL}"
-                )
-            return True
-        return False
     # WinGet's exact Store selector exits zero only when a matching package exists.
     return True
 
 
 def setup_chatgpt(*, dry_run: bool = False, yes: bool = False) -> dict[str, Any]:
-    """Install if absent, then verify registration with the package manager.
+    """Install if absent, then verify the native bundle or Store registration.
 
     Returns the plan plus ``status`` (planned/already_installed/installed) and
     ``verified``. Dry-run does not require or invoke a package manager. Existing
@@ -99,6 +83,10 @@ def setup_chatgpt(*, dry_run: bool = False, yes: bool = False) -> dict[str, Any]
     result = {**plan, "status": "planned", "verified": False}
     if dry_run:
         return result
+    if plan.get("method") == "macos":
+        from chatup.setup.desktop import setup_desktop_app
+
+        return {**plan, **setup_desktop_app("chatgpt")}
     executable = shutil.which(plan["manager"])
     if not executable:
         raise RuntimeError(
