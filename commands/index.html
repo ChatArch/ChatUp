@@ -1231,7 +1231,7 @@
 <a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>chatup<span class="w"> </span>snipaste<span class="w"> </span>--yes<span class="w">        </span><span class="c1"># Windows 明确接受来源和包协议</span>
 </code></pre></div>
 <p>三个命令支持 <code>--log-level DEBUG|INFO|WARNING|ERROR</code>；没有必填参数，不会触发补参交互。<code>--dry-run</code> 只检查本机平台/路径并打印计划，不联网、不执行安装程序、不写目录。</p>
-<p>macOS 优先复用 <code>/Applications</code> 或 <code>~/Applications</code> 中已有的应用，否则安装到可写的 <code>/Applications</code>，不可写时回退到 <code>~/Applications</code>。下载后校验 bundle ID、版本、可执行文件、最低 macOS 版本和官方 Developer ID 签名，再暂存复制并原子移入目标位置。已有异常应用会报错，不覆盖；不会自动升级、启动、登录或更改默认浏览器/终端。安装缓存暂存于 <code>~/.chatarch/cache/desktop</code>（遵循 <code>CHATARCH_HOME</code>），完成后清理并卸载 DMG。</p>
+<p>macOS 优先复用 <code>/Applications</code> 或 <code>~/Applications</code> 中已有的应用，否则安装到可写的 <code>/Applications</code>，不可写时回退到 <code>~/Applications</code>。下载后校验 bundle ID、版本、可执行文件和最低 macOS 版本；暂存复制时排除资源叉与扩展属性，保留 quarantine 信息，再对暂存应用执行严格、递归的官方 Developer ID 签名验证，成功后才原子移入目标位置。这可处理 Chrome 官方 DMG 自带的 Finder 元数据，无需修改只读镜像或放宽签名检查。已有异常应用会报错，不覆盖；不会自动升级、启动、登录或更改默认浏览器/终端。安装缓存暂存于 <code>~/.chatarch/cache/desktop</code>（遵循 <code>CHATARCH_HOME</code>），完成后清理并卸载 DMG。</p>
 <p>Linux 需要对应系统包管理器；普通用户必须显式提供 <code>--sudo</code>，否则安装前返回操作提示，root 可直接安装。包管理器负责依赖和系统要求，安装后回读 <code>google-chrome --version</code>。Windows 安装需要 <a href="https://aka.ms/getwinget">WinGet</a>，安装前后按精确包 ID 回读 <code>Google.Chrome.EXE</code> 或 <code>liule.Snipaste</code>，不自动升级已有应用。Chrome 使用带版本号的官方 EXE，保留 WinGet 哈希校验，避免浮动 MSI 下载地址与清单不同步；安装后还会验证 <code>chrome.exe</code> 的有效 Google LLC 签名、产品身份及版本。标准用户或系统目录中已有的有效 Chrome 可直接复用，无需重新安装；无效程序或仅有登记记录而缺少程序时返回错误。</p>
 <p>这些桌面安装入口不写 CFT/ChromeDriver/Playwright metadata、浏览器 profile 或 Cookie。自动化制品继续使用各自的独立 backend。</p>
 <p>来源：<a href="https://www.google.com/chrome/">Google Chrome</a>、<a href="https://www.snipaste.com/">Snipaste</a>、<a href="https://iterm2.com/downloads.html">iTerm2 下载</a>。</p>
@@ -1275,8 +1275,8 @@
 <tbody>
 <tr>
 <td>macOS</td>
-<td><code>brew install --cask homebrew/cask/chatgpt</code></td>
-<td>已安装 <a href="https://brew.sh/">Homebrew</a>，系统与架构要求由当前 cask 检查</td>
+<td>与 <code>codex app</code> 相同的 OpenAI 官方 DMG，按 Apple Silicon/Intel 选择</td>
+<td>macOS 13+，无需 Homebrew 或 sudo</td>
 </tr>
 <tr>
 <td>Windows</td>
@@ -1290,11 +1290,12 @@
 </tr>
 </tbody>
 </table>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>chatup<span class="w"> </span>chatgpt<span class="w"> </span>--dry-run<span class="w">  </span><span class="c1"># 只显示当前系统的安装命令，不联网、不下载</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>chatup<span class="w"> </span>chatgpt<span class="w"> </span>--dry-run<span class="w">  </span><span class="c1"># 只显示下载地址/路径或 Store 命令，不联网、不下载</span>
 <a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>chatup<span class="w"> </span>chatgpt<span class="w">            </span><span class="c1"># 安装桌面应用</span>
 <a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>chatup<span class="w"> </span>chatgpt<span class="w"> </span>--yes<span class="w">      </span><span class="c1"># Windows：明确接受 Microsoft Store 来源和包协议</span>
 </code></pre></div>
-<p>Windows 使用非交互安装；首次安装若需要接受 Store 协议，请使用 <code>--yes</code>。macOS 上该标志不改变安装行为。缺少包管理器时返回安装指引，不自动 bootstrap Homebrew/WinGet。已有包管理器登记的安装会跳过，不自动升级（Windows 使用 <code>--no-upgrade</code>）；若 macOS 仍登记旧 <code>1.x</code> ChatGPT Classic，会明确要求手动迁移，而不冒充新版安装成功。手动安装导致冲突时交给包管理器报错，不强制覆盖。</p>
+<p>macOS 的 Apple Silicon 使用 <code>https://persistent.oaistatic.com/codex-app-prod/Codex.dmg</code>，Intel 使用 <code>https://persistent.oaistatic.com/codex-app-prod/Codex-latest-x64.dmg</code>。下载并暂存官方 <code>ChatGPT.app</code>，复制时排除资源叉/Finder 元数据并保留 quarantine，验证 bundle ID <code>com.openai.codex</code>、可执行文件、版本、最低 macOS、OpenAI Developer ID Team <code>2DC432GLL2</code>、严格递归签名与 Gatekeeper 公证后才安装。优先使用可写的 <code>/Applications</code>，否则回退到 <code>~/Applications</code>。已有有效应用直接验证并复用，包括手动安装与更新版本；无效应用或 Classic 保留并报错。安装缓存暂存于 <code>~/.chatarch/cache/desktop</code>（遵循 <code>CHATARCH_HOME</code>），成功或失败后清理暂存并卸载 DMG。</p>
+<p>Windows 使用非交互安装；首次安装若需要接受 Store 协议，请使用 <code>--yes</code>，macOS 上该标志不改变安装行为。缺少 WinGet 时返回安装指引。已有 Store 登记的安装会跳过，不自动升级（<code>--no-upgrade</code>）。</p>
 <p>成功表示包管理器安装记录已经回读确认，不代表应用已启动或登录。应用目录、下载缓存和运行数据由 Homebrew/Microsoft Store 与官方应用管理，使用原生平台布局（macOS 通常为 <code>/Applications/ChatGPT.app</code>），而不是 ChatArch 服务目录。ChatUp 不写桌面应用登录态，不更改 Codex CLI 配置；安装后请手动打开 ChatGPT 并登录。</p>
 <p>Python 调用不需要经由 CLI：</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">chatup.setup.chatgpt</span><span class="w"> </span><span class="kn">import</span> <span class="n">plan_chatgpt_install</span><span class="p">,</span> <span class="n">setup_chatgpt</span>
@@ -1303,8 +1304,8 @@
 <a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="n">result</span> <span class="o">=</span> <span class="n">setup_chatgpt</span><span class="p">(</span><span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="c1"># 真正安装：setup_chatgpt(yes=True)</span>
 </code></pre></div>
-<p>返回值含 <code>app</code>、<code>platform</code>、<code>manager</code>、<code>package</code>、<code>command</code>、<code>verify_command</code>；安装 API 另含 <code>status</code>（<code>planned</code> / <code>already_installed</code> / <code>installed</code>）和 <code>verified</code>。失败或超时抛出 <code>RuntimeError</code>，CLI 非零退出；超时后先检查包管理器状态再重试。</p>
-<p>来源：<a href="https://chatgpt.com/download/">OpenAI 下载页</a>、<a href="https://learn.chatgpt.com/docs/windows/windows-app">Windows 官方安装指引</a>、<a href="https://formulae.brew.sh/cask/chatgpt">Homebrew ChatGPT</a>。</p>
+<p>返回值含 <code>app</code>、<code>platform</code>、<code>manager</code>、<code>status</code>（<code>planned</code> / <code>already_installed</code> / <code>installed</code>）和 <code>verified</code>。macOS 计划另含 <code>url</code>、<code>path</code>、应用/开发者验证要求与 <code>method="macos"</code>，验证后包含 <code>version</code> 和 <code>binary</code>；Windows 保留 <code>package</code>、<code>command</code>、<code>verify_command</code>。失败或超时抛出 <code>RuntimeError</code>，CLI 非零退出；Windows 超时后先检查 Store 状态再重试。</p>
+<p>来源：<a href="https://chatgpt.com/download/">OpenAI 下载页</a>、<a href="https://github.com/openai/codex/blob/main/codex-rs/cli/src/desktop_app/mac.rs">Codex 原生安装器</a>、<a href="https://learn.chatgpt.com/docs/windows/windows-app">Windows 官方安装指引</a>。</p>
 <h2 id="codex">Codex 命令约定<a class="headerlink" href="#codex" title="Permanent link">&para;</a></h2>
 <p><code>chatup codex</code> 配置 OpenAI Codex CLI（默认 <code>~/.codex/config.toml</code> 与 <code>~/.codex/auth.json</code>；设置 <code>CODEX_HOME</code> 时使用该原生配置目录）：</p>
 <p>默认模型为 <code>gpt-5.6-terra</code>（GPT-5.6 Terra），仅在没有可用的模型配置时兜底。显式 <code>--model</code>、所选 OpenAI profile，以及未显式选择 profile 时的已有 Codex 配置、进程环境和 active profile 仍按原优先级生效；不会把用户已配置的模型强制覆盖成默认值。</p>

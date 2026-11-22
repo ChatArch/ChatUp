@@ -722,7 +722,7 @@
 </li>
 <li>
 <p><strong>ChatArch Home</strong></p>
-<p>ChatArch-managed install targets default to <code>~/.chatarch/...</code>. The native desktop installer <code>chatup chatgpt</code> leaves app and cache paths to the OS package manager.</p>
+<p>ChatArch-managed install targets default to <code>~/.chatarch/...</code>. The native desktop installer <code>chatup chatgpt</code> uses macOS Applications directories with temporary downloads under <code>~/.chatarch/cache/desktop</code> (respecting <code>CHATARCH_HOME</code>); Windows uses the Microsoft Store.</p>
 </li>
 <li>
 <p><strong>No Secret Echo</strong></p>
