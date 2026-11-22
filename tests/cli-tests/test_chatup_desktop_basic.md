@@ -60,3 +60,14 @@ chatup snipaste --yes
 
 Linux installation routes remain covered by mock tests in CI. A real Linux
 installer result must be reported separately from that coverage.
+
+## macOS Chrome metadata and direct ChatGPT acceptance
+
+On a Mac without Homebrew, install from the built wheel and run `chatup chrome`
+and `chatup chatgpt`. Chrome must succeed even when the official read-only DMG
+contains Finder metadata on `app_mode_loader`. ChatGPT must download the official
+DMG directly, using the architecture-specific source from `codex app`, and report
+the installed path and version. Verify both apps with strict deep codesign and
+their expected publisher requirements; verify ChatGPT's `com.openai.codex` bundle
+ID and Gatekeeper assessment. Repeat both commands to confirm verified reuse.
+Do not launch apps, log in, or change user settings during this acceptance.

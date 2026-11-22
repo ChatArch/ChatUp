@@ -22,7 +22,7 @@ def desktop(monkeypatch):
     return module
 
 
-@pytest.mark.parametrize("app", ["chrome", "iterm", "wetype", "doubao"])
+@pytest.mark.parametrize("app", ["chrome", "chatgpt", "iterm", "wetype", "doubao"])
 def test_mac_dry_run_does_not_need_brew_or_touch_disk(desktop, monkeypatch, app):
     monkeypatch.setattr(desktop, "_run", lambda *a, **k: pytest.fail("must not run a process"))
     monkeypatch.setattr(desktop, "_download", lambda *a: pytest.fail("must not download"))
@@ -31,7 +31,7 @@ def test_mac_dry_run_does_not_need_brew_or_touch_disk(desktop, monkeypatch, app)
     result = CliRunner().invoke(main, [app, "--dry-run"])
     assert result.exit_code == 0, result.output
     assert desktop.plan_desktop_install(app)["url"] in result.output
-    assert "Dry run" in result.output
+    assert ("预览安装" if app == "chatgpt" else "Dry run") in result.output
     assert "Installation verified" not in result.output
 
 
@@ -121,7 +121,7 @@ def mac_install(desktop, monkeypatch, tmp_path):
             for source in (tmp_path / "source").iterdir():
                 shutil.copytree(source, mount / source.name)
         elif command[0].endswith("ditto"):
-            shutil.copytree(command[1], command[2], symlinks=True)
+            shutil.copytree(command[-2], command[-1], symlinks=True)
         return subprocess.CompletedProcess(command, 0, "", "")
 
     monkeypatch.setattr(desktop, "_download", download)
@@ -130,10 +130,15 @@ def mac_install(desktop, monkeypatch, tmp_path):
     shutil.rmtree(tmp_path)
 
 
-@pytest.mark.parametrize("app", ["chrome", "iterm", "snipaste", "blender", "wetype", "doubao"])
-def test_mac_install_verifies_and_is_idempotent(desktop, mac_install, app):
+@pytest.mark.parametrize("app", ["chrome", "chatgpt", "iterm", "snipaste", "blender", "wetype", "doubao"])
+def test_mac_install_verifies_and_is_idempotent(desktop, mac_install, monkeypatch, app):
     apps, _, cache, calls = mac_install
-    first = desktop.setup_desktop_app(app)
+    if app == "chatgpt":
+        from chatup.setup.chatgpt import setup_chatgpt
+        monkeypatch.setattr(desktop.shutil, "which", lambda _: pytest.fail("must not need Homebrew"))
+        first = setup_chatgpt()
+    else:
+        first = desktop.setup_desktop_app(app)
     assert first["status"] == "installed"
     assert first["verified"] is True
     assert first["version"] == desktop.MAC_APPS[app].get("download_version", "123.4.5")
@@ -142,15 +147,64 @@ def test_mac_install_verifies_and_is_idempotent(desktop, mac_install, app):
     assert any(command[0].endswith("codesign") and desktop.MAC_APPS[app]["team_id"] in command[-2] for command in calls)
     assert all(command[-2].startswith("=anchor ") for command in calls if command[0].endswith("codesign"))
     if desktop.MAC_APPS[app].get("notarized"):
-        assert sum(command[0].endswith("spctl") for command in calls) == 3
+        assert sum(command[0].endswith("spctl") for command in calls) == 2
     if desktop.MAC_APPS[app]["format"] == "dmg":
         assert calls[-1][1] == "detach"
     calls.clear()
     args = ["macos", "--app", app, "-I"] if app in {"snipaste", "blender"} else [app]
     repeated = CliRunner().invoke(main, args)
     assert repeated.exit_code == 0, repeated.output
-    assert "Already installed" in repeated.output
+    assert ("已安装" if app == "chatgpt" else "Already installed") in repeated.output
     assert all(command[0].endswith(("codesign", "spctl")) for command in calls)
+
+
+def test_chrome_dmg_metadata_is_excluded_before_strict_verification(desktop, mac_install, monkeypatch):
+    apps, _, cache, calls = mac_install
+    original = desktop._run
+
+    def run(command, **kwargs):
+        if command[0].endswith("codesign"):
+            assert "volume" not in Path(command[-1]).parts, "read-only DMG carries Finder metadata"
+            assert any(c[0].endswith("ditto") for c in calls)
+            assert {"--verify", "--deep", "--strict", "-R"} <= set(command)
+            assert 'certificate leaf[subject.OU] = "EQHXZ8M8AV"' in command[-2]
+        if command[0].endswith("ditto"):
+            assert {"--norsrc", "--noextattr", "--qtn"} <= set(command)
+        return original(command, **kwargs)
+
+    monkeypatch.setattr(desktop, "_run", run)
+    result = desktop.setup_desktop_app("chrome")
+    assert result["status"] == "installed" and result["verified"] is True
+    assert (apps / "Google Chrome.app").is_dir()
+    assert not list(cache.iterdir())
+
+
+def test_chrome_tampered_staged_copy_is_rejected(desktop, mac_install, monkeypatch):
+    apps, _, cache, calls = mac_install
+    original = desktop._run
+
+    def run(command, **kwargs):
+        if command[0].endswith("codesign") and Path(command[-1]).parent != apps:
+            raise RuntimeError("staged signature rejected")
+        return original(command, **kwargs)
+
+    monkeypatch.setattr(desktop, "_run", run)
+    with pytest.raises(RuntimeError, match="staged signature rejected"):
+        desktop.setup_desktop_app("chrome")
+    assert not list(apps.iterdir())
+    assert not list(cache.iterdir())
+    assert any(command[0].endswith("ditto") for command in calls)
+    assert calls[-1][1] == "detach"
+
+
+def test_chatgpt_classic_bundle_is_preserved_and_rejected(desktop, mac_install):
+    apps, _, cache, calls = mac_install
+    target = apps / "ChatGPT.app"
+    make_bundle(target, {**desktop.MAC_APPS["chatgpt"], "bundle_id": "com.openai.chat"})
+    result = CliRunner().invoke(main, ["chatgpt"])
+    assert result.exit_code != 0 and "bundle identity" in result.output
+    assert plistlib.loads((target / "Contents/Info.plist").read_bytes())["CFBundleIdentifier"] == "com.openai.chat"
+    assert not calls and not list(cache.iterdir())
 
 
 def test_blender_dry_run_has_pinned_official_digest(desktop, monkeypatch):
@@ -201,7 +255,7 @@ def test_blender_failed_verification_or_copy_detaches_image(desktop, mac_install
     assert calls[-1][1] == "detach"
 
 
-@pytest.mark.parametrize("app", ["iterm", "doubao"])
+@pytest.mark.parametrize("app", ["chatgpt", "iterm", "doubao"])
 def test_mac_reuses_user_application(desktop, mac_install, app):
     _, user_apps, _, calls = mac_install
     bundle = desktop.MAC_APPS[app]["bundle"]
@@ -212,7 +266,7 @@ def test_mac_reuses_user_application(desktop, mac_install, app):
     assert not any(command[0] == "download" for command in calls)
 
 
-@pytest.mark.parametrize("app", ["iterm", "doubao"])
+@pytest.mark.parametrize("app", ["chatgpt", "iterm", "doubao"])
 def test_mac_falls_back_to_user_applications(desktop, mac_install, monkeypatch, app):
     apps, user_apps, _, _ = mac_install
     real_access = desktop.os.access
@@ -221,7 +275,7 @@ def test_mac_falls_back_to_user_applications(desktop, mac_install, monkeypatch, 
     assert result["path"] == str(user_apps / desktop.MAC_APPS[app]["bundle"])
 
 
-@pytest.mark.parametrize("app", ["iterm", "doubao"])
+@pytest.mark.parametrize("app", ["chatgpt", "iterm", "doubao"])
 def test_mac_never_overwrites_invalid_existing_app(desktop, mac_install, app):
     apps, _, _, calls = mac_install
     target = apps / desktop.MAC_APPS[app]["bundle"]
@@ -235,7 +289,7 @@ def test_mac_never_overwrites_invalid_existing_app(desktop, mac_install, app):
 
 
 @pytest.mark.parametrize("failure", ["download", "signature", "copy", "timeout", "minimum_os"])
-@pytest.mark.parametrize("app", ["chrome", "doubao"])
+@pytest.mark.parametrize("app", ["chrome", "chatgpt", "doubao"])
 def test_mac_failures_clean_staging_and_do_not_claim_success(desktop, mac_install, monkeypatch, failure, app):
     apps, _, cache, calls = mac_install
     original = desktop._run

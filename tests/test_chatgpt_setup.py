@@ -32,11 +32,20 @@ def test_chatgpt_in_real_tree(flag):
     assert "chatgpt" in result.output
 
 
-def test_macos_plan_uses_current_official_cask(monkeypatch):
-    plan = desktop(monkeypatch).plan_chatgpt_install()
-    assert plan["command"] == ["brew", "install", "--cask", "homebrew/cask/chatgpt"]
-    assert plan["verify_command"] == ["brew", "list", "--cask", "--versions", "homebrew/cask/chatgpt"]
-    assert plan["package"] == "homebrew/cask/chatgpt"
+@pytest.mark.parametrize("machine,artifact", [
+    ("arm64", "Codex.dmg"), ("aarch64", "Codex.dmg"),
+    ("x86_64", "Codex-latest-x64.dmg"), ("amd64", "Codex-latest-x64.dmg"),
+])
+def test_macos_plan_uses_official_native_dmg(monkeypatch, machine, artifact):
+    module = desktop(monkeypatch)
+    monkeypatch.setattr(module.platform, "machine", lambda: machine)
+    monkeypatch.setattr(module.platform, "mac_ver", lambda: ("15.0", (), ""))
+    plan = module.plan_chatgpt_install()
+    assert plan["url"] == f"https://persistent.oaistatic.com/codex-app-prod/{artifact}"
+    assert plan["method"] == "macos" and plan["format"] == "dmg"
+    assert plan["bundle"] == "ChatGPT.app" and plan["bundle_id"] == "com.openai.codex"
+    assert plan["team_id"] == "2DC432GLL2" and plan["notarized"] is True
+    assert "brew" not in str(plan)
     assert plan["app"] == "ChatGPT (includes Codex)"
 
 
@@ -75,11 +84,12 @@ def test_dry_run_has_no_install_or_dependency_side_effects(monkeypatch, system):
     cli = CliRunner().invoke(main, ["chatgpt", "--dry-run"])
     assert cli.exit_code == 0, cli.output
     assert "ChatGPT" in cli.output and "Codex" in cli.output
-    assert "install" in cli.output
+    assert ("Codex.dmg" if system == "Darwin" and module.platform.machine() in {"arm64", "aarch64"}
+            else "Codex-latest-x64.dmg" if system == "Darwin" else "install") in cli.output
     assert "安装完成" not in cli.output
 
 
-@pytest.mark.parametrize("system, manager", [("Darwin", "brew"), ("Windows", "winget")])
+@pytest.mark.parametrize("system, manager", [("Windows", "winget")])
 def test_missing_manager_is_actionable(monkeypatch, system, manager):
     module = desktop(monkeypatch, system)
     monkeypatch.setattr(module.shutil, "which", lambda _: None)
@@ -89,7 +99,7 @@ def test_missing_manager_is_actionable(monkeypatch, system, manager):
     assert "https://" in result.output
 
 
-@pytest.mark.parametrize("system, listing", [("Darwin", "chatgpt 26.908.70816\n"), ("Windows", "ChatGPT 9PLM9XGG6VKS msstore\n")])
+@pytest.mark.parametrize("system, listing", [("Windows", "ChatGPT 9PLM9XGG6VKS msstore\n")])
 @pytest.mark.parametrize("already_installed", [False, True])
 def test_installer_uses_resolved_manager_and_reads_back(monkeypatch, system, listing, already_installed):
     module = desktop(monkeypatch, system)
@@ -118,8 +128,8 @@ def test_installer_uses_resolved_manager_and_reads_back(monkeypatch, system, lis
 
 @pytest.mark.parametrize("failure", ["nonzero", "timeout", "oserror", "missing_after_install"])
 def test_install_errors_do_not_report_success(monkeypatch, failure):
-    module = desktop(monkeypatch)
-    monkeypatch.setattr(module.shutil, "which", lambda _: "/brew")
+    module = desktop(monkeypatch, "Windows")
+    monkeypatch.setattr(module.shutil, "which", lambda _: "/winget")
 
     def run(args, **kwargs):
         if args[1] == "list":
@@ -137,24 +147,24 @@ def test_install_errors_do_not_report_success(monkeypatch, failure):
     assert "Error:" in result.output
 
 
-def test_legacy_chatgpt_cask_is_not_reported_as_new_app(monkeypatch):
-    module = desktop(monkeypatch)
-    monkeypatch.setattr(module.shutil, "which", lambda _: "/brew")
-
-    def run(args, **kwargs):
-        assert args[1] == "list", "must not migrate or upgrade a Classic installation"
-        return subprocess.CompletedProcess(args, 0, "chatgpt 1.2026.182\n", "")
-
-    monkeypatch.setattr(module.subprocess, "run", run)
-    with pytest.raises(RuntimeError, match="Classic"):
+def test_empty_store_listing_does_not_count_as_installed(monkeypatch):
+    module = desktop(monkeypatch, "Windows")
+    monkeypatch.setattr(module.shutil, "which", lambda _: "/winget")
+    monkeypatch.setattr(module.subprocess, "run", lambda args, **kwargs: subprocess.CompletedProcess(args, 0, "", ""))
+    with pytest.raises(RuntimeError, match="verification"):
         module.setup_chatgpt()
 
 
-def test_empty_brew_listing_does_not_count_as_installed(monkeypatch):
+@pytest.mark.parametrize("machine,version,error", [
+    ("ppc", "15.0", "architecture"), ("arm64", "12.7", "macOS 13.0"),
+])
+def test_macos_unsupported_hosts_fail_before_any_side_effect(monkeypatch, machine, version, error):
     module = desktop(monkeypatch)
-    monkeypatch.setattr(module.shutil, "which", lambda _: "/brew")
-    monkeypatch.setattr(module.subprocess, "run", lambda args, **kwargs: subprocess.CompletedProcess(args, 0, "", ""))
-    with pytest.raises(RuntimeError, match="verification"):
+    monkeypatch.setattr(module.platform, "machine", lambda: machine)
+    monkeypatch.setattr(module.platform, "mac_ver", lambda: (version, (), ""))
+    monkeypatch.setattr(module.shutil, "which", lambda _: pytest.fail("must not look up brew"))
+    monkeypatch.setattr(module.subprocess, "run", lambda *a, **k: pytest.fail("must not execute anything"))
+    with pytest.raises(RuntimeError, match=error):
         module.setup_chatgpt()
 
 

@@ -35,8 +35,15 @@ chatup iterm --dry-run
   list simulated apps in Spotlight or the application launcher after testing.
 - Verify existing apps in `/Applications` or `~/Applications` before downloading.
 - A fresh install downloads official HTTPS artifacts, mounts the DMG or safely
-  extracts the ZIP, verifies the publisher signature and bundle, copies to a
-  staging directory and moves the verified app into place.
+  extracts the ZIP, validates bundle identity, then copies to a staging directory
+  without resource forks or Finder metadata. Preserve quarantine information.
+  Verify the staged app's publisher signature strictly before moving it into place.
+- The official Chrome DMG may carry Finder metadata on `app_mode_loader`.
+  Never attempt to modify the read-only image or weaken codesign checks to
+  accommodate it. Reject tampered staged apps and clean staging on failure.
+- ChatGPT uses the official architecture-specific DMGs used by `codex app`,
+  verifies `com.openai.codex` and OpenAI's Developer ID, and never needs Homebrew.
+  Reject Classic bundles and preserve existing installations without an upgrade.
 - Prefer writable `/Applications`; otherwise use `~/Applications`, without sudo.
 - Detach mounted images and remove temporary staging after success or failure.
 - Never overwrite an existing invalid bundle. Repeated execution reuses a valid

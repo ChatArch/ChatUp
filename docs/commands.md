@@ -196,7 +196,7 @@ chatup snipaste --yes        # Windows 明确接受来源和包协议
 
 三个命令支持 `--log-level DEBUG|INFO|WARNING|ERROR`；没有必填参数，不会触发补参交互。`--dry-run` 只检查本机平台/路径并打印计划，不联网、不执行安装程序、不写目录。
 
-macOS 优先复用 `/Applications` 或 `~/Applications` 中已有的应用，否则安装到可写的 `/Applications`，不可写时回退到 `~/Applications`。下载后校验 bundle ID、版本、可执行文件、最低 macOS 版本和官方 Developer ID 签名，再暂存复制并原子移入目标位置。已有异常应用会报错，不覆盖；不会自动升级、启动、登录或更改默认浏览器/终端。安装缓存暂存于 `~/.chatarch/cache/desktop`（遵循 `CHATARCH_HOME`），完成后清理并卸载 DMG。
+macOS 优先复用 `/Applications` 或 `~/Applications` 中已有的应用，否则安装到可写的 `/Applications`，不可写时回退到 `~/Applications`。下载后校验 bundle ID、版本、可执行文件和最低 macOS 版本；暂存复制时排除资源叉与扩展属性，保留 quarantine 信息，再对暂存应用执行严格、递归的官方 Developer ID 签名验证，成功后才原子移入目标位置。这可处理 Chrome 官方 DMG 自带的 Finder 元数据，无需修改只读镜像或放宽签名检查。已有异常应用会报错，不覆盖；不会自动升级、启动、登录或更改默认浏览器/终端。安装缓存暂存于 `~/.chatarch/cache/desktop`（遵循 `CHATARCH_HOME`），完成后清理并卸载 DMG。
 
 Linux 需要对应系统包管理器；普通用户必须显式提供 `--sudo`，否则安装前返回操作提示，root 可直接安装。包管理器负责依赖和系统要求，安装后回读 `google-chrome --version`。Windows 安装需要 [WinGet](https://aka.ms/getwinget)，安装前后按精确包 ID 回读 `Google.Chrome.EXE` 或 `liule.Snipaste`，不自动升级已有应用。Chrome 使用带版本号的官方 EXE，保留 WinGet 哈希校验，避免浮动 MSI 下载地址与清单不同步；安装后还会验证 `chrome.exe` 的有效 Google LLC 签名、产品身份及版本。标准用户或系统目录中已有的有效 Chrome 可直接复用，无需重新安装；无效程序或仅有登记记录而缺少程序时返回错误。
 
@@ -257,17 +257,19 @@ result = setup_desktop_app("doubao", dry_run=True)
 
 | 平台 | 安装来源 | 前提 |
 | --- | --- | --- |
-| macOS | `brew install --cask homebrew/cask/chatgpt` | 已安装 [Homebrew](https://brew.sh/)，系统与架构要求由当前 cask 检查 |
+| macOS | 与 `codex app` 相同的 OpenAI 官方 DMG，按 Apple Silicon/Intel 选择 | macOS 13+，无需 Homebrew 或 sudo |
 | Windows | `winget install --id 9PLM9XGG6VKS --exact --source msstore` | PATH 中有 WinGet，允许访问 Microsoft Store |
 | Linux | [官方 Linux preview 安装说明](https://learn.chatgpt.com/docs/linux/linux-app) | ChatUp 暂不自动化 Linux 安装，不执行 sudo、软件源配置或整机升级 |
 
 ```bash
-chatup chatgpt --dry-run  # 只显示当前系统的安装命令，不联网、不下载
+chatup chatgpt --dry-run  # 只显示下载地址/路径或 Store 命令，不联网、不下载
 chatup chatgpt            # 安装桌面应用
 chatup chatgpt --yes      # Windows：明确接受 Microsoft Store 来源和包协议
 ```
 
-Windows 使用非交互安装；首次安装若需要接受 Store 协议，请使用 `--yes`。macOS 上该标志不改变安装行为。缺少包管理器时返回安装指引，不自动 bootstrap Homebrew/WinGet。已有包管理器登记的安装会跳过，不自动升级（Windows 使用 `--no-upgrade`）；若 macOS 仍登记旧 `1.x` ChatGPT Classic，会明确要求手动迁移，而不冒充新版安装成功。手动安装导致冲突时交给包管理器报错，不强制覆盖。
+macOS 的 Apple Silicon 使用 `https://persistent.oaistatic.com/codex-app-prod/Codex.dmg`，Intel 使用 `https://persistent.oaistatic.com/codex-app-prod/Codex-latest-x64.dmg`。下载并暂存官方 `ChatGPT.app`，复制时排除资源叉/Finder 元数据并保留 quarantine，验证 bundle ID `com.openai.codex`、可执行文件、版本、最低 macOS、OpenAI Developer ID Team `2DC432GLL2`、严格递归签名与 Gatekeeper 公证后才安装。优先使用可写的 `/Applications`，否则回退到 `~/Applications`。已有有效应用直接验证并复用，包括手动安装与更新版本；无效应用或 Classic 保留并报错。安装缓存暂存于 `~/.chatarch/cache/desktop`（遵循 `CHATARCH_HOME`），成功或失败后清理暂存并卸载 DMG。
+
+Windows 使用非交互安装；首次安装若需要接受 Store 协议，请使用 `--yes`，macOS 上该标志不改变安装行为。缺少 WinGet 时返回安装指引。已有 Store 登记的安装会跳过，不自动升级（`--no-upgrade`）。
 
 成功表示包管理器安装记录已经回读确认，不代表应用已启动或登录。应用目录、下载缓存和运行数据由 Homebrew/Microsoft Store 与官方应用管理，使用原生平台布局（macOS 通常为 `/Applications/ChatGPT.app`），而不是 ChatArch 服务目录。ChatUp 不写桌面应用登录态，不更改 Codex CLI 配置；安装后请手动打开 ChatGPT 并登录。
 
@@ -281,9 +283,9 @@ result = setup_chatgpt(dry_run=True)
 # 真正安装：setup_chatgpt(yes=True)
 ```
 
-返回值含 `app`、`platform`、`manager`、`package`、`command`、`verify_command`；安装 API 另含 `status`（`planned` / `already_installed` / `installed`）和 `verified`。失败或超时抛出 `RuntimeError`，CLI 非零退出；超时后先检查包管理器状态再重试。
+返回值含 `app`、`platform`、`manager`、`status`（`planned` / `already_installed` / `installed`）和 `verified`。macOS 计划另含 `url`、`path`、应用/开发者验证要求与 `method="macos"`，验证后包含 `version` 和 `binary`；Windows 保留 `package`、`command`、`verify_command`。失败或超时抛出 `RuntimeError`，CLI 非零退出；Windows 超时后先检查 Store 状态再重试。
 
-来源：[OpenAI 下载页](https://chatgpt.com/download/)、[Windows 官方安装指引](https://learn.chatgpt.com/docs/windows/windows-app)、[Homebrew ChatGPT](https://formulae.brew.sh/cask/chatgpt)。
+来源：[OpenAI 下载页](https://chatgpt.com/download/)、[Codex 原生安装器](https://github.com/openai/codex/blob/main/codex-rs/cli/src/desktop_app/mac.rs)、[Windows 官方安装指引](https://learn.chatgpt.com/docs/windows/windows-app)。
 
 ## Codex 命令约定
 

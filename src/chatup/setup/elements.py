@@ -135,7 +135,16 @@ def chatgpt_setup(dry_run, yes):
         raise click.ClickException(str(exc)) from exc
     click.echo(result["app"])
     if result["status"] == "planned":
-        click.echo("预览安装命令（未执行）：" + " ".join(result["command"]))
+        if result.get("method") == "macos":
+            click.echo(f"预览安装（未执行）：{result['url']} -> {result['path']}")
+        else:
+            click.echo("预览安装命令（未执行）：" + " ".join(result["command"]))
+    elif result.get("method") == "macos":
+        click.echo(f"{result['path']} ({result['version']})")
+        if result["status"] == "already_installed":
+            click.echo("已安装，并已验证应用身份、签名与公证。")
+        else:
+            click.echo("安装完成，已验证应用身份、签名与公证。请手动打开 ChatGPT 并登录。")
     elif result["status"] == "already_installed":
         click.echo("已安装，并已通过包管理器回读确认；未升级或启动应用。")
     else:

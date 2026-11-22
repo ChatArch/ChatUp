@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.28
+
+### Fixed
+- Fix macOS Chrome installation when the official DMG includes Finder metadata: copy into staging without resource forks/extended attributes, retain quarantine, and strictly verify the staged publisher signature before placement.
+- Install the new ChatGPT desktop app directly from OpenAI's architecture-specific DMGs, as used by `codex app`, without requiring Homebrew. Verify bundle identity, OpenAI signature and notarization; reuse existing valid apps without upgrades. Windows retains the official Microsoft Store path.
+
 ## 0.2.27
 
 ### Fixed

@@ -196,7 +196,7 @@ chatup snipaste --yes        # Windows: accept source and package agreements
 
 All three commands accept `--log-level DEBUG|INFO|WARNING|ERROR`. There are no required inputs or input prompts. `--dry-run` only reads local platform/paths and prints the plan, without network requests, installer processes or directory writes.
 
-macOS reuses existing apps in `/Applications` or `~/Applications`. New apps go to writable `/Applications`, falling back to `~/Applications`. Downloads are checked for bundle ID, version, executable, minimum macOS version and official Developer ID signature, then copied into staging and renamed into place. Invalid existing apps cause an error and are not overwritten. Commands do not upgrade, launch, log in, or change browser/terminal defaults. Temporary downloads use `~/.chatarch/cache/desktop` (respecting `CHATARCH_HOME`); staging is cleaned and DMGs detached afterward.
+macOS reuses existing apps in `/Applications` or `~/Applications`. New apps go to writable `/Applications`, falling back to `~/Applications`. Downloads are checked for bundle ID, version, executable and minimum macOS version, then copied into staging without resource forks or extended attributes, retaining quarantine information. The staged copy must pass strict, deep official Developer ID signature verification before being renamed into place. This handles Finder metadata shipped in the official Chrome DMG without changing the read-only image or weakening signature checks. Invalid existing apps cause an error and are not overwritten. Commands do not upgrade, launch, log in, or change browser/terminal defaults. Temporary downloads use `~/.chatarch/cache/desktop` (respecting `CHATARCH_HOME`); staging is cleaned and DMGs detached afterward.
 
 Linux needs a supported package manager. Non-root users must explicitly pass `--sudo`; otherwise installation stops with instructions. Root may install directly. The package manager resolves dependencies/system requirements, and `google-chrome --version` verifies the result. Windows installation requires [WinGet](https://aka.ms/getwinget); exact `Google.Chrome.EXE` or `liule.Snipaste` package records are checked before and after installation, without upgrading existing apps. Chrome uses a versioned official EXE with WinGet hash verification intact, avoiding drift between a floating MSI URL and its manifest. Its installed `chrome.exe` must also have a valid Google LLC signature, expected product identity and version. Valid existing user/machine Chrome installations in standard directories are reused without reinstallation; invalid executables or records without executables are errors.
 
@@ -257,17 +257,19 @@ Plans include `app`, `platform`, `url`, `path` and verification requirements. In
 
 | Platform | Install source | Prerequisites |
 | --- | --- | --- |
-| macOS | `brew install --cask homebrew/cask/chatgpt` | Existing [Homebrew](https://brew.sh/); the current cask checks OS and CPU requirements |
+| macOS | Official OpenAI DMG used by `codex app`, selected for Apple Silicon or Intel | macOS 13+; no Homebrew or sudo |
 | Windows | `winget install --id 9PLM9XGG6VKS --exact --source msstore` | WinGet on PATH and Microsoft Store access |
 | Linux | [Official Linux preview instructions](https://learn.chatgpt.com/docs/linux/linux-app) | Not automated by ChatUp; no sudo, repository configuration or full-system upgrade |
 
 ```bash
-chatup chatgpt --dry-run  # Show the current OS install command; no network/download
+chatup chatgpt --dry-run  # Show the download/path or Store command; no network/download
 chatup chatgpt            # Install the desktop app
 chatup chatgpt --yes      # Windows: explicitly accept Store source/package agreements
 ```
 
-Windows installation is non-interactive. Use `--yes` when first-time Store agreements need acceptance. This flag does not change macOS behavior. Missing package managers produce installation guidance instead of bootstrapping Homebrew/WinGet. A package-manager-registered installation is skipped, not upgraded (`--no-upgrade` on Windows). A registered legacy `1.x` ChatGPT Classic cask produces a manual-migration error instead of reporting the new app as installed. Conflicts with manually installed apps remain package-manager errors; ChatUp does not force an overwrite.
+On macOS, Apple Silicon uses `https://persistent.oaistatic.com/codex-app-prod/Codex.dmg`; Intel uses `https://persistent.oaistatic.com/codex-app-prod/Codex-latest-x64.dmg`. Download and stage the official `ChatGPT.app`, exclude resource forks/Finder metadata while retaining quarantine, then verify bundle ID `com.openai.codex`, executable, version, minimum macOS, OpenAI Developer ID Team `2DC432GLL2`, strict deep signature and Gatekeeper notarization before placement. Prefer writable `/Applications`, falling back to `~/Applications`. Verify and reuse valid existing apps, including manually installed apps and newer versions. Invalid or Classic bundles are preserved and rejected. Temporary downloads use `~/.chatarch/cache/desktop`, respecting `CHATARCH_HOME`, and are cleaned with the mounted DMG after success or failure.
+
+Windows installation is non-interactive. Use `--yes` when first-time Store agreements need acceptance; this flag does not change macOS behavior. Missing WinGet produces installation guidance. Registered Store installations are skipped, not upgraded (`--no-upgrade`).
 
 Success means the package manager installation record was read back, not that the app was launched or authenticated. Homebrew/Microsoft Store and the official app own application paths, caches and runtime data using native layouts (typically `/Applications/ChatGPT.app` on macOS), rather than ChatArch service directories. ChatUp does not write desktop login state or change Codex CLI configuration. Open ChatGPT and sign in manually after installation.
 
@@ -281,9 +283,9 @@ result = setup_chatgpt(dry_run=True)
 # Actual installation: setup_chatgpt(yes=True)
 ```
 
-Results include `app`, `platform`, `manager`, `package`, `command`, and `verify_command`. The install API adds `status` (`planned` / `already_installed` / `installed`) and `verified`. Failures/timeouts raise `RuntimeError` and produce a nonzero CLI exit. Check package-manager state before retrying after a timeout.
+Results include `app`, `platform`, `manager`, `status` (`planned` / `already_installed` / `installed`) and `verified`. macOS plans add `url`, `path`, bundle/publisher requirements and `method="macos"`; verified installs add `version` and `binary`. Windows plans retain `package`, `command` and `verify_command`. Failures/timeouts raise `RuntimeError` and produce a nonzero CLI exit. Check Store state before retrying a Windows timeout.
 
-Sources: [OpenAI downloads](https://chatgpt.com/download/), [official Windows instructions](https://learn.chatgpt.com/docs/windows/windows-app), [Homebrew ChatGPT](https://formulae.brew.sh/cask/chatgpt).
+Sources: [OpenAI downloads](https://chatgpt.com/download/), [native Codex app installer](https://github.com/openai/codex/blob/main/codex-rs/cli/src/desktop_app/mac.rs), [official Windows instructions](https://learn.chatgpt.com/docs/windows/windows-app).
 
 ## Codex Command Contract
 

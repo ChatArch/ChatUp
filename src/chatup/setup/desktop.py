@@ -32,6 +32,21 @@ MAC_APPS = {
         "url": "https://dl.google.com/chrome/mac/universal/stable/GGRO/googlechrome.dmg",
         "format": "dmg",
     },
+    "chatgpt": {
+        "app": "ChatGPT (includes Codex)",
+        "bundle": "ChatGPT.app",
+        "bundle_id": "com.openai.codex",
+        "team_id": "2DC432GLL2",
+        # Official native installer sources used by `codex app`.
+        "url": "https://persistent.oaistatic.com/codex-app-prod/Codex.dmg",
+        "architecture_urls": {
+            "arm64": "https://persistent.oaistatic.com/codex-app-prod/Codex.dmg",
+            "x86_64": "https://persistent.oaistatic.com/codex-app-prod/Codex-latest-x64.dmg",
+        },
+        "format": "dmg",
+        "minimum_macos": "13.0",
+        "notarized": True,
+    },
     "iterm": {
         "app": "iTerm2",
         "bundle": "iTerm.app",
@@ -133,7 +148,7 @@ def plan_desktop_install(app: str, *, sudo: bool = False, yes: bool = False) -> 
     spec = MAC_APPS[app]
     system = platform.system()
     plan = {"app": spec["app"], "platform": system}
-    if system != "Darwin" and app in {"iterm", "blender", "wetype", "doubao", "uuremote"}:
+    if system != "Darwin" and app in {"chatgpt", "iterm", "blender", "wetype", "doubao", "uuremote"}:
         raise RuntimeError(f"{spec['app']} is supported on macOS only; current platform: {system}.")
     if system not in {"Darwin", "Windows"} and app == "snipaste":
         raise RuntimeError(f"{spec['app']} is supported on macOS and Windows only; current platform: {system}.")
@@ -236,7 +251,7 @@ def _cache_dir() -> Path:
     return cache
 
 
-def _mac_bundle(plan: dict[str, Any], path: Path) -> dict[str, str]:
+def _mac_bundle_info(plan: dict[str, Any], path: Path) -> dict[str, str]:
     try:
         with (path / "Contents" / "Info.plist").open("rb") as stream:
             info = plistlib.load(stream)
@@ -254,11 +269,16 @@ def _mac_bundle(plan: dict[str, Any], path: Path) -> dict[str, str]:
                 raise ValueError(f"requires macOS {minimum} or later; current: {current}")
     except (OSError, ValueError, plistlib.InvalidFileException) as exc:
         raise RuntimeError(f"Cannot verify {plan['app']} at {path}: {exc}. Existing apps are never overwritten.") from exc
+    return {"path": str(path), "binary": str(binary), "version": str(version)}
+
+
+def _mac_bundle(plan: dict[str, Any], path: Path) -> dict[str, str]:
+    details = _mac_bundle_info(plan, path)
     requirement = f'=anchor apple generic and certificate leaf[subject.OU] = "{plan["team_id"]}"'
     _run(["/usr/bin/codesign", "--verify", "--deep", "--strict", "-R", requirement, str(path)], timeout=120)
     if plan.get("notarized"):
         _run(["/usr/sbin/spctl", "--assess", "--type", "execute", str(path)], timeout=120)
-    return {"path": str(path), "binary": str(binary), "version": str(version)}
+    return details
 
 
 def _install_macos(plan: dict[str, Any]) -> dict[str, Any]:
@@ -289,17 +309,19 @@ def _install_macos(plan: dict[str, Any]) -> dict[str, Any]:
         else:
             source = work / "unpacked" / plan["bundle"]
             safe_extract_zip(archive, source.parent, label=plan["app"])
-        logger.info("Verifying %s publisher signature and app bundle", plan["app"])
-        source_details = _mac_bundle(plan, source)
-        if plan.get("download_version") and source_details["version"] != plan["download_version"]:
-            raise RuntimeError(f"Unexpected downloaded {plan['app']} version: {source_details['version']}.")
+        _mac_bundle_info(plan, source)
         target.parent.mkdir(parents=True, exist_ok=True)
         # Stage on the target filesystem so the final app appears in one rename.
         with tempfile.TemporaryDirectory(prefix=".chatup-", dir=target.parent) as staging:
             staged = Path(staging) / plan["bundle"]
             logger.info("Installing %s", target)
-            _run(["/usr/bin/ditto", str(source), str(staged)])
-            _mac_bundle(plan, staged)
+            # Read-only DMGs may carry Finder metadata rejected by strict codesign.
+            # Exclude it from the copy while retaining quarantine information.
+            _run(["/usr/bin/ditto", "--norsrc", "--noextattr", "--qtn", str(source), str(staged)])
+            logger.info("Verifying %s publisher signature and app bundle", plan["app"])
+            staged_details = _mac_bundle(plan, staged)
+            if plan.get("download_version") and staged_details["version"] != plan["download_version"]:
+                raise RuntimeError(f"Unexpected downloaded {plan['app']} version: {staged_details['version']}.")
             if target.exists() or target.is_symlink():
                 raise RuntimeError(f"App appeared during installation; refusing to overwrite {target}.")
             staged.rename(target)
