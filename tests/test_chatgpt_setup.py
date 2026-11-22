@@ -11,6 +11,9 @@ from chatup.cli import main
 def desktop(monkeypatch, system="Darwin"):
     module = importlib.import_module("chatup.setup.chatgpt")
     monkeypatch.setattr(module.platform, "system", lambda: system)
+    if system == "Darwin":
+        monkeypatch.setattr(module.platform, "machine", lambda: "arm64")
+        monkeypatch.setattr(module.platform, "mac_ver", lambda: ("15.0", (), ""))
     return module
 
 
@@ -84,8 +87,7 @@ def test_dry_run_has_no_install_or_dependency_side_effects(monkeypatch, system):
     cli = CliRunner().invoke(main, ["chatgpt", "--dry-run"])
     assert cli.exit_code == 0, cli.output
     assert "ChatGPT" in cli.output and "Codex" in cli.output
-    assert ("Codex.dmg" if system == "Darwin" and module.platform.machine() in {"arm64", "aarch64"}
-            else "Codex-latest-x64.dmg" if system == "Darwin" else "install") in cli.output
+    assert ("Codex.dmg" if system == "Darwin" else "install") in cli.output
     assert "安装完成" not in cli.output
 
 
