@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 import platform
 import re
 import shutil
@@ -40,8 +40,9 @@ def _package_entry(package: Path) -> Path | None:
     binary = data.get("bin")
     relative = binary.get("gemini") if isinstance(binary, dict) else binary
     if (data.get("name") != NPM_PACKAGE or not isinstance(relative, str)
-            or not relative or Path(relative).is_absolute() or ".." in Path(relative).parts
-            or "\\" in relative):
+            or not relative or PurePosixPath(relative).is_absolute()
+            or PureWindowsPath(relative).drive or PureWindowsPath(relative).root
+            or ".." in PurePosixPath(relative).parts or "\\" in relative):
         raise RuntimeError(f"Invalid official Gemini CLI package metadata: {metadata}.")
     entry = package / relative
     if not entry.is_file():

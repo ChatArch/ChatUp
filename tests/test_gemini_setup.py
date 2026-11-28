@@ -216,6 +216,9 @@ def test_npm_and_verification_failures_never_claim_installation(setup, monkeypat
     [], {"name": "other-tool", "bin": {"gemini": "index.js"}},
     {"name": gemini.NPM_PACKAGE, "bin": {"gemini": "../outside.js"}},
     {"name": gemini.NPM_PACKAGE, "bin": {"gemini": "/outside.js"}},
+    {"name": gemini.NPM_PACKAGE, "bin": {"gemini": "C:/outside.js"}},
+    {"name": gemini.NPM_PACKAGE, "bin": {"gemini": "C:outside.js"}},
+    {"name": gemini.NPM_PACKAGE, "bin": {"gemini": "//server/share/bin.js"}},
 ])
 def test_invalid_existing_package_metadata_is_preserved(setup, monkeypatch, metadata):
     _, root = setup
