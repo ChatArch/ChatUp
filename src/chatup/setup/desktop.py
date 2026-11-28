@@ -22,6 +22,34 @@ from chatup.utils.custom_logger import setup_logger
 logger = logging.getLogger(__name__)
 
 MAC_APPS = {
+    "gemini": {
+        "app": "Gemini",
+        "bundle": "Gemini.app",
+        "bundle_id": "com.google.GeminiMacOS",
+        "team_id": "EQHXZ8M8AV",
+        # Official native Gemini app, separate from Antigravity App and agy.
+        "url": "https://gemini.google/download/mac/",
+        "format": "dmg",
+        "architectures": ("arm64", "aarch64"),
+        "minimum_macos": "15.0",
+        "notarized": True,
+    },
+    "antigravity": {
+        "app": "Antigravity App",
+        "bundle": "Antigravity.app",
+        "bundle_id": "com.google.antigravity",
+        "team_id": "EQHXZ8M8AV",
+        # Antigravity App from https://antigravity.google/download, not the IDE.
+        "url": "https://storage.googleapis.com/antigravity-public/antigravity-hub/2.36.0-5596661662220288/darwin-arm/Antigravity.dmg",
+        "architecture_urls": {
+            "arm64": "https://storage.googleapis.com/antigravity-public/antigravity-hub/2.36.0-5596661662220288/darwin-arm/Antigravity.dmg",
+            "x86_64": "https://storage.googleapis.com/antigravity-public/antigravity-hub/2.36.0-5596661662220288/darwin-x64/Antigravity.dmg",
+        },
+        "format": "dmg",
+        "download_version": "2.36.0",
+        "minimum_macos": "13.0",
+        "notarized": True,
+    },
     "chrome": {
         "app": "Google Chrome",
         "winget_id": "Google.Chrome.EXE",
@@ -148,7 +176,7 @@ def plan_desktop_install(app: str, *, sudo: bool = False, yes: bool = False) -> 
     spec = MAC_APPS[app]
     system = platform.system()
     plan = {"app": spec["app"], "platform": system}
-    if system != "Darwin" and app in {"chatgpt", "iterm", "blender", "wetype", "doubao", "uuremote"}:
+    if system != "Darwin" and app in {"gemini", "antigravity", "chatgpt", "iterm", "blender", "wetype", "doubao", "uuremote"}:
         raise RuntimeError(f"{spec['app']} is supported on macOS only; current platform: {system}.")
     if system not in {"Darwin", "Windows"} and app == "snipaste":
         raise RuntimeError(f"{spec['app']} is supported on macOS and Windows only; current platform: {system}.")

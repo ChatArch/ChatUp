@@ -121,6 +121,28 @@ chatup doubao
 
 Install official Doubao 2.34.6 on Apple Silicon or Intel Macs running macOS 12+, with publisher signature and notarization verification, without Homebrew. Verified existing installations are reused. The command does not launch, log in, grant permissions or add Doubao to `chatup macos` defaults. See the [Doubao install contract](https://arch.gh.wzhecnu.cn/ChatUp/en/commands/#doubao).
 
+## Gemini CLI and Desktop
+
+```bash
+chatup gemini cli --dry-run
+chatup gemini cli
+chatup gemini desktop --dry-run
+chatup gemini desktop
+```
+
+The CLI installs the official npm package `@google/gemini-cli` (command `gemini`) and requires Node.js 20+. Desktop installs Google's native Gemini app on Apple Silicon macOS 15+. Both offer offline previews and verified reuse of existing installations. Sign in manually after installation. Gemini and the Antigravity App / `agy` below have separate installations and configuration. See the [Gemini contract](https://arch.gh.wzhecnu.cn/ChatUp/en/commands/#gemini).
+
+## Antigravity CLI and Desktop
+
+```bash
+chatup antigravity cli --dry-run
+chatup antigravity cli
+chatup antigravity desktop --dry-run
+chatup antigravity desktop
+```
+
+The CLI installs `agy` through Google's official installer on macOS, Linux and Windows x64/arm64; `--install-dir PATH` selects another directory. Desktop installs Antigravity App 2.36.0 on Apple Silicon or Intel Macs running macOS 13+, with Google signature and notarization checks. Both actions support offline previews and verified reuse of existing installations. Sign in manually after installation. See the [Antigravity contract](https://arch.gh.wzhecnu.cn/ChatUp/en/commands/#antigravity).
+
 ## ChatGPT / Codex Desktop App
 
 ```bash
@@ -139,11 +161,11 @@ Installs the official new ChatGPT desktop app including Codex. On macOS 13+ (App
 | --- | --- |
 | Base runtime | `doctor`, `uv`, `nodejs`, `docker`, `zsh`, `chrome-for-testing`, `chromedriver`, `playwright`, `frp` |
 | Workspace scaffold | `workspace` |
-| Full selector and desktop apps | `all` (host-filtered complete CLI tree), `macos` (Snipaste/iTerm2/Chrome/Blender selection), `chrome`, `snipaste` (macOS/Windows), `iterm` / `wetype` / `doubao` / `uuremote` (macOS only), `chatgpt` (includes Codex) |
+| Full selector and desktop apps | `all` (host-filtered complete CLI tree), `macos` (Snipaste/iTerm2/Chrome/Blender selection), `chrome`, `snipaste` (macOS/Windows), `iterm` / `wetype` / `doubao` / `uuremote` (macOS only), `chatgpt` (includes Codex), `antigravity desktop` (macOS), `gemini desktop` (Apple Silicon macOS 15+) |
 | Linux X11 Computer Use | `computer-use` (read-only preview by default; `--sudo` applies) |
 | Video projects | `remotion` |
 | Local service installers | `gitea`, `glance`, `mysql`, `nginx`, `crs` |
-| Agent toolchains | `cc-connect`, `claude`, `codex`, `cursor-agent`, `opencode`, `hermes`, `lark-cli` |
+| Agent toolchains | `gemini cli`, `antigravity cli`, `cc-connect`, `claude`, `codex`, `cursor-agent`, `opencode`, `hermes`, `lark-cli` |
 
 Bare `chatup glance` installs the latest stable maintained `ChatArch/glance` release under `glance` in the effective ChatArch home. The current matrix is Linux amd64 only. It verifies the archive, `SHA256SUMS`, `BUILDINFO.txt`, source SHA and raw binary version, then reuses ChatGlance portable APIs for loopback initialization. It never starts a service, creates a public endpoint or writes passwords; repeated runs preserve configuration/data, and version changes belong to `chatglance runtime update`.
 

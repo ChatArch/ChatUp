@@ -123,6 +123,28 @@ chatup doubao
 
 在 macOS 12+ 的 Apple Silicon 或 Intel Mac 安装官方豆包 2.34.6，校验开发者签名与公证，无需 Homebrew。验证并复用已有安装；不自动启动、登录、授权或加入 `chatup macos` 默认集合。详见[豆包安装约定](https://arch.gh.wzhecnu.cn/ChatUp/commands/#doubao)。
 
+## Gemini CLI 与桌面应用
+
+```bash
+chatup gemini cli --dry-run
+chatup gemini cli
+chatup gemini desktop --dry-run
+chatup gemini desktop
+```
+
+CLI 安装官方 npm 包 `@google/gemini-cli`，命令为 `gemini`，需要 Node.js 20+；Desktop 从 Google 官方地址安装 Gemini 原生应用，支持 macOS 15+ Apple Silicon。两项均支持离线预览与已有安装验证复用；登录由用户完成。Gemini 与下面的 Antigravity App / `agy` 分别安装、使用各自配置。详见 [Gemini 安装约定](https://arch.gh.wzhecnu.cn/ChatUp/commands/#gemini)。
+
+## Antigravity CLI 与桌面应用
+
+```bash
+chatup antigravity cli --dry-run
+chatup antigravity cli
+chatup antigravity desktop --dry-run
+chatup antigravity desktop
+```
+
+CLI 通过 Google 官方安装器安装 `agy`，支持 macOS、Linux、Windows 的 x64/arm64；可用 `--install-dir PATH` 自定义目录。Desktop 在 macOS 13+ 的 Apple Silicon 或 Intel Mac 安装 Antigravity App 2.36.0，验证 Google 签名与公证。两项均可离线预览、验证并复用已有安装；登录由用户完成。详见 [Antigravity 安装约定](https://arch.gh.wzhecnu.cn/ChatUp/commands/#antigravity)。
+
 ## ChatGPT / Codex 桌面应用
 
 ```bash
@@ -141,11 +163,11 @@ chatup chatgpt --yes  # Windows 首次安装时接受 Store 协议
 | --- | --- |
 | 基础运行环境 | `doctor`、`uv`、`nodejs`、`docker`、`zsh`、`chrome-for-testing`、`chromedriver`、`playwright`、`frp` |
 | 工作区脚手架 | `workspace` |
-| 全命令入口与桌面应用 | `all`（按系统筛选完整 CLI 树）、`macos`（Snipaste/iTerm2/Chrome/Blender 多选）、`chrome`、`snipaste`（macOS/Windows）、`iterm` / `wetype` / `doubao` / `uuremote`（仅 macOS）、`chatgpt`（含 Codex） |
+| 全命令入口与桌面应用 | `all`（按系统筛选完整 CLI 树）、`macos`（Snipaste/iTerm2/Chrome/Blender 多选）、`chrome`、`snipaste`（macOS/Windows）、`iterm` / `wetype` / `doubao` / `uuremote`（仅 macOS）、`chatgpt`（含 Codex）、`antigravity desktop`（macOS）、`gemini desktop`（Apple Silicon macOS 15+） |
 | Linux X11 Computer Use | `computer-use`（默认只读预览，`--sudo` 应用） |
 | 视频项目 | `remotion` |
 | 本地服务安装 | `gitea`、`glance`、`discourse`、`zulip`、`mysql`、`nginx`、`crs` |
-| Agent 工具链 | `cc-connect`、`claude`、`codex`、`cursor-agent`、`opencode`、`hermes`、`lark-cli` |
+| Agent 工具链 | `gemini cli`、`antigravity cli`、`cc-connect`、`claude`、`codex`、`cursor-agent`、`opencode`、`hermes`、`lark-cli` |
 
 `chatup glance` 裸命令安装 `ChatArch/glance` 最新稳定维护版到有效 ChatArch home 下的 `glance`。当前仅支持 Linux amd64；严格验证归档、`SHA256SUMS`、`BUILDINFO.txt`、source SHA 和原始二进制版本，复用 ChatGlance portable API 初始化 loopback 配置。它不启动服务、不建立公网入口、不写密码；重复运行保留配置和数据，版本变更请使用 `chatglance runtime update`。
 

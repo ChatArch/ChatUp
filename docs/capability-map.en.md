@@ -34,6 +34,8 @@ chatup
 |-- nginx       # Prepare user-level NGINX runtime and entry templates
 |-- crs         # Install local Claude Relay Service + Redis + smoke check
 |-- cc-connect  # Install CC Connect CLI and runtime dependencies
+|-- gemini              # Install official Gemini CLI / Desktop App
+|-- antigravity         # Install Google Antigravity CLI / Desktop App
 |-- claude      # Configure Claude Code CLI and config files
 |-- chatgpt     # Install the new ChatGPT desktop app (includes Codex)
 |-- codex       # Configure Codex CLI and config files (uses CODEX_HOME when set)
@@ -113,6 +115,10 @@ Local-service commands use user-level layouts by default:
 `chatup chrome` installs regular Google Chrome for the current OS. `chatup snipaste` installs Snipaste on macOS or Windows. `chatup iterm` installs iTerm2 on macOS. All three support `--dry-run` and reuse verified existing installations; macOS does not require Homebrew and Windows verifies exact WinGet package IDs. See the [install contract](commands.md#chrome-iterm).
 
 `chatup wetype` installs the signed official macOS input method in Input Methods, reuses verified existing installations and prints activation/voice shortcut guidance. Supports `--dry-run`; Windows and Linux are not supported. See the [WeType contract](commands.md#wetype).
+
+`chatup gemini cli` installs the official npm package `@google/gemini-cli` (command `gemini`, Node.js 20+). `chatup gemini desktop` installs Google's native Gemini app on Apple Silicon macOS 15+, verifying bundle identity, Google signature and notarization. Both offer offline previews and verified existing-install reuse, with configuration independent of Antigravity App / `agy`. See the [Gemini contract](commands.en.md#gemini).
+
+`chatup antigravity cli` installs and verifies official `agy` on macOS/Linux/Windows x64/arm64. `chatup antigravity desktop` installs Antigravity App 2.36.0 on macOS 13+, verifying Google signature and notarization. Both support offline previews, reuse existing installations and appear as separate host-supported `chatup all` actions. See the [Antigravity contract](commands.en.md#antigravity).
 
 `chatup chatgpt` installs the official new ChatGPT desktop app including Codex directly from OpenAI's architecture-specific DMG on macOS 13+, without Homebrew, or through the exact Microsoft Store product on Windows. `--dry-run` has no side effects. macOS verifies bundle identity, OpenAI signature and notarization, reuses valid existing apps and cleans temporary downloads under the ChatArch cache; Windows checks Store registration. No launch, login, Codex CLI config changes or automatic Linux preview installation. See the [desktop install contract](commands.md#chatgpt-desktop).
 

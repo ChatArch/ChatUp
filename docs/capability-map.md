@@ -36,6 +36,8 @@ chatup
 |-- nginx       # 准备 user-level NGINX runtime，并生成入口模板
 |-- crs         # 安装本地 Claude Relay Service + Redis + smoke check
 |-- cc-connect  # 安装 CC Connect CLI 和运行依赖
+|-- gemini              # 安装官方 Gemini CLI / Desktop App
+|-- antigravity         # 安装 Google Antigravity CLI / Desktop App
 |-- claude      # 配置 Claude Code CLI 和配置文件
 |-- chatgpt      # 安装新版 ChatGPT 桌面应用（含 Codex）
 |-- codex       # 配置 Codex CLI 和配置文件（设置时使用 CODEX_HOME）
@@ -119,6 +121,10 @@ chatup crs                 # 准备本地 CRS、Redis、secret、admin SPA 和 s
 `chatup chrome` 按系统安装普通 Google Chrome；`chatup snipaste` 在 macOS 或 Windows 安装 Snipaste；`chatup iterm` 在 macOS 安装 iTerm2。三个命令支持 `--dry-run`，验证并复用已有安装，macOS 无需 Homebrew。Windows 通过 WinGet 的精确包 ID 验证。详见[安装约定](commands.md#chrome-iterm)。
 
 `chatup wetype` 将官方签名的微信输入法安装到 macOS Input Methods，验证并复用已有安装，显示启用与语音快捷键提示。支持 `--dry-run`，Windows/Linux 当前不支持。详见[微信输入法约定](commands.md#wetype)。
+
+`chatup gemini cli` 安装官方 npm 包 `@google/gemini-cli`（命令 `gemini`，需要 Node.js 20+）；`chatup gemini desktop` 在 macOS 15+ Apple Silicon 安装 Google 官方原生 Gemini app，验证 bundle 身份、Google 签名与公证。两项可离线预览并复用有效已有安装，与独立的 Antigravity App / `agy` 各自配置。详见 [Gemini 约定](commands.md#gemini)。
+
+`chatup antigravity cli` 通过官方安装器安装并验证 macOS/Linux/Windows x64/arm64 的 `agy`；`chatup antigravity desktop` 在 macOS 13+ 安装官方 Antigravity App 2.36.0，验证 Google 签名与公证。两项都支持离线 `--dry-run`、已有安装复用和 `chatup all` 分别选择。详见 [Antigravity 约定](commands.md#antigravity)。
 
 `chatup chatgpt` 在 macOS 13+ 直接下载按架构选择的 OpenAI 官方 DMG，无需 Homebrew；Windows 使用官方 Microsoft Store 精确 ID，安装含 Codex 的新版 ChatGPT 桌面应用。`--dry-run` 无副作用。macOS 校验应用身份、OpenAI 签名与公证，复用已有有效应用，并清理 ChatArch 缓存中的临时下载；Windows 回读 Store 登记。不启动应用、不登录、不改 Codex CLI 配置，也不自动安装 Linux preview。详见[桌面安装约定](commands.md#chatgpt-desktop)。
 
