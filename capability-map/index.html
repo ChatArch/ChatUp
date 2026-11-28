@@ -659,12 +659,14 @@
 <a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>|-- nginx       # 准备 user-level NGINX runtime，并生成入口模板
 <a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>|-- crs         # 安装本地 Claude Relay Service + Redis + smoke check
 <a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>|-- cc-connect  # 安装 CC Connect CLI 和运行依赖
-<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>|-- claude      # 配置 Claude Code CLI 和配置文件
-<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>|-- chatgpt      # 安装新版 ChatGPT 桌面应用（含 Codex）
-<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>|-- codex       # 配置 Codex CLI 和配置文件（设置时使用 CODEX_HOME）
-<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>|-- opencode    # 配置 OpenCode CLI 和配置文件
-<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>|-- hermes      # 安装 Hermes Agent 和可选 WebUI
-<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>`-- lark-cli    # 配置官方 lark-cli，并复用 ChatEnv 飞书配置
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>|-- gemini              # 安装官方 Gemini CLI / Desktop App
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>|-- antigravity         # 安装 Google Antigravity CLI / Desktop App
+<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>|-- claude      # 配置 Claude Code CLI 和配置文件
+<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>|-- chatgpt      # 安装新版 ChatGPT 桌面应用（含 Codex）
+<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>|-- codex       # 配置 Codex CLI 和配置文件（设置时使用 CODEX_HOME）
+<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>|-- opencode    # 配置 OpenCode CLI 和配置文件
+<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>|-- hermes      # 安装 Hermes Agent 和可选 WebUI
+<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>`-- lark-cli    # 配置官方 lark-cli，并复用 ChatEnv 飞书配置
 </code></pre></div>
 <h2 id="_2">能力分组<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <div class="grid cards">
@@ -764,6 +766,8 @@
 <p><code>chatup remotion PROJECT_DIR</code> 创建带锁定依赖和可渲染示例的视频项目，要求已有 Node/npm，保护已有目录并检测本机浏览器。它使用项目目录，可配合 macOS 的 Chrome/Blender 安装入口。详见<a href="../commands/#remotion">Remotion 约定</a>。</p>
 <p><code>chatup chrome</code> 按系统安装普通 Google Chrome；<code>chatup snipaste</code> 在 macOS 或 Windows 安装 Snipaste；<code>chatup iterm</code> 在 macOS 安装 iTerm2。三个命令支持 <code>--dry-run</code>，验证并复用已有安装，macOS 无需 Homebrew。Windows 通过 WinGet 的精确包 ID 验证。详见<a href="../commands/#chrome-iterm">安装约定</a>。</p>
 <p><code>chatup wetype</code> 将官方签名的微信输入法安装到 macOS Input Methods，验证并复用已有安装，显示启用与语音快捷键提示。支持 <code>--dry-run</code>，Windows/Linux 当前不支持。详见<a href="../commands/#wetype">微信输入法约定</a>。</p>
+<p><code>chatup gemini cli</code> 安装官方 npm 包 <code>@google/gemini-cli</code>（命令 <code>gemini</code>，需要 Node.js 20+）；<code>chatup gemini desktop</code> 在 macOS 15+ Apple Silicon 安装 Google 官方原生 Gemini app，验证 bundle 身份、Google 签名与公证。两项可离线预览并复用有效已有安装，与独立的 Antigravity App / <code>agy</code> 各自配置。详见 <a href="../commands/#gemini">Gemini 约定</a>。</p>
+<p><code>chatup antigravity cli</code> 通过官方安装器安装并验证 macOS/Linux/Windows x64/arm64 的 <code>agy</code>；<code>chatup antigravity desktop</code> 在 macOS 13+ 安装官方 Antigravity App 2.36.0，验证 Google 签名与公证。两项都支持离线 <code>--dry-run</code>、已有安装复用和 <code>chatup all</code> 分别选择。详见 <a href="../commands/#antigravity">Antigravity 约定</a>。</p>
 <p><code>chatup chatgpt</code> 在 macOS 13+ 直接下载按架构选择的 OpenAI 官方 DMG，无需 Homebrew；Windows 使用官方 Microsoft Store 精确 ID，安装含 Codex 的新版 ChatGPT 桌面应用。<code>--dry-run</code> 无副作用。macOS 校验应用身份、OpenAI 签名与公证，复用已有有效应用，并清理 ChatArch 缓存中的临时下载；Windows 回读 Store 登记。不启动应用、不登录、不改 Codex CLI 配置，也不自动安装 Linux preview。详见<a href="../commands/#chatgpt-desktop">桌面安装约定</a>。</p>
 <p><code>chatup doubao</code> 在 macOS 12+ Apple Silicon 或 Intel Mac 安装官方豆包 2.34.6，无需 Homebrew。支持无副作用的 <code>--dry-run</code>，校验签名与公证后复用已有安装；不覆盖无效应用、不启动、不登录、不授权，不加入 <code>chatup macos</code> 默认集合。详见<a href="../commands/#doubao">豆包安装约定</a>。</p>
 <p><code>chatup all</code> 从注册命令树列出当前系统/架构支持的全部可执行命令（Agent、工作区、服务、浏览器管理也在内），默认不勾选；无交互必须明确 <code>--only</code>，<code>--list</code> 与 <code>--dry-run</code> 无写入。原命令的必填参数和确认规则不被绕过。<code>chatup uuremote</code> 在 macOS 11+ 安装经过 SHA-256、Apple 签名和公证验证的官方 pkg，首次安装需 <code>--sudo</code>；安装包会启动客户端，但不自动登录或授权。详见<a href="../commands/#all">全命令入口</a>和<a href="../commands/#uuremote">UU 远程</a>。</p>
