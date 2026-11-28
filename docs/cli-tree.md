@@ -22,6 +22,8 @@ chatup
 ├── twikoo              # 安装多实例 Twikoo 评论服务
 ├── nginx               # 准备 user-level NGINX
 ├── crs                 # 安装本地 Claude Relay Service + Redis
+├── gemini              # 安装官方 Gemini CLI / Desktop App
+├── antigravity         # 安装 Google Antigravity CLI / Desktop App
 ├── claude              # 安装/配置 Claude Code
 ├── docker              # 检查 Docker 环境与权限
 ├── frp                 # 安装 FRP Client/Server
@@ -53,6 +55,26 @@ chatup
 `chatup all [--list] [--only 'COMMAND PATH']... [--dry-run] [--sudo] [--yes] [-i|-I]` 从真实注册命令树列出本机支持的命令；嵌套管理命令以完整路径显示，例如 `chrome-for-testing install`。复选框默认空；非交互必须重复 `--only` 显式选择。`--list` 与 `--dry-run` 不执行安装；需要参数、提权或删除确认时沿用原命令规则，不自动代填。详见 [全命令入口](commands.md#all)。
 
 `chatup uuremote [--dry-run] [--sudo] [--log-level LEVEL]` 支持 macOS 11+，首次安装需 `--sudo`；使用官方固定版本 pkg 并验证签名、公证和 SHA-256。详见 [UU 远程](commands.md#uuremote)。
+
+## Gemini CLI 与桌面应用
+
+```text
+chatup gemini
+├── cli [--dry-run]
+└── desktop [--dry-run] [--log-level LEVEL]
+```
+
+`cli` 安装官方 npm 包 `@google/gemini-cli`（命令为 `gemini`）；`desktop` 在 macOS 15+ Apple Silicon 安装官方 Gemini app。两者均可离线预览，通过 `chatup all` 分别选择。Gemini 与独立的 Antigravity App / `agy` 各自安装、使用各自配置。完整约定见 [Gemini](commands.md#gemini)。
+
+## Antigravity CLI 与桌面应用
+
+```text
+chatup antigravity
+├── cli [--dry-run] [--install-dir PATH]
+└── desktop [--dry-run] [--log-level LEVEL]
+```
+
+`cli` 使用 Google 官方安装器安装 macOS/Linux/Windows 的 `agy`；`desktop` 在 macOS 13+ 安装按架构选择的 Antigravity App。两者均支持离线预览，并可通过 `chatup all` 分别选择。完整下载、校验和已有安装复用规则见 [Antigravity 约定](commands.md#antigravity)。
 
 ## Linux Computer Use
 

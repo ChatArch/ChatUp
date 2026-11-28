@@ -58,7 +58,21 @@ def _supported(path: str, system: str, machine: str) -> bool:
     if name == "nodejs" and system == "Windows":
         return machine in {"amd64", "x86_64", "x64", "arm64", "aarch64"}
     try:
-        if name in {"chrome", "snipaste", "iterm", "wetype", "doubao", "uuremote"}:
+        if name == "gemini":
+            if path == "gemini desktop":
+                from chatup.setup.desktop import plan_desktop_install
+                plan_desktop_install("gemini")
+            else:
+                from chatup.setup.gemini import plan_gemini_cli_install
+                plan_gemini_cli_install()
+        elif name == "antigravity":
+            if path == "antigravity desktop":
+                from chatup.setup.desktop import plan_desktop_install
+                plan_desktop_install("antigravity")
+            else:
+                from chatup.setup.antigravity import plan_antigravity_cli_install
+                plan_antigravity_cli_install()
+        elif name in {"chrome", "snipaste", "iterm", "wetype", "doubao", "uuremote"}:
             from chatup.setup.desktop import plan_desktop_install
             plan_desktop_install(name)
         elif name == "chatgpt":

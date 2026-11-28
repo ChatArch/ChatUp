@@ -37,6 +37,8 @@ chatup
 |-- nginx       # 准备 user-level NGINX runtime，并生成入口模板
 |-- crs         # 安装本地 Claude Relay Service + Redis + smoke check
 |-- cc-connect  # 安装 CC Connect CLI 和运行依赖
+|-- gemini              # 安装官方 Gemini CLI / Desktop App
+|-- antigravity         # 安装 Google Antigravity CLI / Desktop App
 |-- claude      # 配置 Claude Code CLI 和配置文件
 |-- chatgpt      # 安装新版 ChatGPT 桌面应用（含 Codex）
 |-- codex       # 配置 Codex CLI 和配置文件（设置时使用 CODEX_HOME）
@@ -99,6 +101,8 @@ chatup
 
 | 命令 | 当前能力 |
 |---|---|
+| `chatup gemini cli` | 安装并验证官方 `@google/gemini-cli`；Desktop 见 [Gemini](#gemini)。 |
+| `chatup antigravity cli` | 安装并验证官方 Antigravity CLI；Desktop 见 [Antigravity](#antigravity)。 |
 | `chatup claude` | 配置 Claude Code CLI 和配置文件。 |
 | `chatup codex` | 配置 Codex CLI 和配置文件；设置时使用 `CODEX_HOME`。 |
 | `chatup cursor-agent` | 安装/验证 Cursor Agent CLI，并安全复制 `auth.json`、`cli-config.json` 和 `agent-cli-state.json`。 |
@@ -250,6 +254,51 @@ result = setup_desktop_app("doubao", dry_run=True)
 ```
 
 计划含 `app`、`platform`、`url`、`path` 和验证要求；安装结果另含 `status`（`planned` / `already_installed` / `installed`）与 `verified`，验证成功时包含 `version` 和 `binary`。失败抛出 `RuntimeError`，CLI 非零退出。
+
+## Gemini CLI 与桌面应用 {#gemini}
+
+```bash
+chatup gemini cli --dry-run
+chatup gemini cli
+chatup gemini desktop --dry-run
+chatup gemini desktop
+chatup all --only 'gemini cli' --only 'gemini desktop' --dry-run -I
+```
+
+`chatup gemini cli` 安装 Google 官方 npm 包 `@google/gemini-cli`，提供 `gemini` 命令，支持 macOS、Linux、Windows，需要 Node.js 20+。使用 ChatUp 的共享 Node/npm 运行时：POSIX 缺少合格 Node 时提示先运行 `chatup nodejs`；Windows 可按现有运行时规则在 ChatArch home 内安装官方便携 Node。通过 `npm install -g @google/gemini-cli` 安装当前稳定版，并成功回读 `gemini --version` 才报告完成。已有有效 Gemini CLI 直接验证并复用，不主动升级、不写入认证或模型设置。登录由用户在首次使用时完成。
+
+已有 `gemini` 启动入口还需验证其官方 `@google/gemini-cli` 包身份，支持其他 npm 或 Homebrew 安装前缀；无法识别的同名包装程序会保留并报错。成功要求 `gemini` 在所选 Node 运行环境的 PATH 中可调用。若包已安装但启动入口缺失或不可达，命令会保留包并给出修复提示；按提示使用 `npm install -g @google/gemini-cli` 修复缺失入口，或将对应 bin 目录加入 PATH 后重试。
+
+`chatup gemini desktop` 从 [Google 官方桌面下载页](https://gemini.google/desktop/)的稳定入口 `https://gemini.google/download/mac/` 下载原生 `Gemini.app`，支持 macOS 15+ Apple Silicon（`arm64` / `aarch64`）。下载入口随官方版本更新，不在 ChatUp 固定应用版本。Intel Mac、Linux 和 Windows 不由此安装入口自动化；Windows 用户可使用[官方下载页](https://gemini.google/desktop/)。其他系统、架构或过旧 macOS 在下载前报错。支持 `--log-level DEBUG|INFO|WARNING|ERROR`。
+
+Desktop 优先安装到可写的 `/Applications/Gemini.app`，否则使用 `~/Applications/Gemini.app`，无需 Homebrew。验证 bundle ID `com.google.GeminiMacOS`、可执行文件、版本、最低 macOS、Google Developer ID Team `EQHXZ8M8AV` 的严格签名与 Gatekeeper 公证；暂存副本验证后原子移入，再回读已安装应用。复用有效已有应用，包括较新版本；无效应用和断开的符号链接会保留并报错。临时下载遵循 `CHATARCH_HOME`，位于 `~/.chatarch/cache/desktop`，结束后清理并卸载 DMG；无法卸载的镜像保留缓存。安装器不自动启动、登录、授权或添加启动项，也不加入 `chatup macos` 默认集合。
+
+两个子命令都支持离线 `--dry-run`，不下载、不运行进程、不写安装缓存；`chatup all` 按本机支持情况分别列出 `gemini cli` 与 `gemini desktop`。Gemini app / `@google/gemini-cli`（`gemini`）和 [Antigravity App / `agy`](#antigravity) 是不同产品，各自安装与配置；此入口不共享或迁移两者认证、运行时与设置。
+
+来源：[Gemini Desktop](https://gemini.google/desktop/)、[Gemini CLI 官方安装说明](https://geminicli.com/docs/get-started/installation/)。
+
+## Antigravity CLI 与桌面应用 {#antigravity}
+
+```bash
+chatup antigravity cli --dry-run
+chatup antigravity cli
+chatup antigravity cli --install-dir "$HOME/tools/bin"
+chatup antigravity desktop --dry-run
+chatup antigravity desktop
+chatup all --only 'antigravity cli' --only 'antigravity desktop' --dry-run -I
+```
+
+`chatup antigravity cli` 安装 Google 官方 Antigravity CLI（`agy`），支持 macOS、Linux、Windows 的 x64/arm64。macOS/Linux 下载并运行官方 `https://antigravity.google/cli/install.sh`；Windows 使用 `https://antigravity.google/cli/install.ps1` 和 PowerShell。默认位置为 `~/.local/bin/agy`，Windows 为 `%LOCALAPPDATA%\agy\bin\agy.exe`；`--install-dir PATH` 可自定义。临时 bootstrapper 放入有效 ChatArch home 的 `cache/antigravity/install-*/`，执行后清理。官方安装器负责选择当前版本、按 manifest 校验 SHA512 和配置用户 shell/PATH；其自身缓存与更新行为仍由官方 CLI 管理。已有目标只校验 `--version` 并复用，不覆盖或主动升级；无效已有目标会报错。安装后必须成功读回版本才报告完成。账户登录和首次交互配置由用户完成。
+
+`chatup antigravity desktop` 安装 **Antigravity App**，使用[官方下载页](https://antigravity.google/download)公布的固定 2.36.0 DMG，而非另一个 Antigravity IDE 下载。支持 macOS 13+：`arm64` / `aarch64` 选择 `darwin-arm`，`x86_64` / `amd64` 选择 `darwin-x64`，地址为 `https://storage.googleapis.com/antigravity-public/antigravity-hub/2.36.0-5596661662220288/<平台>/Antigravity.dmg`。Windows/Linux Desktop 当前请使用官方下载页；此命令在不支持的平台、架构或 macOS 版本上于下载前报错。支持 `--log-level DEBUG|INFO|WARNING|ERROR`。
+
+Desktop 优先安装到可写的 `/Applications/Antigravity.app`，否则使用 `~/Applications/Antigravity.app`，无需 Homebrew。检查 bundle ID `com.google.antigravity`、版本、可执行文件、最低 macOS、Google Developer ID Team `EQHXZ8M8AV` 的严格签名与 Gatekeeper 公证；暂存校验后原子移入并回读。验证并复用已有有效应用，包括较新版本；无效应用或断开的符号链接会保留并报错。临时下载使用 `~/.chatarch/cache/desktop`（遵循 `CHATARCH_HOME`），结束后清理并卸载 DMG。失败时非零退出，不覆盖已有应用；仍挂载的镜像会保留缓存。不自动启动、登录、授权或改启动项，不加入 `chatup macos` 默认集合。
+
+两个子命令的 `--dry-run` 均离线，只显示计划，不下载、不运行进程、不创建安装缓存；`chatup all` 按本机支持范围分别提供 `antigravity cli` 与 `antigravity desktop`。CLI 使用最新官方发行版，Desktop 下载固定版本；这两个安装入口不提供主动覆盖升级。
+
+同一台机器、同一系统用户下，Antigravity App 与 `agy` 使用统一登录；CLI 可通过操作系统安全钥匙串复用有效会话，通常无需分别登录。此行为属于 Antigravity 产品本身，不表示 Gemini app / `gemini` 共享其认证。见[官方认证说明](https://antigravity.google/docs/install/)。
+
+来源：[官方安装说明](https://antigravity.google/docs/getting-started?tab=cli)、[官方下载页](https://antigravity.google/download)。
 
 ## ChatGPT 桌面应用 {#chatgpt-desktop}
 

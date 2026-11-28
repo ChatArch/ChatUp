@@ -22,6 +22,8 @@ chatup
 ├── twikoo              # Install multi-instance Twikoo comment services
 ├── nginx               # Prepare user-level NGINX
 ├── crs                 # Install local Claude Relay Service plus Redis
+├── gemini              # Install official Gemini CLI / Desktop App
+├── antigravity         # Install Google Antigravity CLI / Desktop App
 ├── claude              # Install/configure Claude Code
 ├── docker              # Check Docker and permissions
 ├── frp                 # Install FRP Client/Server
@@ -53,6 +55,26 @@ Run `chatup --tree` to read back the registered tree with parameter signatures a
 `chatup all [--list] [--only 'COMMAND PATH']... [--dry-run] [--sudo] [--yes] [-i|-I]` derives every supported leaf from the registered CLI, including nested paths like `chrome-for-testing install`. No checkbox is preselected and non-TTY use requires explicit `--only`. List and dry-run do not execute commands; required inputs, elevation and deletion confirmation still follow each original command's rules. See [Full Selector](commands.en.md#all).
 
 `chatup uuremote [--dry-run] [--sudo] [--log-level LEVEL]` supports macOS 11+; fresh installs require `--sudo` and verify the pinned official pkg's SHA-256, signature and notarization. See [UU Remote](commands.en.md#uuremote).
+
+## Gemini CLI and Desktop
+
+```text
+chatup gemini
+├── cli [--dry-run]
+└── desktop [--dry-run] [--log-level LEVEL]
+```
+
+`cli` installs the official npm package `@google/gemini-cli` (command `gemini`); `desktop` installs Google's native Gemini app on Apple Silicon macOS 15+. Both offer offline previews and separate `chatup all` selection. Gemini and the independent Antigravity App / `agy` have separate installations and configuration. See the [Gemini contract](commands.en.md#gemini).
+
+## Antigravity CLI and Desktop
+
+```text
+chatup antigravity
+├── cli [--dry-run] [--install-dir PATH]
+└── desktop [--dry-run] [--log-level LEVEL]
+```
+
+`cli` uses Google's official installer for `agy` on macOS/Linux/Windows; `desktop` installs the architecture-specific Antigravity App on macOS 13+. Both support offline previews and separate selection through `chatup all`. See the [Antigravity contract](commands.en.md#antigravity) for download, verification and existing-installation behavior.
 
 ## Linux Computer Use
 

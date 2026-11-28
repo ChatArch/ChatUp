@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.30
+
+### Added
+- Add `chatup gemini cli` for Google's official `@google/gemini-cli` npm package, using the shared Node.js 20+ runtime helpers, offline preview and verified existing-install reuse.
+- Add `chatup gemini desktop` for Google's native Gemini app on Apple Silicon macOS 15+, using the official DMG endpoint and bundle identity, Google signature and notarization checks. Expose separate Gemini CLI/Desktop actions in `all`, alongside the independent Antigravity commands.
+
+## 0.2.29
+
+### Added
+- Add `chatup antigravity cli` for the official Google Antigravity terminal client on macOS, Linux and Windows x64/arm64, with a custom install directory, offline preview, verified reuse and post-install version readback.
+- Add `chatup antigravity desktop` for Antigravity App 2.36.0 on Apple Silicon/Intel macOS 13+, using official DMGs, Google signature/notarization checks and verified existing-app reuse. Expose both actions separately in the host-filtered `all` selector.
+
 ## 0.2.28
 
 ### Fixed

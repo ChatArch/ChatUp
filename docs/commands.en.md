@@ -37,6 +37,8 @@ chatup
 |-- nginx       # Prepare user-level NGINX runtime and entry templates
 |-- crs         # Install local Claude Relay Service + Redis + smoke check
 |-- cc-connect  # Install CC Connect CLI and runtime dependencies
+|-- gemini              # Install official Gemini CLI / Desktop App
+|-- antigravity         # Install Google Antigravity CLI / Desktop App
 |-- claude      # Configure Claude Code CLI and config files
 |-- chatgpt      # Install the new ChatGPT desktop app (includes Codex)
 |-- codex       # Configure Codex CLI and config files (uses CODEX_HOME when set)
@@ -99,6 +101,8 @@ chatup
 
 | Command | Current capability |
 |---|---|
+| `chatup gemini cli` | Install and verify official `@google/gemini-cli`; see [Gemini](#gemini) for Desktop. |
+| `chatup antigravity cli` | Install and verify the official Antigravity CLI; see [Antigravity](#antigravity) for Desktop. |
 | `chatup claude` | Configure Claude Code CLI and config files. |
 | `chatup codex` | Configure Codex CLI and config files, using `CODEX_HOME` when it is set. |
 | `chatup cursor-agent` | Install/verify Cursor Agent CLI and safely copy `auth.json`, `cli-config.json`, and `agent-cli-state.json`. |
@@ -250,6 +254,51 @@ result = setup_desktop_app("doubao", dry_run=True)
 ```
 
 Plans include `app`, `platform`, `url`, `path` and verification requirements. Install results add `status` (`planned` / `already_installed` / `installed`) and `verified`, with `version` and `binary` after successful verification. Failures raise `RuntimeError` and produce a nonzero CLI exit.
+
+## Gemini CLI and Desktop {#gemini}
+
+```bash
+chatup gemini cli --dry-run
+chatup gemini cli
+chatup gemini desktop --dry-run
+chatup gemini desktop
+chatup all --only 'gemini cli' --only 'gemini desktop' --dry-run -I
+```
+
+`chatup gemini cli` installs Google's official npm package `@google/gemini-cli`, providing the `gemini` command on macOS, Linux and Windows with Node.js 20+. It uses ChatUp's shared Node/npm helpers: POSIX hosts without a suitable runtime receive `chatup nodejs` guidance; Windows can bootstrap the official portable Node under ChatArch home using the existing runtime rules. It installs the current stable package with `npm install -g @google/gemini-cli` and requires a successful `gemini --version` readback. A valid existing Gemini CLI is verified and reused without a forced upgrade. No authentication or model settings are written; complete sign-in manually on first use.
+
+Existing `gemini` launchers must also resolve to the official `@google/gemini-cli` package, including alternate npm or Homebrew prefixes. Unrecognized same-name wrappers are preserved and rejected. Success requires a callable `gemini` launcher on the selected Node runtime PATH. An installed package with a missing or unreachable launcher is preserved with repair guidance; repair a missing launcher with the suggested `npm install -g @google/gemini-cli`, or add its bin directory to PATH, then retry.
+
+`chatup gemini desktop` installs the native `Gemini.app` through the stable `https://gemini.google/download/mac/` endpoint advertised by [Google's Desktop page](https://gemini.google/desktop/). It supports Apple Silicon (`arm64` / `aarch64`) macOS 15+. This stable endpoint follows Google's current app version rather than a ChatUp-pinned version. Intel Mac, Linux and Windows installation is not automated here; Windows users can use the [official downloads](https://gemini.google/desktop/). Unsupported hosts, architectures and older macOS fail before downloading. Desktop accepts `--log-level DEBUG|INFO|WARNING|ERROR`.
+
+Desktop prefers writable `/Applications/Gemini.app`, falling back to `~/Applications/Gemini.app`, without Homebrew. Verify bundle ID `com.google.GeminiMacOS`, executable, version, minimum macOS, Google Developer ID Team `EQHXZ8M8AV`, strict signature and Gatekeeper notarization. Verify staging before atomic placement and read back the installed bundle. Valid existing apps, including newer versions, are reused; invalid apps and broken symlinks are preserved and rejected. Temporary downloads use `~/.chatarch/cache/desktop`, respecting `CHATARCH_HOME`, and are cleaned with the mounted DMG; still-mounted images retain their cache. The installer does not launch, sign in, grant permissions, add startup items or include Gemini in `chatup macos` defaults.
+
+Both leaves offer offline `--dry-run` without downloads, processes or installation-cache writes. `chatup all` lists `gemini cli` and `gemini desktop` separately according to host support. Gemini app / `@google/gemini-cli` (`gemini`) and [Antigravity App / `agy`](#antigravity) are separate products with independent installation and configuration; these commands do not share or migrate their authentication, runtime or settings.
+
+Sources: [Gemini Desktop](https://gemini.google/desktop/), [official Gemini CLI installation](https://geminicli.com/docs/get-started/installation/).
+
+## Antigravity CLI and Desktop {#antigravity}
+
+```bash
+chatup antigravity cli --dry-run
+chatup antigravity cli
+chatup antigravity cli --install-dir "$HOME/tools/bin"
+chatup antigravity desktop --dry-run
+chatup antigravity desktop
+chatup all --only 'antigravity cli' --only 'antigravity desktop' --dry-run -I
+```
+
+`chatup antigravity cli` installs Google's official Antigravity terminal client (`agy`) on macOS, Linux and Windows x64/arm64. It downloads and runs `https://antigravity.google/cli/install.sh` with Bash on macOS/Linux, or `https://antigravity.google/cli/install.ps1` with PowerShell on Windows. The default binary is `~/.local/bin/agy`, or `%LOCALAPPDATA%\agy\bin\agy.exe` on Windows; `--install-dir PATH` selects another directory. Temporary bootstrappers use `cache/antigravity/install-*/` under the effective ChatArch home and are cleaned after execution. Google's installer selects the current release, verifies the manifest SHA512 and configures the user's shell/PATH. The official CLI owns its own cache and update behavior. Existing target binaries are verified with `--version` and reused; invalid targets fail without replacement. A successful version readback is required after installation. Complete account sign-in and first-run interaction manually.
+
+`chatup antigravity desktop` installs **Antigravity App**, using pinned 2.36.0 DMGs advertised by the [official download page](https://antigravity.google/download), rather than the separate Antigravity IDE. It supports macOS 13+: `arm64` / `aarch64` select `darwin-arm`, and `x86_64` / `amd64` select `darwin-x64`, from `https://storage.googleapis.com/antigravity-public/antigravity-hub/2.36.0-5596661662220288/<platform>/Antigravity.dmg`. For Windows/Linux Desktop use Google's downloads; this command rejects unsupported hosts, architectures and macOS versions before downloading. Desktop accepts `--log-level DEBUG|INFO|WARNING|ERROR`.
+
+Desktop prefers writable `/Applications/Antigravity.app`, falling back to `~/Applications/Antigravity.app`, without Homebrew. Verify bundle ID `com.google.antigravity`, version, executable, minimum macOS, Google Developer ID Team `EQHXZ8M8AV`, strict signature and Gatekeeper notarization. Verify a staged copy before atomic placement and read back the installed bundle. Valid existing apps, including newer versions, are reused; invalid bundles and broken symlinks are preserved and rejected. Temporary downloads use `~/.chatarch/cache/desktop` (respecting `CHATARCH_HOME`) and are cleaned with the mounted DMG. Failures exit nonzero without overwriting existing apps; still-mounted images retain their cache. The installer does not launch, sign in, grant permissions, change startup items or add Antigravity to `chatup macos` defaults.
+
+Both leaves offer an offline `--dry-run` with no downloads, processes or installation-cache writes. `chatup all` exposes `antigravity cli` and `antigravity desktop` separately according to host support. CLI uses the current official release; Desktop uses the pinned download. These commands reuse existing installations rather than force upgrades.
+
+Under the same local OS user, Antigravity App and `agy` use unified sign-in; the CLI can reuse a valid session through the native secure keyring. This is Antigravity behavior and does not imply shared authentication with Gemini app / `gemini`. See [official authentication](https://antigravity.google/docs/install/).
+
+Sources: [official installation guide](https://antigravity.google/docs/getting-started?tab=cli), [official downloads](https://antigravity.google/download).
 
 ## ChatGPT Desktop App {#chatgpt-desktop}
 
